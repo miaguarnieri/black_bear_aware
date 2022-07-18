@@ -1,0 +1,24 @@
+---
+title: "WIR_data_cleaning"
+author: "Claire Meuter"
+date: "2022-07-18"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(janitor)
+library(here)
+```
+
+## WIR Data
+Here I'll tidy up the WIR data, and remove accidental ' in coordinates 
+
+## Read in the data 
+
+```{r}
+WIR_org <- read_csv(here("data", "Bear_WIR_Data_orginal.csv"))
+#the column names are not very clean, lets fix that first
+```
+
