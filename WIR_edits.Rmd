@@ -33,7 +33,9 @@ WIR_clean <- WIR_org %>% clean_names()
 
 WIR_clean$longitude <- gsub("'","",as.character(WIR_clean$longitude))
 
-# Cool, now that ' is taken out of our data, and we can start reading this data in Arc to map out the conflict occurance points! 
+# Cool, now that ' is taken out of our data, and we can start reading this data in Arc to map out the conflict occurrence points! 
 
+# Exporting.. 
+write.csv(WIR_clean,"WIR_clean.csv", row.names = FALSE)
 ```
 
