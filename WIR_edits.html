@@ -387,6 +387,15 @@ coordinates</p>
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
 <pre class="r"><code>#the column names are not very clean, lets fix that first</code></pre>
+<pre class="r"><code>#code chunk to clean the column names 
+WIR_clean &lt;- WIR_org %&gt;% clean_names()
+
+# now all of the columns are in lower snake case, much better :) </code></pre>
+<pre class="r"><code># Now we want to get rid of the unnecessary &#39; hanging before all my longitude points 
+
+WIR_clean$longitude &lt;- gsub(&quot;&#39;&quot;,&quot;&quot;,as.character(WIR_clean$longitude))
+
+# Cool, now that &#39; is taken out of our data, and we can start reading this data in Arc to map out the conflict occurance points! </code></pre>
 </div>
 
 

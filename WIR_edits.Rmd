@@ -21,4 +21,19 @@ Here I'll tidy up the WIR data, and remove accidental ' in coordinates
 WIR_org <- read_csv(here("data", "Bear_WIR_Data_orginal.csv"))
 #the column names are not very clean, lets fix that first
 ```
+```{r}
+#code chunk to clean the column names 
+WIR_clean <- WIR_org %>% clean_names()
+
+# now all of the columns are in lower snake case, much better :) 
+```
+
+```{r}
+# Now we want to get rid of the unnecessary ' hanging before all my longitude points 
+
+WIR_clean$longitude <- gsub("'","",as.character(WIR_clean$longitude))
+
+# Cool, now that ' is taken out of our data, and we can start reading this data in Arc to map out the conflict occurance points! 
+
+```
 
