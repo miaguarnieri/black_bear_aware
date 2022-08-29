@@ -38,6 +38,6 @@ WIR_clean$longitude <- gsub("'","",as.character(WIR_clean$longitude))
 # Exporting.. 
 write.csv(WIR_clean,"WIR_clean.csv", row.names = FALSE)
 
-# This is just preliminary data to visualize our data, we'll likely want to tweak this data set going forward to make it better. A helpful addition would be a year column, so we can visualize the data by year in Arc. It might also be helpful to do months while we're at it.
+# This is just preliminary data to visualize our data, we'll likely want to tweak this data set going forward to make it better. A helpful addition would be a year column, so we can visualize the data by year in Arc. It might also be helpful to do months while we're at it. We also need to remove any erroneous points
 ```
 
