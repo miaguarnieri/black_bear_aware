@@ -5,10 +5,17 @@ date: '2022-09-05'
 output: html_document
 ---
 
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+#Data Wrangling Prior to Coding
+
+*Data Sources*: Please see ReadMe file for metadata and citations.
+*Reference Paper*: Insert hagani citation here
+
+#Reformatting Data
 
 Step 1: Adjust the data to the same geographic extent and projection
 ```{r}
@@ -25,12 +32,15 @@ Step 3
 
 ```
 
-Step 4
+
+#Model Creation
+
+Step 1: replicating the model from Hagani et al.
 ```{r}
 
 ```
 
-Step 5
+Step 2
 ```{r}
 
 ```
