@@ -9,6 +9,36 @@ Test
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+#attach packages
+#note - Loading all of the ones Jason used, I don't think we will need all of them 
+
+library(rgdal) #for loading vector data 
+library(ggplot2)
+library(terra) #or loading raster data
+library(dismo)
+library(rJava)
+library(spThin)
+library(bbmle)
+library(Rlab)
+library(ResourceSelection)
+library(dominanceanalysis)
+library(mctest)
+library(dplyr)
+library(randomForest)
+library(corrplot)
+library(ENMeval)
+library(biomod2)
+library(jtools)
+library(car)
+library(mgcv)
+library(lubridate)
+library(ROCR)
+library(Metrics)
+library(MuMIn)
+library(boot)
+library(splines)
+
+
 ```
 
 #Data Wrangling Prior to Coding
@@ -28,7 +58,7 @@ Step 2: Buffering conflict points to create conflict raster
 
 ```
 
-Step 3
+Step 3: Create distance layers from roads, streams, etc...
 ```{r}
 
 ```
