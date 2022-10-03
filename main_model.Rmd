@@ -21,7 +21,6 @@ library(spThin)
 library(bbmle)
 library(Rlab)
 library(ResourceSelection)
-library(dominanceanalysis)
 library(mctest)
 library(dplyr)
 library(randomForest)
@@ -37,6 +36,7 @@ library(Metrics)
 library(MuMIn)
 library(boot)
 library(splines)
+library(tidyverse)
 
 
 ```
@@ -46,10 +46,26 @@ library(splines)
 *Data Sources*: Please see ReadMe file for metadata and citations.
 *Reference Paper*: Insert hagani citation here
 
+#Load in the data
+
+```{r}
+ca_raster <- raster("G:/Data/IntermediateData/IntermediateData_Files/CARaster_Tiger_Reclassed/CARaster_Tiger_Reclassed.img")
+
+plot(ca_raster)
+
+ca_raster_df <- as.data.frame(ca_raster)
+
+#check the coordinate reference system 
+crs(ca_raster)
+#NAD
+
+```
+
 #Reformatting Data
 
 Step 1: Adjust the data to the same geographic extent and projection
 ```{r}
+land_cover_2001 <-raster("G:/Data/InputData/InputData-Files/LandCover_NLCD/2001_LandCover_NLCD.img")
 
 ```
 
