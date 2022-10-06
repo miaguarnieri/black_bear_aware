@@ -5,7 +5,7 @@ date: '2022-09-05'
 output: html_document
 ---
 
-Test
+##Setup and packages
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -46,9 +46,11 @@ library(tidyverse)
 *Data Sources*: Please see ReadMe file for metadata and citations.
 *Reference Paper*: Insert hagani citation here
 
-#Load in the data
+#Load in existing data layers
 
 ```{r}
+#Sam's example (delete or move later)
+
 ca_raster <- raster("G:/Data/IntermediateData/IntermediateData_Files/CARaster_Tiger_Reclassed/CARaster_Tiger_Reclassed.img")
 
 plot(ca_raster)
@@ -59,7 +61,37 @@ ca_raster_df <- as.data.frame(ca_raster)
 crs(ca_raster)
 #NAD
 
+#elevation data
+
+#human population density data
+
+#land cover data
+
+#road density data
+
+#forest density data
+
 ```
+
+#Create remaining data layers
+
+```{r}
+#aspect
+
+#terrain ruggedness
+
+#distance to road
+
+#distance to streams
+
+#distance to urban areas
+
+#distance to recreational areas
+
+#distance to forest cover
+
+```
+
 
 #Reformatting Data
 
