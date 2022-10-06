@@ -65,9 +65,17 @@ crs(ca_raster)
 
 Step 1: Adjust the data to the same geographic extent and projection
 ```{r}
-land_cover_2001 <-raster("G:/Data/InputData/InputData-Files/LandCover_NLCD/2001_LandCover_NLCD.img")
+ human_pop_2020 <- raster("G:/Data/InputData/InputData_Files/HumanPopulationDensity_LandScan/2020_HumanPopulationDensity_LandScan/2020_HumanPopulationDensity_LandScan_colorized.tif")
+
+plot(human_pop_2020)
+
 
 ```
+```{r}
+land_cover_2016 <- raster("G:/Data/InputData/InputData_Files/LandCover_NLCD/2016_LandCover_NLCD/nlcd_2016_land_cover_l48_20210604.img")
+land_cover_2016
+```
+
 
 Step 2: Buffering conflict points to create conflict raster
 ```{r}
