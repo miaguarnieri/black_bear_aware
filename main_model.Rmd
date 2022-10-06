@@ -20,7 +20,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Step 1: Adjust the data to the same geographic extent and projection
 ```{r}
-
+land_cover_2001 <-raster("G:/Data/InputData/InputData-Files/LandCover_NLCD/2001_LandCover_NLCD.img")
 ```
 
 Step 2: Buffering conflict points to create conflict raster
