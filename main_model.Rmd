@@ -1,6 +1,6 @@
 ---
-title: "Main Model Code"
-author: "Mia Guarnieri"
+title: "Black Bear Aware Main Model Code"
+author: "Mia Guarnieri, Claire Meuter, Sam Rozal, Chase Tarr"
 date: '2022-09-05'
 output: html_document
 ---
@@ -64,7 +64,7 @@ crs(ca_raster)
 
 human_pop_2020 <- raster("G:/Data/InputData/InputData_Files/HumanPopulationDensity_LandScan/2020_HumanPopulationDensity_LandScan/2020_HumanPopulationDensity_LandScan_colorized.tif")
 
-plot(human_pop_2020)
+#plot(human_pop_2020)
 
 land_cover_2016 <- raster("G:/Data/InputData/InputData_Files/LandCover_NLCD/2016_LandCover_NLCD/nlcd_2016_land_cover_l48_20210604.img")
 land_cover_2016
@@ -81,6 +81,11 @@ dem_norcal <- raster("G:/Data/InputData/InputData_Files/2010_DEM_USGSEROS_Norcal
 #southern California raster
 
 dem_socal <- raster("G:/Data/InputData/InputData_Files/2010_DEM_USGSEROS_Socal/30n120w_20101117_gmted_mea300.tif")
+
+#merging the two rasters
+
+dem_ca <- merge(dem_norcal, dem_socal)
+
 ```
 
 ##Human population density
@@ -147,7 +152,7 @@ road_density_2014 <- raster("G:/Data/InputData/InputData_Files/2014_UsaRoadDensi
 #distance to urban areas
 
 #distance to recreational areas
-
+   
 #distance to forest cover
 
 ```
