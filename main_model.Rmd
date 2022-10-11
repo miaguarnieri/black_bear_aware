@@ -131,9 +131,14 @@ land_cover_2016 <- raster("G:/Data/InputData/InputData_Files/LandCover_NLCD/2016
 road_density_2014 <- raster("G:/Data/InputData/InputData_Files/2014_UsaRoadDensity_ESRI/2014_UsaRoadDensity_ESRI.tif")
 ```
 
-##Forest density
+##Forest density (canopy cover)
 
 ```{r}
+#data from two years, 2011 and 2016
+
+forest_dens_2011 <- raster("G:/Data/InputData/InputData_Files/TreeCanopyCover_NLCD/2011_TreeCanopyCover_NLCD/2011_TreeCanopyCover_NLCD.img")
+
+forest_dens_2016 <- raster("G:/Data/InputData/InputData_Files/TreeCanopyCover_NLCD/2016_TreeCanopyCover_NLCD/2016_TreeCanopyCover_NLCD.img")
 
 ```
 
@@ -188,6 +193,8 @@ road_density_2014 <- raster("G:/Data/InputData/InputData_Files/2014_UsaRoadDensi
 
 Step 1: Adjust the data to the same geographic extent and projection
 ```{r}
+#elevation
+
 
 
 ```
