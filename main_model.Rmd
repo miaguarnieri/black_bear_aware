@@ -140,20 +140,46 @@ road_density_2014 <- raster("G:/Data/InputData/InputData_Files/2014_UsaRoadDensi
 
 #Create remaining data layers
 
+##Aspect
+
 ```{r}
-#aspect
 
-#terrain ruggedness
+```
 
-#distance to road
+##Terrain ruggedness
 
-#distance to streams
+```{r}
 
-#distance to urban areas
+```
 
-#distance to recreational areas
-   
-#distance to forest cover
+##Distance to road
+
+```{r}
+
+```
+
+##Distance to streams
+
+```{r}
+
+```
+
+##Distance to urban areas
+
+```{r}
+
+```
+
+##Distance to recreational areas
+
+```{r}
+
+```
+
+##Distance to forest cover
+
+```{r}
+
 
 ```
 
