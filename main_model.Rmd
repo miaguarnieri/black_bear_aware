@@ -160,6 +160,9 @@ forest_dens_2016 <- raster("G:/Data/InputData/InputData_Files/TreeCanopyCover_NL
 ##Distance to road
 
 ```{r}
+distance_to_roads <- distanceFromPoints(object = road_density_2014, xy=points)
+
+
 
 ```
 
