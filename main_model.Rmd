@@ -12,32 +12,20 @@ knitr::opts_chunk$set(echo = TRUE)
 #attach packages
 #note - Loading all of the ones Jason used, I don't think we will need all of them 
 
-library(rgdal) #for loading vector data 
-library(ggplot2)
-library(terra) #or loading raster data
-library(dismo)
-library(rJava)
-library(spThin)
-library(bbmle)
-library(Rlab)
-library(ResourceSelection)
-library(mctest)
-library(dplyr)
-library(randomForest)
-library(corrplot)
-library(ENMeval)
-library(biomod2)
-library(jtools)
-library(car)
-library(mgcv)
-library(lubridate)
-library(ROCR)
-library(Metrics)
-library(MuMIn)
-library(boot)
-library(splines)
 library(tidyverse)
+library(here)
+library(terra)
+library(sf)
+library(tmap)
 
+#mia's file path
+gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+
+#claire's file path
+
+#sam's file path
+
+#chase's file path
 
 ```
 
@@ -48,26 +36,20 @@ library(tidyverse)
 
 #Load in existing data layers
 
-##Setup
+##California raster
 
 ```{r}
 #Sam's example (delete or move later)
 
-ca_raster <- raster("G:/Data/IntermediateData/IntermediateData_Files/CARaster_Tiger_Reclassed/CARaster_Tiger_Reclassed.img")
-
-plot(ca_raster)
-
-ca_raster_df <- as.data.frame(ca_raster)
+ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Reclassed/CARaster_Tiger_Reclassed.img"))
 
 ##check the coordinate reference system 
 crs(ca_raster)
 
-human_pop_2020 <- raster("G:/Data/InputData/InputData_Files/HumanPopulationDensity_LandScan/2020_HumanPopulationDensity_LandScan/2020_HumanPopulationDensity_LandScan_colorized.tif")
-
-#plot(human_pop_2020)
-
-land_cover_2016 <- raster("G:/Data/InputData/InputData_Files/LandCover_NLCD/2016_LandCover_NLCD/nlcd_2016_land_cover_l48_20210604.img")
-land_cover_2016
+#plot CA raster
+tm_shape(ca_raster) +
+  tm_raster() +
+  tmap_mode("view")
 
 ```
 
@@ -93,15 +75,18 @@ dem_ca <- merge(dem_norcal, dem_socal)
 ```{r}
 #data are by year, from 2016 - 2020 (1 file per year)
 
-human_pop_den_2016 <- raster("G:/Data/InputData/InputData_Files/HumanPopulationDensity_LandScan/2016_HumanPopulationDensity_LandScan/2016_HumanPopulationDensity_LandScan.tif")
+human_pop_den_2016 <- raster("G:/Data/InputData/InputData_Files/HumanPopulationDensity_LandScan/2016_HumanPopulationDensity_LandScan/2016_conus_night_colorized.tif")
 
-human_pop_den_2017 <- raster("G:/Data/InputData/InputData_Files/HumanPopulationDensity_LandScan/2017_HumanPopulationDensity_LandScan/2017_HumanPopulationDensity_LandScan_colorized.tif")
+human_pop_den_2017 <- raster("G:/Data/InputData/InputData_Files/HumanPopulationDensity_LandScan/2017_HumanPopulationDensity_LandScan/2017_conus_night_colorized.tif")
 
-human_pop_den_2018 <- raster("G:/Data/InputData/InputData_Files/HumanPopulationDensity_LandScan/2018_HumanPopulationDensity_LandScan/2018_HumanPopulationDensity_LandScan_colorized.tif")
+human_pop_den_2018 <- raster("G:/Data/InputData/InputData_Files/HumanPopulationDensity_LandScan/2018_HumanPopulationDensity_LandScan/2018_conus_night_colorized.tif")
 
-human_pop_den_2019 <- raster("G:/Data/InputData/InputData_Files/HumanPopulationDensity_LandScan/2019_HumanPopulationDensity_LandScan/2019_HumanPopulationDensity_LandScan_colorized.tif")
+human_pop_den_2019 <- raster("G:/Data/InputData/InputData_Files/HumanPopulationDensity_LandScan/2019_HumanPopulationDensity_LandScan/2019_conus_night_colorized.tif")
 
-human_pop_den_2020 <- raster("G:/Data/InputData/InputData_Files/HumanPopulationDensity_LandScan/2020_HumanPopulationDensity_LandScan/2020_HumanPopulationDensity_LandScan_colorized.tif")
+human_pop_den_2020 <- raster("G:/Data/InputData/InputData_Files/HumanPopulationDensity_LandScan/2020_HumanPopulationDensity_LandScan/2020_conus_night_colorized.tif")
+
+human_pop_den_2021 <- raster("G:/Data/InputData/InputData_Files/HumanPopulationDensity_LandScan/2021_HumanPopulationDensity_LandScan/2021_conus_night_colorized.tif")
+
 ```
 
 ##Land cover
@@ -196,8 +181,6 @@ distance_to_roads <- distanceFromPoints(object = road_density_2014, xy=points)
 
 Step 1: Adjust the data to the same geographic extent and projection
 ```{r}
-#elevation
-
 
 
 ```
