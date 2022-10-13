@@ -18,10 +18,10 @@ library(terra)
 library(sf)
 library(tmap)
 
-#mia's file path
+#mia's/claire's file path
 gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
-#claire's file path
+
 
 #sam's file path
 
@@ -75,17 +75,18 @@ dem_ca <- merge(dem_norcal, dem_socal)
 ```{r}
 #data are by year, from 2016 - 2020 (1 file per year)
 
-human_pop_den_2016 <- raster("G:/Data/InputData/InputData_Files/HumanPopulationDensity_LandScan/2016_HumanPopulationDensity_LandScan/2016_conus_night_colorized.tif")
 
-human_pop_den_2017 <- raster("G:/Data/InputData/InputData_Files/HumanPopulationDensity_LandScan/2017_HumanPopulationDensity_LandScan/2017_conus_night_colorized.tif")
+human_pop_den_2016 <- rast(here(gdrive_data,"InputData/InputData_Files/HumanPopulationDensity_LandScan/2016_HumanPopulationDensity_LandScan/2016_conus_night_colorized.tif"))
 
-human_pop_den_2018 <- raster("G:/Data/InputData/InputData_Files/HumanPopulationDensity_LandScan/2018_HumanPopulationDensity_LandScan/2018_conus_night_colorized.tif")
+human_pop_den_2017 <- rast(here(gdrive_data,"InputData/InputData_Files/HumanPopulationDensity_LandScan/2017_HumanPopulationDensity_LandScan/2017_conus_night_colorized.tif"))
 
-human_pop_den_2019 <- raster("G:/Data/InputData/InputData_Files/HumanPopulationDensity_LandScan/2019_HumanPopulationDensity_LandScan/2019_conus_night_colorized.tif")
+human_pop_den_2018 <- rast(here(gdrive_data,"InputData/InputData_Files/HumanPopulationDensity_LandScan/2018_HumanPopulationDensity_LandScan/2018_conus_night_colorized.tif"))
 
-human_pop_den_2020 <- raster("G:/Data/InputData/InputData_Files/HumanPopulationDensity_LandScan/2020_HumanPopulationDensity_LandScan/2020_conus_night_colorized.tif")
+human_pop_den_2019 <- rast(here(gdrive_data, "InputData/InputData_Files/HumanPopulationDensity_LandScan/2019_HumanPopulationDensity_LandScan/2019_conus_night_colorized.tif"))
 
-human_pop_den_2021 <- raster("G:/Data/InputData/InputData_Files/HumanPopulationDensity_LandScan/2021_HumanPopulationDensity_LandScan/2021_conus_night_colorized.tif")
+human_pop_den_2020 <- rast(here(gdrive_data, "InputData/InputData_Files/HumanPopulationDensity_LandScan/2020_HumanPopulationDensity_LandScan/2020_conus_night_colorized.tif"))
+
+human_pop_den_2021 <- rast(here(gdrive_data,"InputData/InputData_Files/HumanPopulationDensity_LandScan/2021_HumanPopulationDensity_LandScan/2021_conus_night_colorized.tif"))
 
 ```
 
