@@ -19,9 +19,10 @@ library(sf)
 library(tmap)
 
 #mia and claire's file path
-gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+#gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #sam's file path
+gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #chase's file path
 
@@ -153,7 +154,7 @@ nlcd_2001_reclassed <- classify(land_cover_2001, m)
 ##Road density
 
 ```{r}
-road_density_2014 <- raster("G:/Data/InputData/InputData_Files/2014_UsaRoadDensity_ESRI/2014_UsaRoadDensity_ESRI.tif")
+road_density_2014 <- rast(here(gdrive_data,"/InputData/InputData_Files/2014_UsaRoadDensity_ESRI/2014_UsaRoadDensity_ESRI.tif"))
 ```
 
 ##Forest density (canopy cover)
@@ -161,9 +162,9 @@ road_density_2014 <- raster("G:/Data/InputData/InputData_Files/2014_UsaRoadDensi
 ```{r}
 #data from two years, 2011 and 2016
 
-forest_dens_2011 <- raster("G:/Data/InputData/InputData_Files/TreeCanopyCover_NLCD/2011_TreeCanopyCover_NLCD/2011_TreeCanopyCover_NLCD.img")
+forest_dens_2011 <- rast(here(gdrive_data,"/InputData/InputData_Files/TreeCanopyCover_NLCD/2011_TreeCanopyCover_NLCD/2011_TreeCanopyCover_NLCD.img"))
 
-forest_dens_2016 <- raster("G:/Data/InputData/InputData_Files/TreeCanopyCover_NLCD/2016_TreeCanopyCover_NLCD/2016_TreeCanopyCover_NLCD.img")
+forest_dens_2016 <- rast(here(gdrive_data,"/InputData/InputData_Files/TreeCanopyCover_NLCD/2016_TreeCanopyCover_NLCD/2016_TreeCanopyCover_NLCD.img"))
 
 ```
 
@@ -180,6 +181,7 @@ forest_dens_2016 <- raster("G:/Data/InputData/InputData_Files/TreeCanopyCover_NL
 ##Human population density
 
 ```{r}
+
 
 ```
 
@@ -224,6 +226,9 @@ forest_dens_2016 <- raster("G:/Data/InputData/InputData_Files/TreeCanopyCover_NL
 ##Distance to road
 
 ```{r}
+distance_to_roads <- distanceFromPoints(object = road_density_2014, xy=points)
+
+
 
 ```
 
