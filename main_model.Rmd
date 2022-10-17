@@ -10,7 +10,6 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 #attach packages
-#note - Loading all of the ones Jason used, I don't think we will need all of them 
 
 library(tidyverse)
 library(here)
@@ -19,10 +18,10 @@ library(sf)
 library(tmap)
 
 #mia and claire's file path
-#gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #sam's file path
-gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
+#gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #chase's file path
 
@@ -56,6 +55,15 @@ tm_shape(ca_raster) +
 
 ```{r}
 #Buffer conflict points to create conflict raster
+# first loading in conflict data 
+conflict_points <- vect(here(gdrive_data,"/IntermediateData/IntermediateData_Files/2022_07_18_WIRClean_CDFW.csv"))
+
+
+#need to set conflict crs 
+#need to set extent 
+#Need to buffer 
+
+
 ```
 
 ##Elevation (DEM, mean elevation)
