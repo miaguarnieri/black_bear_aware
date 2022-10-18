@@ -245,7 +245,8 @@ dem_mask <- mask(dem_calbers, ca_raster)
 ##Human population density
 
 ```{r}
-
+#reproject to the same crs (NAD 83, CA Albers (2011))
+human_pop_den_2016 
 
 ```
 
