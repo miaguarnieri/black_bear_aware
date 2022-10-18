@@ -320,13 +320,19 @@ levels(lc_2001_formatted) <- val_mat
 ##Road density
 
 ```{r}
+#reproject to the correct CRS
+
+road_density_2014_calbers <- project(road_density_2014, ca_raster)
+
+#cropping the files to the spatial extent of CA
+road_density_2014_mask <- mask(road_density_2014_calbers, ca_raster)
 
 ```
 
 ##Forest density (canopy cover)
 
 ```{r}
-#reproject to the correct 
+#reproject to the correct CRS
 
 forest_dens_2011_calbers <- project(forest_dens_2011, ca_raster)
 
