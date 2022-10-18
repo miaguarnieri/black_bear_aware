@@ -320,12 +320,13 @@ val <- c(11, "open_water",
        90, "wetlands")
 
 #turning those values into a matrix
-val_mat <- matrix(val, ncol = 2, byrow = TRUE) 
+val_mat <- as.data.frame(val, ncol = 2, byrow = TRUE) 
 
 #apply reclassification function
 
-lc_2001_formatted <- classify(lc_2001_mask, mat) %>% 
-  dropV
+lc_2001_formatted <- classify(lc_2001_mask, mat)
+
+levels(lc_2001_formatted) <- val_mat
 
 ```
 
