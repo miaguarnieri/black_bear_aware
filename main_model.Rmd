@@ -112,7 +112,7 @@ human_pop_den_2021 <- rast(here(gdrive_data,"InputData/InputData_Files/HumanPopu
 
 Land cover data from the NLCD from 2001-2019 (~3 year intervals).
 
-Land cover class codes and descriptions for contiguous US:
+###Land cover class codes and descriptions for contiguous US:
 
 0
 Unclassified
@@ -182,6 +182,7 @@ NLCD Legend Land Cover Class Descriptions
 Emergent Herbaceous Wetlands - Areas where perennial herbaceous vegetation accounts for greater than 80 percent of vegetative cover and the soil or substrate is periodically saturated with or covered with water.
 NLCD Legend Land Cover Class Descriptions
 
+###Wrangling code
 ```{r}
 #data are by year, from 2001 - 2016 (1 file per year)
 
