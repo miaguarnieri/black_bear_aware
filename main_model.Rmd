@@ -19,10 +19,10 @@ library(sf)
 library(tmap)
 
 #mia and claire's file path
-gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+#gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #sam's file path
-#gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
+gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #chase's file path
 
@@ -339,6 +339,16 @@ levels(lc_2001_formatted) <- val_mat
 ##Forest density (canopy cover)
 
 ```{r}
+#reproject to the correct 
+
+forest_dens_2011_calbers <- project(forest_dens_2011, ca_raster)
+
+forest_dens_2016_calbers <- project(forest_dens_2016, ca_raster)
+
+
+#cropping the files to the spatial extent of CA
+forest_dens_2011_mask <- mask(forest_dens_2011_calbers, ca_raster)
+forest_dens_2016_mask <- mask(forest_dens_2016_calbers, ca_raster)
 
 ```
 
