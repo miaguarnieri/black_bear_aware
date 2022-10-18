@@ -349,6 +349,7 @@ forest_dens_2016_calbers <- project(forest_dens_2016, ca_raster)
 #cropping the files to the spatial extent of CA
 forest_dens_2011_mask <- mask(forest_dens_2011_calbers, ca_raster)
 forest_dens_2016_mask <- mask(forest_dens_2016_calbers, ca_raster)
+#code check
 
 ```
 
