@@ -246,7 +246,31 @@ dem_mask <- mask(dem_calbers, ca_raster)
 
 ```{r}
 #reproject to the same crs (NAD 83, CA Albers (2011))
-human_pop_den_2016 
+pop_den_2016_calbers <- project(human_pop_den_2016, ca_raster)
+
+pop_den_2017_calbers <- project(human_pop_den_2017, ca_raster)
+
+pop_den_2018_calbers <- project(human_pop_den_2018, ca_raster)
+
+pop_den_2019_calbers <- project(human_pop_den_2019, ca_raster)
+
+pop_den_2020_calbers <- project(human_pop_den_2020, ca_raster)
+
+pop_den_2021_calbers <- project(human_pop_den_2021, ca_raster)
+
+#crop to spatial extent of CA
+
+pop_den_2016_mask <- mask(pop_den_2016_calbers, ca_raster)
+
+pop_den_2017_mask <- mask(pop_den_2017_calbers, ca_raster)
+
+pop_den_2018_mask <- mask(pop_den_2018_calbers, ca_raster)
+
+pop_den_2019_mask <- mask(pop_den_2019_calbers, ca_raster)
+
+pop_den_2020_mask <- mask(pop_den_2020_calbers, ca_raster)
+
+pop_den_2021_mask <- mask(pop_den_2021_calbers, ca_raster)
 
 ```
 
