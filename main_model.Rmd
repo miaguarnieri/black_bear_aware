@@ -36,15 +36,16 @@ gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
 ##California raster
 
+Insert info about CA raster layer here
+
 ```{r}
-#Sam's example (delete or move later)
 
 ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Reclassed/CARaster_Tiger_Reclassed.img"))
 
-##check the coordinate reference system 
+#check the coordinate reference system 
 crs(ca_raster)
 
-#plot CA raster
+#plot CA raster to confirm
 tm_shape(ca_raster) +
   tm_raster() +
   tmap_mode("view")
@@ -52,6 +53,8 @@ tm_shape(ca_raster) +
 ```
 
 ##Conflict data
+
+Insert info about WIR data here
 
 ```{r}
 #Buffer conflict points to create conflict raster
@@ -67,6 +70,9 @@ conflict_points <- vect(here(gdrive_data,"/IntermediateData/IntermediateData_Fil
 ```
 
 ##Elevation (DEM, mean elevation)
+
+Two separate DEM rasters were available at 7.5-arc second resolution from USGS EROS. These will need to be merged togther.
+
 ```{r}
 
 #northern California raster
@@ -81,18 +87,16 @@ dem_socal <- rast(here(gdrive_data, "/InputData/InputData_Files/2010_DEM_USGSERO
 
 dem_ca <- merge(dem_norcal, dem_socal)
 
-#crop to CA extent
-
-dem_ca_cropped <- mask(x = dem_ca, mask = ca_raster)
-
 #plot DEM raster
-tm_shape(dem_ca_cropped) +
+tm_shape(dem_ca) +
   tm_raster() +
   tmap_mode("view")
 
 ```
 
 ##Human population density
+
+Insert info about human pop density layers here
 
 ```{r}
 #data are by year, from 2016 - 2020 (1 file per year)
@@ -114,6 +118,78 @@ human_pop_den_2021 <- rast(here(gdrive_data,"InputData/InputData_Files/HumanPopu
 
 ##Land cover
 
+Land cover data from the NLCD from 2001-2019 (~3 year intervals).
+
+Land cover class codes and descriptions for contiguous US:
+
+0
+Unclassified
+Producer defined
+
+11
+Open Water - All areas of open water, generally with less than 25% cover or vegetation or soil
+NLCD Legend Land Cover Class Descriptions
+
+12
+Perennial Ice/Snow - All areas characterized by a perennial cover of ice and/or snow, generally greater than 25% of total cover.
+NLCD Legend Land Cover Class Descriptions
+
+21
+Developed, Open Space - Includes areas with a mixture of some constructed materials, but mostly vegetation in the form of lawn grasses.  Impervious surfaces account for less than 20 percent of total cover.  These areas most commonly include large-lot single-family housing units, parks, golf courses, and vegetation planted in developed settings for recreation, erosion control, or aesthetic purposes.
+NLCD Legend Land Cover Class Descriptions
+
+22
+Developed, Low Intensity -Includes areas with a mixture of constructed materials and vegetation.  Impervious surfaces account for 20-49 percent of total cover.  These areas most commonly include single-family housing units.
+NLCD Legend Land Cover Class Descriptions
+
+23
+Developed, Medium Intensity - Includes areas with a mixture of constructed materials and vegetation. Impervious surfaces account for 50-79 percent of the total cover.  These areas most commonly include single-family housing units.
+NLCD Legend Land Cover Class Descriptions
+
+24
+Developed, High Intensity - Includes highly developed areas where people reside or work in high numbers. Examples include apartment complexes, row houses and commercial/industrial.  Impervious surfaces account for 80 to 100 percent of the total cover.
+NLCD Legend Land Cover Class Descriptions
+
+31
+Barren Land (Rock/Sand/Clay) - Barren areas of bedrock, desert pavement, scarps, talus, slides, volcanic material, glacial debris, sand dunes, strip mines, gravel pits and other accumulations of earthen material. Generally, vegetation accounts for less than 15% of total cover.
+NLCD Legend Land Cover Class Descriptions
+
+41
+Deciduous Forest - Areas dominated by trees generally greater than 5 meters tall, and greater than 20% of total vegetation cover. More than 75 percent of the tree species shed foliage simultaneously in response to seasonal change.
+NLCD Legend Land Cover Class Descriptions
+
+42
+Evergreen Forest - Areas dominated by trees generally greater than 5 meters tall, and greater than 20% of total vegetation cover. More than 75 percent of the tree species maintain their leaves all year. Canopy is never without green foliage.
+NLCD Legend Land Cover Class Descriptions
+
+43
+Mixed Forest - Areas dominated by trees generally greater than 5 meters tall, and greater than 20% of total vegetation cover. Neither deciduous nor evergreen species are greater than 75 percent of total tree cover.
+NLCD Legend Land Cover Class Descriptions
+
+52
+Shrub/Scrub - Areas dominated by shrubs; less than 5 meters tall with shrub canopy typically greater than 20% of total vegetation. This class includes true shrubs, young trees in an early successional stage or trees stunted from environmental conditions.
+NLCD Legend Land Cover Class Descriptions
+
+71
+Grassland/Herbaceous - Areas dominated by grammanoid or herbaceous vegetation, generally greater than 80% of total vegetation.  These areas are not subject to intensive management such as tilling, but can be utilized for grazing.
+NLCD Legend Land Cover Class Descriptions
+
+81
+Pasture/Hay - Areas of grasses, legumes, or grass-legume mixtures planted for livestock grazing or the production of seed or hay crops, typically on a perennial cycle. Pasture/hay vegetation accounts for greater than 20 percent of total vegetation.
+NLCD Legend Land Cover Class Descriptions
+
+82
+Cultivated Crops - Areas used for the production of annual crops, such as corn, soybeans, vegetables, tobacco, and cotton, and also perennial woody crops such as orchards and vineyards. Crop vegetation accounts for greater than 20 percent of total vegetation. This class also includes all land being actively tilled.
+NLCD Legend Land Cover Class Descriptions
+
+90
+Woody Wetlands - Areas where forest or shrub land vegetation accounts for greater than 20 percent of vegetative cover and the soil or substrate is periodically saturated with or covered with water.
+NLCD Legend Land Cover Class Descriptions
+
+95
+Emergent Herbaceous Wetlands - Areas where perennial herbaceous vegetation accounts for greater than 80 percent of vegetative cover and the soil or substrate is periodically saturated with or covered with water.
+NLCD Legend Land Cover Class Descriptions
+
 ```{r}
 #data are by year, from 2001 - 2016 (1 file per year)
 
@@ -132,30 +208,6 @@ land_cover_2013 <- rast(here(gdrive_data, "/InputData/InputData_Files/LandCover_
 land_cover_2016 <- rast(here(gdrive_data, "/InputData/InputData_Files/LandCover_NLCD/2016_LandCover_NLCD/nlcd_2016_land_cover_l48_20210604.img"))
 
 land_cover_2019 <- rast(here(gdrive_data, "/InputData/InputData_Files/LandCover_NLCD/2019_LandCover_NLCD/nlcd_2019_land_cover_l48_20210604.img"))
-
-#Reclassify land cover categories
-
-#reclassification matrix
-m <- rbind(c("Open Water", "open_water"),
-       c("Perennial Snow/Ice", "perennial_ice_snow"),
-       c("Developed, Open Space", "developed_open_space"), 
-       c("Developed, Low Intensity", "developed_low_int"),
-       c("Developed, Medium Intensity", "developed_med_int"),
-       c("Developed, High Intensity", "developed_high_int"),
-       c("Barren Land", "barren_land"),
-       c("Deciduous Forest", "forest"),
-       c("Evergreen Forest", "forest"),
-       c("Mixed Forest", "forest"),
-       c("Shrub/Scrub", "shrubland"),
-       c("Hay/Pasture", "planted_cultivated"),
-       c("Cultivated Crops", "planted_cultivated"),
-       c("Woody Wetlands", "wetlands"),
-       c("Emergent Herbaceous Wetlands", "wetlands"))
-
-#reclassification function
-
-nlcd_2001_reclassed <- classify(land_cover_2001, m)
-
 
 ```
 
@@ -182,7 +234,11 @@ forest_dens_2016 <- rast(here(gdrive_data,"/InputData/InputData_Files/TreeCanopy
 
 ##Elevation
 ```{r}
+#reproject to the same crs (NAD 83, CA Albers (2011))
+dem_calbers <- project(dem_ca, ca_raster)
 
+#cropping to the spatial extent of CA
+dem_mask <- mask(dem_calbers, ca_raster)
 
 ```
 
@@ -195,7 +251,90 @@ forest_dens_2016 <- rast(here(gdrive_data,"/InputData/InputData_Files/TreeCanopy
 
 ##Land cover
 
+We will additionally reclassify land cover rasters after they are clipped, to avoid exceeding memory capacity with large files
+
 ```{r}
+#reproject to the same crs (NAD 83, CA Albers (2011))
+lc_2001_calbers <- project(land_cover_2001, ca_raster)
+
+lc_2004_calbers <- project(land_cover_2004, ca_raster)
+
+lc_2006_calbers <- project(land_cover_2006, ca_raster)
+
+lc_2008_calbers <- project(land_cover_2008, ca_raster)
+
+lc_2011_calbers <- project(land_cover_2011, ca_raster)
+
+lc_2013_calbers <- project(land_cover_2013, ca_raster)
+
+lc_2016_calbers <- project(land_cover_2016, ca_raster)
+
+lc_2019_calbers <- project(land_cover_2019, ca_raster)
+
+
+#cropping the files to the spatial extent of CA
+lc_2001_mask <- mask(lc_2001_calbers, ca_raster)
+
+lc_2004_mask <- mask(lc_2004_calbers, ca_raster)
+
+lc_2006_mask <- mask(lc_2004_calbers, ca_raster)
+
+lc_2008_mask <- mask(lc_2004_calbers, ca_raster)
+
+lc_2011_mask <- mask(lc_2004_calbers, ca_raster)
+
+lc_2013_mask <- mask(lc_2004_calbers, ca_raster)
+
+lc_2016_mask <- mask(lc_2004_calbers, ca_raster)
+
+lc_2019_mask <- mask(lc_2004_calbers, ca_raster)
+
+#Reclassify land cover categories
+
+#reclassification values (from, to)
+m <- c(11, 11, #open water 
+       12, 12, #perennial ice/snow
+       21, 21, #developed open space
+       22, 22, #developed low intensity
+       23, 23, #developed med intensity
+       24, 24, #developed high intensity
+       31, 31, #barren land (rock/sand/clay)
+       41, 40, #deciduous forest --> forest
+       42, 40, #evergreen forest --> forest
+       43, 40, #mixed forest --> forest
+       52, 52, #shrub/scrub
+       71, 71, #grassland/herbaceous
+       81, 80, # pasture/hay --> planted_cultivated
+       82, 80, #cultivated crops --> planted_cultivated
+       90, 90, #woody wetlands --> wetlands
+       95, 90) #emergent herbaceous wetlands --> wetlands
+
+#turning those values into a matrix
+mat <- matrix(m, ncol = 2, byrow = TRUE) 
+
+#setting values for each numeric
+
+val <- c(11, "open_water",  
+       12, "perrenial_ice_snow", 
+       21, "dev_open_space", 
+       22, "dev_low_int", 
+       23, "dev_med_int", 
+       24, "dev_high_int", 
+       31, "barren_land", 
+       40, "forest", 
+       52, "shrub_scrub", 
+       71, "grassland_herbaceous", 
+       80, "planted_cultivated", 
+       90, "wetlands")
+
+#turning those values into a matrix
+val_mat <- as.data.frame(val, ncol = 2, byrow = TRUE) 
+
+#apply reclassification function
+
+lc_2001_formatted <- classify(lc_2001_mask, mat)
+
+levels(lc_2001_formatted) <- val_mat
 
 ```
 
