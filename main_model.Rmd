@@ -226,7 +226,11 @@ forest_dens_2016 <- rast(here(gdrive_data,"/InputData/InputData_Files/TreeCanopy
 
 ##Elevation
 ```{r}
+#reproject to the same crs (NAD 83, CA Albers (2011))
+dem_calbers <- project(dem_ca, ca_raster)
 
+#cropping to the spatial extent of CA
+dem_mask <- mask(dem_calbers, ca_raster)
 
 ```
 
@@ -242,11 +246,40 @@ forest_dens_2016 <- rast(here(gdrive_data,"/InputData/InputData_Files/TreeCanopy
 We will additionally reclassify land cover rasters after they are clipped, to avoid exceeding memory capacity with large files
 
 ```{r}
-#reproject to the same crs
+#reproject to the same crs (NAD 83, CA Albers (2011))
 lc_2001_calbers <- project(land_cover_2001, ca_raster)
+
+lc_2004_calbers <- project(land_cover_2004, ca_raster)
+
+lc_2006_calbers <- project(land_cover_2006, ca_raster)
+
+lc_2008_calbers <- project(land_cover_2008, ca_raster)
+
+lc_2011_calbers <- project(land_cover_2011, ca_raster)
+
+lc_2013_calbers <- project(land_cover_2013, ca_raster)
+
+lc_2016_calbers <- project(land_cover_2016, ca_raster)
+
+lc_2019_calbers <- project(land_cover_2019, ca_raster)
+
 
 #cropping the files to the spatial extent of CA
 lc_2001_mask <- mask(lc_2001_calbers, ca_raster)
+
+lc_2004_mask <- mask(lc_2004_calbers, ca_raster)
+
+lc_2006_mask <- mask(lc_2004_calbers, ca_raster)
+
+lc_2008_mask <- mask(lc_2004_calbers, ca_raster)
+
+lc_2011_mask <- mask(lc_2004_calbers, ca_raster)
+
+lc_2013_mask <- mask(lc_2004_calbers, ca_raster)
+
+lc_2016_mask <- mask(lc_2004_calbers, ca_raster)
+
+lc_2019_mask <- mask(lc_2004_calbers, ca_raster)
 
 #Reclassify land cover categories
 
@@ -270,6 +303,31 @@ m <- c(11, 11, #open water
 
 #turning those values into a matrix
 mat <- matrix(m, ncol = 2, byrow = TRUE) 
+
+#setting values for each numeric
+
+val <- c(11, "open_water",  
+       12, "perrenial_ice_snow", 
+       21, "dev_open_space", 
+       22, "dev_low_int", 
+       23, "dev_med_int", 
+       24, "dev_high_int", 
+       31, "barren_land", 
+       40, "forest", 
+       52, "shrub_scrub", 
+       71, "grassland_herbaceous", 
+       80, "planted_cultivated", 
+       90, "wetlands")
+
+#turning those values into a matrix
+val_mat <- as.data.frame(val, ncol = 2, byrow = TRUE) 
+
+#apply reclassification function
+
+lc_2001_formatted <- classify(lc_2001_mask, mat)
+
+levels(lc_2001_formatted) <- val_mat
+
 ```
 
 ##Road density
