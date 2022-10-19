@@ -59,13 +59,16 @@ Insert info about WIR data here
 ```{r}
 #Buffer conflict points to create conflict raster
 # first loading in conflict data 
-conflict_points <- vect(here(gdrive_data,"/IntermediateData/IntermediateData_Files/2022_07_18_WIRClean_CDFW.csv"))
+conflict_points <- read_sf(here(gdrive_data,"/IntermediateData/IntermediateData_Files/2022_07_18_WIRClean_CDFW.csv"))
 
-
+# look into buffering with SF SF user st_buffer
 #need to set conflict crs 
 #need to set extent 
 #Need to buffer 
 
+#test plot
+tm_shape(conflict_points) +
+  tm_dots()
 
 ```
 
