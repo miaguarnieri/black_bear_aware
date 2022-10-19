@@ -1,7 +1,7 @@
 ---
-title: "Black Bear Aware Main Model Code"
-author: "Mia Guarnieri, Claire Meuter, Sam Rozal, Chase Tarr"
-date: '2022-09-05'
+title: "Land Cover Data Wrangling"
+author: "Mia Guarnieri"
+date: '2022-10-19'
 output: html_document
 ---
 
@@ -50,61 +50,6 @@ crs(ca_raster)
 tm_shape(ca_raster) +
   tm_raster() +
   tmap_mode("view")
-
-```
-
-##Conflict data
-
-Insert info about WIR data here
-
-```{r}
-#Buffer conflict points to create conflict raster
-```
-
-##Elevation (DEM, mean elevation)
-
-Two separate DEM rasters were available at 7.5-arc second resolution from USGS EROS. These will need to be merged togther.
-
-```{r}
-
-#northern California raster
-
-dem_norcal <- rast(here(gdrive_data, "/InputData/InputData_Files/2010_DEM_USGSEROS_Norcal/30n150w_20101117_gmted_mea075.tif"))
-
-#southern California raster
-
-dem_socal <- rast(here(gdrive_data, "/InputData/InputData_Files/2010_DEM_USGSEROS_Socal/30n120w_20101117_gmted_mea075.tif"))
-
-#merging the two rasters
-
-dem_ca <- merge(dem_norcal, dem_socal)
-
-#plot DEM raster
-tm_shape(dem_ca) +
-  tm_raster() +
-  tmap_mode("view")
-
-```
-
-##Human population density
-
-Insert info about human pop density layers here
-
-```{r}
-#data are by year, from 2016 - 2020 (1 file per year)
-
-
-human_pop_den_2016 <- rast(here(gdrive_data,"InputData/InputData_Files/HumanPopulationDensity_LandScan/2016_HumanPopulationDensity_LandScan/2016_conus_night_colorized.tif"))
-
-human_pop_den_2017 <- rast(here(gdrive_data,"InputData/InputData_Files/HumanPopulationDensity_LandScan/2017_HumanPopulationDensity_LandScan/2017_conus_night_colorized.tif"))
-
-human_pop_den_2018 <- rast(here(gdrive_data,"InputData/InputData_Files/HumanPopulationDensity_LandScan/2018_HumanPopulationDensity_LandScan/2018_conus_night_colorized.tif"))
-
-human_pop_den_2019 <- rast(here(gdrive_data, "InputData/InputData_Files/HumanPopulationDensity_LandScan/2019_HumanPopulationDensity_LandScan/2019_conus_night_colorized.tif"))
-
-human_pop_den_2020 <- rast(here(gdrive_data, "InputData/InputData_Files/HumanPopulationDensity_LandScan/2020_HumanPopulationDensity_LandScan/2020_conus_night_colorized.tif"))
-
-human_pop_den_2021 <- rast(here(gdrive_data,"InputData/InputData_Files/HumanPopulationDensity_LandScan/2021_HumanPopulationDensity_LandScan/2021_conus_night_colorized.tif"))
 
 ```
 
@@ -204,45 +149,8 @@ land_cover_2019 <- rast(here(gdrive_data, "/InputData/InputData_Files/LandCover_
 
 ```
 
-##Road density
-
-```{r}
-road_density_2014 <- rast(here(gdrive_data,"/InputData/InputData_Files/2014_UsaRoadDensity_ESRI/2014_UsaRoadDensity_ESRI.tif"))
-```
-
-##Forest density (canopy cover)
-
-```{r}
-#data from two years, 2011 and 2016
-
-forest_dens_2011 <- rast(here(gdrive_data,"/InputData/InputData_Files/TreeCanopyCover_NLCD/2011_TreeCanopyCover_NLCD/2011_TreeCanopyCover_NLCD.img"))
-
-forest_dens_2016 <- rast(here(gdrive_data,"/InputData/InputData_Files/TreeCanopyCover_NLCD/2016_TreeCanopyCover_NLCD/2016_TreeCanopyCover_NLCD.img"))
-
-```
-
-
 
 #Adjust the data to the same geographic extent and projection
-
-##Elevation
-```{r}
-#reproject to the same crs (NAD 83, CA Albers (2011))
-dem_calbers <- project(dem_ca, ca_raster)
-
-#cropping to the spatial extent of CA
-dem_mask <- mask(dem_calbers, ca_raster)
-
-```
-
-##Human population density
-
-```{r}
-
-
-```
-
-##Land cover
 
 We will additionally reclassify land cover rasters after they are clipped, to avoid exceeding memory capacity with large files
 
@@ -315,97 +223,6 @@ lc_2001_formatted <- classify(lc_2001_mask, mat)
 
 #test plot
 plot(lc_2001_formatted, type = "classes", levels = val)
-
-```
-
-##Road density
-
-```{r}
-
-```
-
-##Forest density (canopy cover)
-
-```{r}
-#reproject to the correct 
-
-forest_dens_2011_calbers <- project(forest_dens_2011, ca_raster)
-
-forest_dens_2016_calbers <- project(forest_dens_2016, ca_raster)
-
-
-#cropping the files to the spatial extent of CA
-forest_dens_2011_mask <- mask(forest_dens_2011_calbers, ca_raster)
-forest_dens_2016_mask <- mask(forest_dens_2016_calbers, ca_raster)
-#code check
-
-```
-
-
-
-#Create remaining data layers
-
-```{r}
-
-```
-
-##Aspect
-
-```{r}
-
-```
-
-##Terrain ruggedness
-
-```{r}
-
-```
-
-##Distance to road
-
-```{r}
-distance_to_roads <- distanceFromPoints(object = road_density_2014, xy=points)
-
-
-
-```
-
-##Distance to streams
-
-```{r}
-
-```
-
-##Distance to urban areas
-
-```{r}
-
-```
-
-##Distance to recreational areas
-
-```{r}
-
-```
-
-##Distance to forest cover
-
-```{r}
-
-
-```
-
-
-
-#Model Creation
-
-Step 1: replicating the model from Hagani et al.
-```{r}
-
-```
-
-Step 2
-```{r}
 
 ```
 
