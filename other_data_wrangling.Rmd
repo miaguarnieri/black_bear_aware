@@ -1,0 +1,118 @@
+---
+title: "Other Data Wrangling"
+author: "Mia Guarnieri"
+date: '2022-10-19'
+output: html_document
+---
+
+##Setup and packages
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#attach packages
+#note - Loading all of the ones Jason used, I don't think we will need all of them 
+
+library(tidyverse)
+library(here)
+library(terra)
+library(sf)
+library(tmap)
+
+#mia and claire's file path
+#gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+
+#sam's file path
+gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
+
+#chase's file path
+
+```
+
+#Data Wrangling Prior to Coding
+
+*Data Sources*: Please see ReadMe file for metadata and citations.
+*Reference Paper*: Insert hagani citation here
+
+#Load in existing data layers
+
+##California raster
+
+Insert info about CA raster layer here
+
+```{r}
+
+ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Reclassed/CARaster_Tiger_Reclassed.img"))
+
+#check the coordinate reference system 
+crs(ca_raster)
+
+#plot CA raster to confirm
+tm_shape(ca_raster) +
+  tm_raster() +
+  tmap_mode("view")
+
+```
+
+##Conflict data
+
+Insert info about WIR data here
+
+```{r}
+#Buffer conflict points to create conflict raster
+```
+
+##Elevation (DEM, mean elevation)
+
+Two separate DEM rasters were available at 7.5-arc second resolution from USGS EROS. These will need to be merged togther.
+
+```{r}
+
+#northern California raster
+
+dem_norcal <- rast(here(gdrive_data, "/InputData/InputData_Files/2010_DEM_USGSEROS_Norcal/30n150w_20101117_gmted_mea075.tif"))
+
+#southern California raster
+
+dem_socal <- rast(here(gdrive_data, "/InputData/InputData_Files/2010_DEM_USGSEROS_Socal/30n120w_20101117_gmted_mea075.tif"))
+
+#merging the two rasters
+
+dem_ca <- merge(dem_norcal, dem_socal)
+
+#plot DEM raster
+tm_shape(dem_ca) +
+  tm_raster() +
+  tmap_mode("view")
+
+```
+
+##Road density
+
+```{r}
+road_density_2014 <- rast(here(gdrive_data,"/InputData/InputData_Files/2014_UsaRoadDensity_ESRI/2014_UsaRoadDensity_ESRI.tif"))
+```
+
+
+#Adjust the data to the same geographic extent and projection
+
+##Conflict
+
+```{r}
+
+```
+
+##Elevation
+```{r}
+#reproject to the same crs (NAD 83, CA Albers (2011))
+dem_calbers <- project(dem_ca, ca_raster)
+
+#cropping to the spatial extent of CA
+dem_mask <- mask(dem_calbers, ca_raster)
+
+```
+
+##Road density
+
+```{r}
+
+```

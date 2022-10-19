@@ -1,7 +1,7 @@
 ---
-title: "Black Bear Aware Main Model Code"
-author: "Mia Guarnieri, Claire Meuter, Sam Rozal, Chase Tarr"
-date: '2022-09-05'
+title: "Land Cover Data Wrangling"
+author: "Mia Guarnieri"
+date: '2022-10-19'
 output: html_document
 ---
 
@@ -18,10 +18,10 @@ library(sf)
 library(tmap)
 
 #mia and claire's file path
-#gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #sam's file path
-gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
+#gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #chase's file path
 
@@ -32,7 +32,7 @@ gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 *Data Sources*: Please see ReadMe file for metadata and citations.
 *Reference Paper*: Insert hagani citation here
 
-#Load in existing data layers
+#Load in relevant data layers
 
 ##California raster
 
@@ -52,78 +52,11 @@ tm_shape(ca_raster) +
 
 ```
 
-##Conflict data
-
-Insert info about WIR data here
-
-```{r}
-#Buffer conflict points to create conflict raster
-# first loading in conflict data 
-conflict_points <- read_sf(here(gdrive_data,"/IntermediateData/IntermediateData_Files/2022_07_18_WIRClean_CDFW.csv"))
-
-# look into buffering with SF SF user st_buffer
-#need to set conflict crs 
-#need to set extent 
-#Need to buffer 
-
-#test plot
-tm_shape(conflict_points) +
-  tm_dots()
-
-```
-
-##Elevation (DEM, mean elevation)
-
-Two separate DEM rasters were available at 7.5-arc second resolution from USGS EROS. These will need to be merged togther.
-
-```{r}
-
-#northern California raster
-
-dem_norcal <- rast(here(gdrive_data, "/InputData/InputData_Files/2010_DEM_USGSEROS_Norcal/30n150w_20101117_gmted_mea075.tif"))
-
-#southern California raster
-
-dem_socal <- rast(here(gdrive_data, "/InputData/InputData_Files/2010_DEM_USGSEROS_Socal/30n120w_20101117_gmted_mea075.tif"))
-
-#merging the two rasters
-
-dem_ca <- merge(dem_norcal, dem_socal)
-
-#plot DEM raster
-tm_shape(dem_ca) +
-  tm_raster() +
-  tmap_mode("view")
-
-```
-
-##Human population density
-
-Insert info about human pop density layers here
-
-```{r}
-#data are by year, from 2016 - 2020 (1 file per year)
-
-
-human_pop_den_2016 <- rast(here(gdrive_data,"InputData/InputData_Files/HumanPopulationDensity_LandScan/2016_HumanPopulationDensity_LandScan/2016_conus_night_colorized.tif"))
-
-human_pop_den_2017 <- rast(here(gdrive_data,"InputData/InputData_Files/HumanPopulationDensity_LandScan/2017_HumanPopulationDensity_LandScan/2017_conus_night_colorized.tif"))
-
-human_pop_den_2018 <- rast(here(gdrive_data,"InputData/InputData_Files/HumanPopulationDensity_LandScan/2018_HumanPopulationDensity_LandScan/2018_conus_night_colorized.tif"))
-
-human_pop_den_2019 <- rast(here(gdrive_data, "InputData/InputData_Files/HumanPopulationDensity_LandScan/2019_HumanPopulationDensity_LandScan/2019_conus_night_colorized.tif"))
-
-human_pop_den_2020 <- rast(here(gdrive_data, "InputData/InputData_Files/HumanPopulationDensity_LandScan/2020_HumanPopulationDensity_LandScan/2020_conus_night_colorized.tif"))
-
-human_pop_den_2021 <- rast(here(gdrive_data,"InputData/InputData_Files/HumanPopulationDensity_LandScan/2021_HumanPopulationDensity_LandScan/2021_conus_night_colorized.tif"))
-
-```
-
 ##Land cover
 
 Land cover data from the NLCD from 2001-2019 (~3 year intervals).
 
-###Land cover class codes and descriptions for contiguous US:
+Land cover class codes and descriptions for contiguous US:
 
 0
 Unclassified
@@ -193,7 +126,6 @@ NLCD Legend Land Cover Class Descriptions
 Emergent Herbaceous Wetlands - Areas where perennial herbaceous vegetation accounts for greater than 80 percent of vegetative cover and the soil or substrate is periodically saturated with or covered with water.
 NLCD Legend Land Cover Class Descriptions
 
-###Code
 ```{r}
 #data are by year, from 2001 - 2016 (1 file per year)
 
@@ -215,70 +147,7 @@ land_cover_2019 <- rast(here(gdrive_data, "/InputData/InputData_Files/LandCover_
 
 ```
 
-##Road density
-
-```{r}
-road_density_2014 <- rast(here(gdrive_data,"/InputData/InputData_Files/2014_UsaRoadDensity_ESRI/2014_UsaRoadDensity_ESRI.tif"))
-```
-
-##Forest density (canopy cover)
-
-```{r}
-#data from two years, 2011 and 2016
-
-forest_dens_2011 <- rast(here(gdrive_data,"/InputData/InputData_Files/TreeCanopyCover_NLCD/2011_TreeCanopyCover_NLCD/2011_TreeCanopyCover_NLCD.img"))
-
-forest_dens_2016 <- rast(here(gdrive_data,"/InputData/InputData_Files/TreeCanopyCover_NLCD/2016_TreeCanopyCover_NLCD/2016_TreeCanopyCover_NLCD.img"))
-
-```
-
-
-
 #Adjust the data to the same geographic extent and projection
-
-##Elevation
-```{r}
-#reproject to the same crs (NAD 83, CA Albers (2011))
-dem_calbers <- project(dem_ca, ca_raster)
-
-#cropping to the spatial extent of CA
-dem_mask <- mask(dem_calbers, ca_raster)
-
-```
-
-##Human population density
-
-```{r}
-#reproject to the same crs (NAD 83, CA Albers (2011))
-pop_den_2016_calbers <- project(human_pop_den_2016, ca_raster)
-
-pop_den_2017_calbers <- project(human_pop_den_2017, ca_raster)
-
-pop_den_2018_calbers <- project(human_pop_den_2018, ca_raster)
-
-pop_den_2019_calbers <- project(human_pop_den_2019, ca_raster)
-
-pop_den_2020_calbers <- project(human_pop_den_2020, ca_raster)
-
-pop_den_2021_calbers <- project(human_pop_den_2021, ca_raster)
-
-#crop to spatial extent of CA
-
-pop_den_2016_mask <- mask(pop_den_2016_calbers, ca_raster)
-
-pop_den_2017_mask <- mask(pop_den_2017_calbers, ca_raster)
-
-pop_den_2018_mask <- mask(pop_den_2018_calbers, ca_raster)
-
-pop_den_2019_mask <- mask(pop_den_2019_calbers, ca_raster)
-
-pop_den_2020_mask <- mask(pop_den_2020_calbers, ca_raster)
-
-pop_den_2021_mask <- mask(pop_den_2021_calbers, ca_raster)
-
-```
-
-##Land cover
 
 We will additionally reclassify land cover rasters after they are clipped, to avoid exceeding memory capacity with large files
 
@@ -318,9 +187,9 @@ lc_2016_mask <- mask(lc_2004_calbers, ca_raster)
 
 lc_2019_mask <- mask(lc_2004_calbers, ca_raster)
 
-#Reclassify land cover categories
+#Create reclassification matrix for land cover values (from, to)
 
-#reclassification values (from, to)
+#list out the from, to values in an object
 m <- c(11, 11, #open water 
        12, 12, #perennial ice/snow
        21, 21, #developed open space
@@ -338,116 +207,81 @@ m <- c(11, 11, #open water
        90, 90, #woody wetlands --> wetlands
        95, 90) #emergent herbaceous wetlands --> wetlands
 
-#turning those values into a matrix
+#turn those values into a matrix
 mat <- matrix(m, ncol = 2, byrow = TRUE) 
 
-#setting values for each numeric
+#set categories (labels) for each numeric index
 
-val <- c("undefined","open_water", "perrenial_ice_snow", "dev_open_space","dev_low_int", "dev_med_int", "dev_high_int", "barren_land", "forest", "shrub_scrub", "grassland_herbaceous", "planted_cultivated", "wetlands")
+#index vector
+index <- c(0, 11, 12, 21, 22, 23, 24, 31, 40, 52, 71, 80, 90)
 
-#apply reclassification function
+#categories vector
+cats <- c("undefined","open_water", "perrenial_ice_snow", "dev_open_space","dev_low_int", "dev_med_int", "dev_high_int", "barren_land", "forest", "shrub_scrub", "grassland_herbaceous", "planted_cultivated", "wetlands")
 
-lc_2001_formatted <- classify(lc_2001_mask, mat)
+#combine those into a dataframe
+catdat <- data.frame(id = index, category = cats)
 
-#test plot
-plot(lc_2001_formatted, type = "classes", levels = val)
+#Reclassify
 
+#create reclassification function
+
+reclassify <- function(x){
+  x_reclassed <- classify(x, mat) #reclassify using the matrix above
+  
+  levels(x_reclassed) <- catdat #then reassign levels (labels) using the dataframe above
+  
+  return(x_reclassed)
+}
+
+#Apply function to each layer
+
+lc01_reclassed <- reclassify(lc_2001_mask)
+
+lc04_reclassed <- reclassify(lc_2004_mask)
+
+lc06_reclassed <- reclassify(lc_2006_mask)
+
+lc08_reclassed <- reclassify(lc_2008_mask)
+
+lc11_reclassed <- reclassify(lc_2011_mask)
+
+lc13_reclassed <- reclassify(lc_2013_mask)
+
+lc16_reclassed <- reclassify(lc_2016_mask)
+
+lc19_reclassed <- reclassify(lc_2019_mask)
 ```
 
-##Road density
+#Save reclassified, reprojected, and clipped rasters to the data drive
+
+**ONLY RUN THIS ONE TIME; IT WILL NOT RUN ONCE THE FILES ARE SAVED**
 
 ```{r}
-#reproject to the correct CRS
+saverast <- function(x){
+  
+  name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+  #write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted", name), filetype = "GTiff")
+  
+}
 
-road_density_2014_calbers <- project(road_density_2014, ca_raster)
+saverast(lc01_reclassed)
 
-#cropping the files to the spatial extent of CA
-road_density_2014_mask <- mask(road_density_2014_calbers, ca_raster)
+saverast(lc04_reclassed)
 
-```
+saverast(lc06_reclassed)
 
-##Forest density (canopy cover)
+saverast(lc08_reclassed)
 
-```{r}
-#reproject to the correct CRS
+saverast(lc11_reclassed)
 
-forest_dens_2011_calbers <- project(forest_dens_2011, ca_raster)
+saverast(lc13_reclassed)
 
-forest_dens_2016_calbers <- project(forest_dens_2016, ca_raster)
+saverast(lc16_reclassed)
 
-
-#cropping the files to the spatial extent of CA
-forest_dens_2011_mask <- mask(forest_dens_2011_calbers, ca_raster)
-forest_dens_2016_mask <- mask(forest_dens_2016_calbers, ca_raster)
-#code check
-
-```
-
-
-
-#Create remaining data layers
-
-```{r}
-
-```
-
-##Aspect
-
-```{r}
-
-```
-
-##Terrain ruggedness
-
-```{r}
-
-```
-
-##Distance to road
-
-```{r}
-distance_to_roads <- distanceFromPoints(object = road_density_2014, xy=points)
-
-
-
-```
-
-##Distance to streams
-
-```{r}
-
-```
-
-##Distance to urban areas
-
-```{r}
-
-```
-
-##Distance to recreational areas
-
-```{r}
-
-```
-
-##Distance to forest cover
-
-```{r}
-
-
-```
-
-
-
-#Model Creation
-
-Step 1: replicating the model from Hagani et al.
-```{r}
-
-```
-
-Step 2
-```{r}
+saverast(lc19_reclassed)
 
 ```
 
