@@ -16,7 +16,7 @@ library(rgdal) #for loading vector data
 library(ggplot2)
 library(terra) #or loading raster data
 library(dismo)
-library(rJava)
+# library(rJava)
 library(spThin)
 library(bbmle)
 library(Rlab)
@@ -33,10 +33,10 @@ library(mgcv)
 library(lubridate)
 library(ROCR)
 library(Metrics)
-library(MuMIn)
+# library(MuMIn) # have to update R for this
 library(boot)
 library(splines)
-library(tidyverse)
+library(tidyverse) # have to update R for this too
 
 
 ```
