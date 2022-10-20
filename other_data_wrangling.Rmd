@@ -19,10 +19,10 @@ library(sf)
 library(tmap)
 
 #mia and claire's file path
-#gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #sam's file path
-gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
+#gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #chase's file path
 
@@ -58,7 +58,41 @@ tm_shape(ca_raster) +
 Insert info about WIR data here
 
 ```{r}
+
 #Buffer conflict points to create conflict raster
+# first loading in conflict data 
+conflict_points <- read_csv(here(gdrive_data,"/IntermediateData/IntermediateData_Files/2022_07_18_WIRClean_CDFW.csv"))
+
+# Turning conflict_points into a sf object from data frame 
+
+#st_as_sf(conflict_points, coords = "latitude","longitude")
+conflict_points_sf <- st_as_sf(conflict_points,coords = c("longitude","latitude"), crs = 4326)
+#4326 is code for WGS 84- map does not render properly otherwise, so we need to reproject  to 6414 (NAD83(2011) / California Albers) (but also I think this issue might go away when I remove the error points that are outside CA)
+
+#reprojecting to NAD83(2011) / California Albers
+conflict_points_albers <- st_transform(conflict_points_sf,crs = 6414)
+
+#buffering points using SF fuction st_buffer. Units are in meters
+conflict_points_buffered <- st_buffer(conflict_points_albers,dist = 5000)
+
+ tm_shape(conflict_points_buffered) +
+   tm_dots()+
+   tmap_mode("view")
+
+ #need to set conflict crs 
+#need to set extent 
+#Need to buffer 
+
+#test plot
+#how to turn data frame with lat and long columns into an sf object 
+
+
+
+# use this if I want to plot
+# tm_shape(conflict_points_sf) +
+ # tm_dots()+
+#  tmap_mode("view")
+# class(conflict_points_sf) use this if I need to check class
 ```
 
 ##Elevation (DEM, mean elevation)
@@ -116,3 +150,19 @@ dem_mask <- mask(dem_calbers, ca_raster)
 ```{r}
 
 ```
+
+
+## Creating aspect and terrian 
+```{r}
+#aspect
+# reading in elevation data 
+elev <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/Elevation_Formatted/dem_clipped.tif"))
+
+elev_aspect <- terrain(elev,v = "aspect",neighbors = 8)
+#I think this worked? 
+
+
+# terrian ruggedness
+elev_tr <- terrain(elev,v = "TRI",neighbors = 8)
+```
+
