@@ -53,6 +53,26 @@ tm_shape(ca_raster) +
 
 ```
 
+#Streams Layer 
+```{r}
+streams_2017 <- vect(here(gdrive_data, "/InputData/InputData_Files/2017_Streams_CDFW/California_Streams.shp"))
+
+streams_2017_calbers <- project(streams_2017, ca_raster)
+
+streams_2017_mask <- crop(streams_2017_calbers, ca_raster)
+
+```
+
+#Roads Layer 
+
+```{r}
+roads_2015 <- vect(here(gdrive_data, "/InputData/InputData_Files/2015_roads_TIGER/tl_2015_06_prisecroads.shp"))
+
+roads_2015_calbers <- project(roads_2015, ca_raster)
+
+roads_2015_mask <- crop(roads_2015_calbers, ca_raster)
+```
+
 
 #Create remaining data layers
 
@@ -64,15 +84,14 @@ tm_shape(ca_raster) +
 ##Distance to road
 
 ```{r}
-distance_to_roads <- distanceFromPoints(object = road_density_2014, xy=points)
-
-
+distance_to_roads <- distance(roads_2015_mask)
 
 ```
 
 ##Distance to streams
 
 ```{r}
+distance_to_streams <- distance(streams_2017_mask)
 
 ```
 
