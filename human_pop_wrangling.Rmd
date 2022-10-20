@@ -17,12 +17,15 @@ library(here)
 library(terra)
 library(sf)
 library(tmap)
+library(beepr)
 
 #mia and claire's file path
-#gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+
+
 
 #sam's file path
-gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
+#gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #chase's file path
 
@@ -51,6 +54,7 @@ tm_shape(ca_raster) +
   tm_raster() +
   tmap_mode("view")
 
+
 ```
 
 
@@ -78,10 +82,67 @@ human_pop_den_2021 <- rast(here(gdrive_data,"InputData/InputData_Files/HumanPopu
 
 
 
-#Adjust the data to the same geographic extent and projection
+#Adjust human population density to the same geographic extent and projection
 
 
 ```{r}
+#reproject to the same crs (NAD 83, CA Albers (2011))
+
+pop_den_2016_calbers <- project(human_pop_den_2016, ca_raster)
+
+pop_den_2017_calbers <- project(human_pop_den_2017, ca_raster)
+
+pop_den_2018_calbers <- project(human_pop_den_2018, ca_raster)
+
+pop_den_2019_calbers <- project(human_pop_den_2019, ca_raster)
+
+pop_den_2020_calbers <- project(human_pop_den_2020, ca_raster)
+
+pop_den_2021_calbers <- project(human_pop_den_2021, ca_raster)
+
+#crop to spatial extent of CA
+
+pop_den_2016_mask <- mask(pop_den_2016_calbers, ca_raster)
+
+pop_den_2017_mask <- mask(pop_den_2017_calbers, ca_raster)
+
+pop_den_2018_mask <- mask(pop_den_2018_calbers, ca_raster)
+
+pop_den_2019_mask <- mask(pop_den_2019_calbers, ca_raster)
+
+pop_den_2020_mask <- mask(pop_den_2020_calbers, ca_raster)
+
+pop_den_2021_mask <- mask(pop_den_2021_calbers, ca_raster)
+
+beep(3)
+```
+#Save reclassified, reprojected, and clipped rasters to the data drive
+
+**ONLY RUN THIS ONE TIME; IT WILL NOT RUN ONCE THE FILES ARE SAVED**
+
+```{r}
+saverast <- function(x){
+  
+  name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+  #write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/Pop_Den_Rasters_Formatted", name), filetype = "GTiff")
+  
+}
+
+saverast(pop_den_2016_mask)
+
+saverast(pop_den_2017_mask)
+
+saverast(pop_den_2018_mask)
+
+saverast(pop_den_2019_mask)
+
+saverast(pop_den_2020_mask)
+
+saverast(pop_den_2021_mask)
+
 
 
 ```

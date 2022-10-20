@@ -10,7 +10,6 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 #attach packages
-#note - Loading all of the ones Jason used, I don't think we will need all of them 
 
 library(tidyverse)
 library(here)
@@ -59,6 +58,18 @@ Insert info about WIR data here
 
 ```{r}
 #Buffer conflict points to create conflict raster
+# first loading in conflict data 
+conflict_points <- read_sf(here(gdrive_data,"/IntermediateData/IntermediateData_Files/2022_07_18_WIRClean_CDFW.csv"))
+
+# look into buffering with SF SF user st_buffer
+#need to set conflict crs 
+#need to set extent 
+#Need to buffer 
+
+#test plot
+tm_shape(conflict_points) +
+  tm_dots()
+
 ```
 
 ##Elevation (DEM, mean elevation)
@@ -86,27 +97,7 @@ tm_shape(dem_ca) +
 
 ```
 
-##Human population density
 
-Insert info about human pop density layers here
-
-```{r}
-#data are by year, from 2016 - 2020 (1 file per year)
-
-
-human_pop_den_2016 <- rast(here(gdrive_data,"InputData/InputData_Files/HumanPopulationDensity_LandScan/2016_HumanPopulationDensity_LandScan/2016_conus_night_colorized.tif"))
-
-human_pop_den_2017 <- rast(here(gdrive_data,"InputData/InputData_Files/HumanPopulationDensity_LandScan/2017_HumanPopulationDensity_LandScan/2017_conus_night_colorized.tif"))
-
-human_pop_den_2018 <- rast(here(gdrive_data,"InputData/InputData_Files/HumanPopulationDensity_LandScan/2018_HumanPopulationDensity_LandScan/2018_conus_night_colorized.tif"))
-
-human_pop_den_2019 <- rast(here(gdrive_data, "InputData/InputData_Files/HumanPopulationDensity_LandScan/2019_HumanPopulationDensity_LandScan/2019_conus_night_colorized.tif"))
-
-human_pop_den_2020 <- rast(here(gdrive_data, "InputData/InputData_Files/HumanPopulationDensity_LandScan/2020_HumanPopulationDensity_LandScan/2020_conus_night_colorized.tif"))
-
-human_pop_den_2021 <- rast(here(gdrive_data,"InputData/InputData_Files/HumanPopulationDensity_LandScan/2021_HumanPopulationDensity_LandScan/2021_conus_night_colorized.tif"))
-
-```
 
 ##Land cover
 
@@ -235,12 +226,7 @@ dem_mask <- mask(dem_calbers, ca_raster)
 
 ```
 
-##Human population density
 
-```{r}
-
-
-```
 
 ##Land cover
 
@@ -321,13 +307,19 @@ plot(lc_2001_formatted, type = "classes", levels = val)
 ##Road density
 
 ```{r}
+#reproject to the correct CRS
+
+road_density_2014_calbers <- project(road_density_2014, ca_raster)
+
+#cropping the files to the spatial extent of CA
+road_density_2014_mask <- mask(road_density_2014_calbers, ca_raster)
 
 ```
 
 ##Forest density (canopy cover)
 
 ```{r}
-#reproject to the correct 
+#reproject to the correct CRS
 
 forest_dens_2011_calbers <- project(forest_dens_2011, ca_raster)
 
