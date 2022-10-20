@@ -17,12 +17,13 @@ library(here)
 library(terra)
 library(sf)
 library(tmap)
+library(rgrass7)
 
 #mia and claire's file path
-#gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #sam's file path
-gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
+#gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #chase's file path
 
@@ -175,27 +176,10 @@ ua13 <- reclassify(lc13)
 ua16 <- reclassify(lc16)
 
 ua19 <- reclassify(lc19)
-
-#create distance layers using urban area raster layers
-
-ua_dist_01 <- distance(ua01)
-
-ua_dist_04 <- distance(ua04)
-
-ua_dist_06 <- distance(ua06)
-
-ua_dist_08 <- distance(ua08)
-
-ua_dist_11 <- distance(ua11)
-
-ua_dist_13 <- distance(ua13)
-
-ua_dist_16 <- distance(ua16)
-
-ua_dist_19 <- distance(ua19)
 ```
 
-##Save reclassified, reprojected, and clipped urban distance rasters to the data drive
+##Save reclassified, reprojected, and clipped urban rasters to the data drive for use in ArcGIS
+
 
 **ONLY RUN THIS ONE TIME; IT WILL NOT RUN ONCE THE FILES ARE SAVED**
 
@@ -206,24 +190,24 @@ saverast <- function(x){
   
 #write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
   
-  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_urban", name), filetype = "GTiff")
+  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/urban_rasters", name), filetype = "GTiff")
 }
 
-saverast(ua_dist_01)
+saverast(ua01)
 
-saverast(ua_dist_04)
+saverast(ua04)
 
-saverast(ua_dist_06)
+saverast(ua06)
 
-saverast(ua_dist_08)
+saverast(ua08)
 
-saverast(ua_dist_11)
+saverast(ua11)
 
-saverast(ua_dist_13)
+saverast(ua13)
 
-saverast(ua_dist_16)
+saverast(ua16)
 
-saverast(ua_dist_19)
+saverast(ua19)
 
 ```
 
@@ -314,26 +298,9 @@ fc16 <- reclassify(lc16)
 
 fc19 <- reclassify(lc19)
 
-#create distance layers using forest cover raster layers
-
-fc_dist_01 <- distance(fc01)
-
-fc_dist_04 <- distance(fc04)
-
-fc_dist_06 <- distance(fc06)
-
-fc_dist_08 <- distance(fc08)
-
-fc_dist_11 <- distance(fc11)
-
-fc_dist_13 <- distance(fc13)
-
-fc_dist_16 <- distance(fc16)
-
-fc_dist_19 <- distance(fc19)
 ```
 
-##Save reclassified, reprojected, and clipped forest distance rasters to the data drive
+##Save reclassified, reprojected, and clipped forest rasters to the data drive for use in ArcGIS
 
 **ONLY RUN THIS ONE TIME; IT WILL NOT RUN ONCE THE FILES ARE SAVED**
 
@@ -344,23 +311,23 @@ saverast <- function(x){
   
 #write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
   
-  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_forest", name), filetype = "GTiff")
+  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/forest_rasters", name), filetype = "GTiff")
 }
 
-saverast(fc_dist_01)
+saverast(fc01)
 
-saverast(fc_dist_04)
+saverast(fc04)
 
-saverast(fc_dist_06)
+saverast(fc06)
 
-saverast(fc_dist_08)
+saverast(fc08)
 
-saverast(fc_dist_11)
+saverast(fc11)
 
-saverast(fc_dist_13)
+saverast(fc13)
 
-saverast(fc_dist_16)
+saverast(fc16)
 
-saverast(fc_dist_19)
+saverast(fc19)
 
 ```
