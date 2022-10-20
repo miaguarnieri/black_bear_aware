@@ -178,21 +178,53 @@ ua19 <- reclassify(lc19)
 
 #create distance layers using urban area raster layers
 
-ua_dist_01 <- distance(fc01)
+ua_dist_01 <- distance(ua01)
 
-ua_dist_04 <- distance(fc04)
+ua_dist_04 <- distance(ua04)
 
-ua_dist_06 <- distance(fc06)
+ua_dist_06 <- distance(ua06)
 
-ua_dist_08 <- distance(fc08)
+ua_dist_08 <- distance(ua08)
 
-ua_dist_11 <- distance(fc11)
+ua_dist_11 <- distance(ua11)
 
-ua_dist_13 <- distance(fc13)
+ua_dist_13 <- distance(ua13)
 
-ua_dist_16 <- distance(fc16)
+ua_dist_16 <- distance(ua16)
 
-ua_dist_19 <- distance(fc19)
+ua_dist_19 <- distance(ua19)
+```
+
+##Save reclassified, reprojected, and clipped urban distance rasters to the data drive
+
+**ONLY RUN THIS ONE TIME; IT WILL NOT RUN ONCE THE FILES ARE SAVED**
+
+```{r}
+saverast <- function(x){
+  
+  name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_urban", name), filetype = "GTiff")
+}
+
+saverast(ua_dist_01)
+
+saverast(ua_dist_04)
+
+saverast(ua_dist_06)
+
+saverast(ua_dist_08)
+
+saverast(ua_dist_11)
+
+saverast(ua_dist_13)
+
+saverast(ua_dist_16)
+
+saverast(ua_dist_19)
+
 ```
 
 ##Distance to recreational areas
@@ -299,4 +331,36 @@ fc_dist_13 <- distance(fc13)
 fc_dist_16 <- distance(fc16)
 
 fc_dist_19 <- distance(fc19)
+```
+
+##Save reclassified, reprojected, and clipped urban distance rasters to the data drive
+
+**ONLY RUN THIS ONE TIME; IT WILL NOT RUN ONCE THE FILES ARE SAVED**
+
+```{r}
+saverast <- function(x){
+  
+  name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_urban", name), filetype = "GTiff")
+}
+
+saverast(fc_dist_01)
+
+saverast(fc_dist_04)
+
+saverast(fc_dist_06)
+
+saverast(fc_dist_08)
+
+saverast(fc_dist_11)
+
+saverast(fc_dist_13)
+
+saverast(fc_dist_16)
+
+saverast(fc_dist_19)
+
 ```
