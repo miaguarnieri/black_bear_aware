@@ -89,6 +89,10 @@ distance_to_roads <- distance(roads_2015_mask)
 
 ```
 
+```{r}
+distance_to_roads_matrix <- as.matrix(distance_to_roads)
+```
+
 ##Distance to streams
 
 ```{r}
