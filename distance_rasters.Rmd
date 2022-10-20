@@ -98,7 +98,101 @@ distance_to_streams <- distance(streams_2017_mask)
 ##Distance to urban areas
 
 ```{r}
+#creation of binary urban area rasters from NLCD data (urban = 1, all other cover = NA)
 
+#read in land cover rasters - we will convert these to hold only developed areas
+
+lc01 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc01_reclassed.tif"))
+
+lc04 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc04_reclassed.tif"))
+
+lc06 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc06_reclassed.tif"))
+
+lc08 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc08_reclassed.tif"))
+
+lc11 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc11_reclassed.tif"))
+
+lc13 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc13_reclassed.tif"))
+
+lc16 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc16_reclassed.tif"))
+
+lc19 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc19_reclassed.tif"))
+
+#list out the from, to values in an object
+m <- c(0, NA,
+       11, NA, 
+       12, NA, 
+       21, 1, #developed open space
+       22, 1, #developed low intensity
+       23, 1, #developed med intensity
+       24, 1, #developed high intensity 
+       31, NA, 
+       40, NA,
+       52, NA, 
+       71, NA, 
+       80, NA, 
+       90, NA)
+
+#turn those values into a matrix
+mat <- matrix(m, ncol = 2, byrow = TRUE) 
+
+#set categories (labels) for the numeric index
+
+#index vector
+index <- c(1)
+
+#categories vector
+cats <- c("urban")
+
+#combine those into a dataframe
+catdat <- data.frame(id = index, category = cats)
+
+#classification function
+
+reclassify <- function(x){
+  
+  x_reclassed <- classify(x, mat) #reclassify using the matrix above, set all non-forest values to NA
+  
+  levels(x_reclassed) <- catdat #then reassign levels (labels) using the dataframe above
+  
+  return(x_reclassed)
+}
+
+#reclassify lc rasters to urban areas
+
+ua01 <- reclassify(lc01)
+
+ua04 <- reclassify(lc04)
+
+ua06 <- reclassify(lc06)
+
+ua08 <- reclassify(lc08)
+
+ua11 <- reclassify(lc11)
+
+ua13 <- reclassify(lc13)
+
+ua16 <- reclassify(lc16)
+
+ua19 <- reclassify(lc19)
+
+#create distance layers using urban area raster layers
+
+ua_dist_01 <- distance(fc01)
+
+ua_dist_04 <- distance(fc04)
+
+ua_dist_06 <- distance(fc06)
+
+ua_dist_08 <- distance(fc08)
+
+ua_dist_11 <- distance(fc11)
+
+ua_dist_13 <- distance(fc13)
+
+ua_dist_16 <- distance(fc16)
+
+ua_dist_19 <- distance(fc19)
 ```
 
 ##Distance to recreational areas
@@ -131,7 +225,8 @@ lc16 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Ra
 lc19 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc19_reclassed.tif"))
 
 #list out the from, to values in an object
-m <- c(11, NA, 
+m <- c(0, NA,
+       11, NA, 
        12, NA, 
        21, NA, 
        22, NA, 
