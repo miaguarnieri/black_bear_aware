@@ -67,12 +67,19 @@ conflict_points <- read_csv(here(gdrive_data,"/IntermediateData/IntermediateData
 
 #st_as_sf(conflict_points, coords = "latitude","longitude")
 conflict_points_sf <- st_as_sf(conflict_points,coords = c("longitude","latitude"), crs = 4326)
-#4326 is code for WGS 84- map does not render properly otherwise, so we need to reproject later to 6414 (NAD83(2011) / California Albers) (but also I think this issue might go away when I remove the error points that are outside CA)
-# look into buffering with SF SF user st_buffer
+#4326 is code for WGS 84- map does not render properly otherwise, so we need to reproject  to 6414 (NAD83(2011) / California Albers) (but also I think this issue might go away when I remove the error points that are outside CA)
 
+#reprojecting to NAD83(2011) / California Albers
+conflict_points_albers <- st_transform(conflict_points_sf,crs = 6414)
 
+#buffering points using SF fuction st_buffer. Units are in meters
+conflict_points_buffered <- st_buffer(conflict_points_albers,dist = 5000)
 
-#need to set conflict crs 
+ tm_shape(conflict_points_buffered) +
+   tm_dots()+
+   tmap_mode("view")
+
+ #need to set conflict crs 
 #need to set extent 
 #Need to buffer 
 
@@ -81,11 +88,11 @@ conflict_points_sf <- st_as_sf(conflict_points,coords = c("longitude","latitude"
 
 
 
-
-tm_shape(conflict_points_sf) +
-  tm_dots()+
-  tmap_mode("view")
-class(conflict_points_sf)
+# use this if I want to plot
+# tm_shape(conflict_points_sf) +
+ # tm_dots()+
+#  tmap_mode("view")
+# class(conflict_points_sf) use this if I need to check class
 ```
 
 ##Elevation (DEM, mean elevation)
