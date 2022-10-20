@@ -97,27 +97,7 @@ tm_shape(dem_ca) +
 
 ```
 
-##Human population density
 
-Insert info about human pop density layers here
-
-```{r}
-#data are by year, from 2016 - 2020 (1 file per year)
-
-
-human_pop_den_2016 <- rast(here(gdrive_data,"InputData/InputData_Files/HumanPopulationDensity_LandScan/2016_HumanPopulationDensity_LandScan/2016_conus_night_colorized.tif"))
-
-human_pop_den_2017 <- rast(here(gdrive_data,"InputData/InputData_Files/HumanPopulationDensity_LandScan/2017_HumanPopulationDensity_LandScan/2017_conus_night_colorized.tif"))
-
-human_pop_den_2018 <- rast(here(gdrive_data,"InputData/InputData_Files/HumanPopulationDensity_LandScan/2018_HumanPopulationDensity_LandScan/2018_conus_night_colorized.tif"))
-
-human_pop_den_2019 <- rast(here(gdrive_data, "InputData/InputData_Files/HumanPopulationDensity_LandScan/2019_HumanPopulationDensity_LandScan/2019_conus_night_colorized.tif"))
-
-human_pop_den_2020 <- rast(here(gdrive_data, "InputData/InputData_Files/HumanPopulationDensity_LandScan/2020_HumanPopulationDensity_LandScan/2020_conus_night_colorized.tif"))
-
-human_pop_den_2021 <- rast(here(gdrive_data,"InputData/InputData_Files/HumanPopulationDensity_LandScan/2021_HumanPopulationDensity_LandScan/2021_conus_night_colorized.tif"))
-
-```
 
 ##Land cover
 
@@ -246,37 +226,7 @@ dem_mask <- mask(dem_calbers, ca_raster)
 
 ```
 
-##Human population density
 
-```{r}
-#reproject to the same crs (NAD 83, CA Albers (2011))
-pop_den_2016_calbers <- project(human_pop_den_2016, ca_raster)
-
-pop_den_2017_calbers <- project(human_pop_den_2017, ca_raster)
-
-pop_den_2018_calbers <- project(human_pop_den_2018, ca_raster)
-
-pop_den_2019_calbers <- project(human_pop_den_2019, ca_raster)
-
-pop_den_2020_calbers <- project(human_pop_den_2020, ca_raster)
-
-pop_den_2021_calbers <- project(human_pop_den_2021, ca_raster)
-
-#crop to spatial extent of CA
-
-pop_den_2016_mask <- mask(pop_den_2016_calbers, ca_raster)
-
-pop_den_2017_mask <- mask(pop_den_2017_calbers, ca_raster)
-
-pop_den_2018_mask <- mask(pop_den_2018_calbers, ca_raster)
-
-pop_den_2019_mask <- mask(pop_den_2019_calbers, ca_raster)
-
-pop_den_2020_mask <- mask(pop_den_2020_calbers, ca_raster)
-
-pop_den_2021_mask <- mask(pop_den_2021_calbers, ca_raster)
-
-```
 
 ##Land cover
 
