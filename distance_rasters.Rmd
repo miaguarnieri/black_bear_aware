@@ -333,7 +333,7 @@ fc_dist_16 <- distance(fc16)
 fc_dist_19 <- distance(fc19)
 ```
 
-##Save reclassified, reprojected, and clipped urban distance rasters to the data drive
+##Save reclassified, reprojected, and clipped forest distance rasters to the data drive
 
 **ONLY RUN THIS ONE TIME; IT WILL NOT RUN ONCE THE FILES ARE SAVED**
 
@@ -344,7 +344,7 @@ saverast <- function(x){
   
 #write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
   
-  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_urban", name), filetype = "GTiff")
+  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_forest", name), filetype = "GTiff")
 }
 
 saverast(fc_dist_01)
