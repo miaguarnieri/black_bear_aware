@@ -1,0 +1,366 @@
+---
+title: "Distance Raster Creation"
+author: "Mia Guarnieri"
+date: '2022-10-19'
+output: html_document
+---
+
+##Setup and packages
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#attach packages
+#note - Loading all of the ones Jason used, I don't think we will need all of them 
+
+library(tidyverse)
+library(here)
+library(terra)
+library(sf)
+library(tmap)
+
+#mia and claire's file path
+#gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+
+#sam's file path
+gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
+
+#chase's file path
+
+```
+
+#Data Wrangling Prior to Coding
+
+*Data Sources*: Please see ReadMe file for metadata and citations.
+*Reference Paper*: Insert hagani citation here
+
+#Load in existing data layers
+
+##California raster
+
+Insert info about CA raster layer here
+
+```{r}
+
+ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Reclassed/CARaster_Tiger_Reclassed.img"))
+
+#check the coordinate reference system 
+crs(ca_raster)
+
+#plot CA raster to confirm
+tm_shape(ca_raster) +
+  tm_raster() +
+  tmap_mode("view")
+
+```
+
+#Streams Layer 
+```{r}
+streams_2017 <- vect(here(gdrive_data, "/InputData/InputData_Files/2017_Streams_CDFW/California_Streams.shp"))
+
+streams_2017_calbers <- project(streams_2017, ca_raster)
+
+streams_2017_mask <- crop(streams_2017_calbers, ca_raster)
+
+```
+
+#Roads Layer 
+
+```{r}
+roads_2015 <- vect(here(gdrive_data, "/InputData/InputData_Files/2015_roads_TIGER/tl_2015_06_prisecroads.shp"))
+
+roads_2015_calbers <- project(roads_2015, ca_raster)
+
+roads_2015_mask <- crop(roads_2015_calbers, ca_raster)
+```
+
+
+#Create remaining data layers
+
+```{r}
+
+```
+
+
+##Distance to road
+
+```{r}
+distance_to_roads <- distance(roads_2015_mask)
+
+```
+
+##Distance to streams
+
+```{r}
+distance_to_streams <- distance(streams_2017_mask)
+
+```
+
+##Distance to urban areas
+
+```{r}
+#creation of binary urban area rasters from NLCD data (urban = 1, all other cover = NA)
+
+#read in land cover rasters - we will convert these to hold only developed areas
+
+lc01 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc01_reclassed.tif"))
+
+lc04 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc04_reclassed.tif"))
+
+lc06 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc06_reclassed.tif"))
+
+lc08 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc08_reclassed.tif"))
+
+lc11 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc11_reclassed.tif"))
+
+lc13 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc13_reclassed.tif"))
+
+lc16 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc16_reclassed.tif"))
+
+lc19 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc19_reclassed.tif"))
+
+#list out the from, to values in an object
+m <- c(0, NA,
+       11, NA, 
+       12, NA, 
+       21, 1, #developed open space
+       22, 1, #developed low intensity
+       23, 1, #developed med intensity
+       24, 1, #developed high intensity 
+       31, NA, 
+       40, NA,
+       52, NA, 
+       71, NA, 
+       80, NA, 
+       90, NA)
+
+#turn those values into a matrix
+mat <- matrix(m, ncol = 2, byrow = TRUE) 
+
+#set categories (labels) for the numeric index
+
+#index vector
+index <- c(1)
+
+#categories vector
+cats <- c("urban")
+
+#combine those into a dataframe
+catdat <- data.frame(id = index, category = cats)
+
+#classification function
+
+reclassify <- function(x){
+  
+  x_reclassed <- classify(x, mat) #reclassify using the matrix above, set all non-forest values to NA
+  
+  levels(x_reclassed) <- catdat #then reassign levels (labels) using the dataframe above
+  
+  return(x_reclassed)
+}
+
+#reclassify lc rasters to urban areas
+
+ua01 <- reclassify(lc01)
+
+ua04 <- reclassify(lc04)
+
+ua06 <- reclassify(lc06)
+
+ua08 <- reclassify(lc08)
+
+ua11 <- reclassify(lc11)
+
+ua13 <- reclassify(lc13)
+
+ua16 <- reclassify(lc16)
+
+ua19 <- reclassify(lc19)
+
+#create distance layers using urban area raster layers
+
+ua_dist_01 <- distance(ua01)
+
+ua_dist_04 <- distance(ua04)
+
+ua_dist_06 <- distance(ua06)
+
+ua_dist_08 <- distance(ua08)
+
+ua_dist_11 <- distance(ua11)
+
+ua_dist_13 <- distance(ua13)
+
+ua_dist_16 <- distance(ua16)
+
+ua_dist_19 <- distance(ua19)
+```
+
+##Save reclassified, reprojected, and clipped urban distance rasters to the data drive
+
+**ONLY RUN THIS ONE TIME; IT WILL NOT RUN ONCE THE FILES ARE SAVED**
+
+```{r}
+saverast <- function(x){
+  
+  name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_urban", name), filetype = "GTiff")
+}
+
+saverast(ua_dist_01)
+
+saverast(ua_dist_04)
+
+saverast(ua_dist_06)
+
+saverast(ua_dist_08)
+
+saverast(ua_dist_11)
+
+saverast(ua_dist_13)
+
+saverast(ua_dist_16)
+
+saverast(ua_dist_19)
+
+```
+
+##Distance to recreational areas
+
+```{r}
+
+```
+
+##Distance to forest cover
+
+```{r}
+#creation of binary forest rasters from NLCD data (forest cover =1, all other cover = NA)
+
+#read in land cover rasters - we will convert these to hold only forest cover
+
+lc01 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc01_reclassed.tif"))
+
+lc04 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc04_reclassed.tif"))
+
+lc06 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc06_reclassed.tif"))
+
+lc08 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc08_reclassed.tif"))
+
+lc11 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc11_reclassed.tif"))
+
+lc13 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc13_reclassed.tif"))
+
+lc16 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc16_reclassed.tif"))
+
+lc19 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc19_reclassed.tif"))
+
+#list out the from, to values in an object
+m <- c(0, NA,
+       11, NA, 
+       12, NA, 
+       21, NA, 
+       22, NA, 
+       23, NA, 
+       24, NA, 
+       31, NA, 
+       40, 40, #forest
+       52, NA, 
+       71, NA, 
+       80, NA, 
+       90, NA)
+
+#turn those values into a matrix
+mat <- matrix(m, ncol = 2, byrow = TRUE) 
+
+#set categories (labels) for the numeric index
+
+#index vector
+index <- c(40)
+
+#categories vector
+cats <- c("forest")
+
+#combine those into a dataframe
+catdat <- data.frame(id = index, category = cats)
+
+#classification function
+
+reclassify <- function(x){
+  
+  x_reclassed <- classify(x, mat) #reclassify using the matrix above, set all non-forest values to NA
+  
+  levels(x_reclassed) <- catdat #then reassign levels (labels) using the dataframe above
+  
+  return(x_reclassed)
+}
+
+#reclassify lc rasters to forest cover and then resample to correct resolution
+
+fc01 <- reclassify(lc01)
+
+fc04 <- reclassify(lc04)
+
+fc06 <- reclassify(lc06)
+
+fc08 <- reclassify(lc08)
+
+fc11 <- reclassify(lc11)
+
+fc13 <- reclassify(lc13)
+
+fc16 <- reclassify(lc16)
+
+fc19 <- reclassify(lc19)
+
+#create distance layers using forest cover raster layers
+
+fc_dist_01 <- distance(fc01)
+
+fc_dist_04 <- distance(fc04)
+
+fc_dist_06 <- distance(fc06)
+
+fc_dist_08 <- distance(fc08)
+
+fc_dist_11 <- distance(fc11)
+
+fc_dist_13 <- distance(fc13)
+
+fc_dist_16 <- distance(fc16)
+
+fc_dist_19 <- distance(fc19)
+```
+
+##Save reclassified, reprojected, and clipped forest distance rasters to the data drive
+
+**ONLY RUN THIS ONE TIME; IT WILL NOT RUN ONCE THE FILES ARE SAVED**
+
+```{r}
+saverast <- function(x){
+  
+  name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_forest", name), filetype = "GTiff")
+}
+
+saverast(fc_dist_01)
+
+saverast(fc_dist_04)
+
+saverast(fc_dist_06)
+
+saverast(fc_dist_08)
+
+saverast(fc_dist_11)
+
+saverast(fc_dist_13)
+
+saverast(fc_dist_16)
+
+saverast(fc_dist_19)
+
+```
