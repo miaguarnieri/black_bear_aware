@@ -20,10 +20,10 @@ library(tmap)
 library(rgrass7)
 
 #mia and claire's file path
-gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+#gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #sam's file path
-#gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
+gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #chase's file path
 
@@ -72,6 +72,8 @@ roads_2015 <- vect(here(gdrive_data, "/InputData/InputData_Files/2015_roads_TIGE
 roads_2015_calbers <- project(roads_2015, ca_raster)
 
 roads_2015_mask <- crop(roads_2015_calbers, ca_raster)
+
+
 ```
 
 
@@ -90,8 +92,21 @@ distance_to_roads <- distance(roads_2015_mask)
 ```
 
 ```{r}
-distance_to_roads_matrix <- as.matrix(distance_to_roads)
+savevect <- function(x){
+  
+  name <- paste0(deparse(substitute(x)), ".shp") #the name of the file will be the same as the input object, plus '.hp' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a shapefile
+  
+  writeVector(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/road_shapefile", name), filetype = "ESRI Shapefile")
+}
+
+#save the file
+savevect(roads_2015_mask)
+
 ```
+
+
 
 ##Distance to streams
 
