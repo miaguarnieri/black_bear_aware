@@ -66,9 +66,12 @@ conflict_points <- read_csv(here(gdrive_data,"/IntermediateData/IntermediateData
 # Turning conflict_points into a sf object from data frame 
 
 #st_as_sf(conflict_points, coords = "latitude","longitude")
-conflict_points_sf <- st_as_sf(conflict_points,coords = c("latitude","longitude"), crs = 6414)
-
+conflict_points_sf <- st_as_sf(conflict_points,coords = c("longitude","latitude"), crs = 4326)
+#4326 is code for WGS 84- map does not render properly otherwise, so we need to reproject later to 6414 (NAD83(2011) / California Albers) (but also I think this issue might go away when I remove the error points that are outside CA)
 # look into buffering with SF SF user st_buffer
+
+
+
 #need to set conflict crs 
 #need to set extent 
 #Need to buffer 
