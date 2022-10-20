@@ -316,6 +316,14 @@ road_density_2014_mask <- mask(road_density_2014_calbers, ca_raster)
 
 ```
 
+#Distance to Roads
+```{r}
+roads_2015 <- vect(here(gdrive_data, "/InputData/InputData_Files/2015_roads_TIGER/tl_2015_06_prisecroads.shp"))
+
+roads_2015_calbers <- project(roads_2015, ca_raster)
+```
+
+
 ##Forest density (canopy cover)
 
 ```{r}
@@ -356,8 +364,7 @@ forest_dens_2016_mask <- mask(forest_dens_2016_calbers, ca_raster)
 ##Distance to road
 
 ```{r}
-distance_to_roads <- distanceFromPoints(object = road_density_2014, xy=points)
-
+distance_to_roads <- distance(roads_2015_calbers)
 
 
 ```
