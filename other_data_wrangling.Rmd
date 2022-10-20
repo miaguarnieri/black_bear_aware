@@ -19,10 +19,10 @@ library(sf)
 library(tmap)
 
 #mia and claire's file path
-#gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #sam's file path
-gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
+#gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #chase's file path
 
@@ -58,7 +58,31 @@ tm_shape(ca_raster) +
 Insert info about WIR data here
 
 ```{r}
+
 #Buffer conflict points to create conflict raster
+# first loading in conflict data 
+conflict_points <- read_csv(here(gdrive_data,"/IntermediateData/IntermediateData_Files/2022_07_18_WIRClean_CDFW.csv"))
+
+# Turning conflict_points into a sf object from data frame 
+
+#st_as_sf(conflict_points, coords = "latitude","longitude")
+conflict_points_sf <- st_as_sf(conflict_points,coords = c("latitude","longitude"), crs = 6414)
+
+# look into buffering with SF SF user st_buffer
+#need to set conflict crs 
+#need to set extent 
+#Need to buffer 
+
+#test plot
+#how to turn data frame with lat and long columns into an sf object 
+
+
+
+
+tm_shape(conflict_points_sf) +
+  tm_dots()+
+  tmap_mode("view")
+class(conflict_points_sf)
 ```
 
 ##Elevation (DEM, mean elevation)
