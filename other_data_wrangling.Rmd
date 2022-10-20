@@ -150,3 +150,19 @@ dem_mask <- mask(dem_calbers, ca_raster)
 ```{r}
 
 ```
+
+
+## Creating aspect and terrian 
+```{r}
+#aspect
+# reading in elevation data 
+elev <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/Elevation_Formatted/dem_clipped.tif"))
+
+elev_aspect <- terrain(elev,v = "aspect",neighbors = 8)
+#I think this worked? 
+
+
+# terrian ruggedness
+elev_tr <- terrain(elev,v = "TRI",neighbors = 8)
+```
+
