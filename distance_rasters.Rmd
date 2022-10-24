@@ -19,22 +19,12 @@ library(sf)
 library(tmap)
 library(rgrass7)
 
-<<<<<<< HEAD
+
 #mia and claire's and chase's file path
 gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #sam's file path
 # gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
-=======
-#mia and claire's file path
-gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
-
-#sam's file path
-#gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
->>>>>>> 426814f6b7055836aec1f6f67f8a3ecf6daf5e23
-
-#chase's file path
-
 ```
 
 #Data Wrangling Prior to Coding
@@ -386,23 +376,23 @@ rec_areas_pb_raster <- rasterize(rec_areas_pb_mask, ca_raster)
 
 #####Saving Rec Areas to Distance Rasters
 ```{r}
-saverast <- function(x){
+savevect <- function(x){
   
   name <- paste0(deparse(substitute(x)), ".shp") #the name of the file will be the same as the input object, plus '.tif' at the end
   
 #write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
   
-  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/recreational_rasters", name), filetype = "GTiff", overwrite=TRUE)
+  writeVector(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/recreational_rasters", name), filetype = "ESRI SHAPEFILE", overwrite=TRUE)
 }
 
-saverast(rec_areas_pb_raster)
-saverast(rec_areas_rr_raster)
-saverast(rec_areas_buildings_raster)
-saverast(rec_areas_structures_raster)
-saverast(rec_areas_parking_raster)
-saverast(rec_areas_PEP_raster)
-saverast(rec_areas_picnic_raster)
-saverast(rec_areas_camp_raster)
+savevect(rec_areas_pb_mask)
+savevect(rec_areas_rr_mask)
+savevect(rec_areas_buildings_mask)
+savevect(rec_areas_structures_mask)
+savevect(rec_areas_parking_mask)
+savevect(rec_areas_PEP_mask)
+savevect(rec_areas_picnic_mask)
+savevect(rec_areas_camp_mask)
 ```
 
 
