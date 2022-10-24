@@ -162,6 +162,14 @@ saverast(streams_2017_raster)
 
 #read in land cover rasters - we will convert these to hold only developed areas
 
+lc13 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc13_reclassed.tif"))
+
+lc16 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc16_reclassed.tif"))
+
+lc19 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc19_reclassed.tif"))
+
+#don't use these, they are outside our time frame
+
 #lc01 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc01_reclassed.tif"))
 
 #lc04 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc04_reclassed.tif"))
@@ -172,11 +180,6 @@ saverast(streams_2017_raster)
 
 #lc11 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc11_reclassed.tif"))
 
-lc13 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc13_reclassed.tif"))
-
-lc16 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc16_reclassed.tif"))
-
-lc19 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc19_reclassed.tif"))
 
 #list out the from, to values in an object
 m <- c(0, NA,
@@ -220,6 +223,14 @@ reclassify <- function(x){
 
 #reclassify lc rasters to urban areas
 
+ua13 <- reclassify(lc13)
+
+ua16 <- reclassify(lc16)
+
+ua19 <- reclassify(lc19)
+
+#these are outside our time frame
+
 #ua01 <- reclassify(lc01)
 
 #ua04 <- reclassify(lc04)
@@ -230,11 +241,6 @@ reclassify <- function(x){
 
 #ua11 <- reclassify(lc11)
 
-ua13 <- reclassify(lc13)
-
-ua16 <- reclassify(lc16)
-
-ua19 <- reclassify(lc19)
 ```
 
 ##Save reclassified, reprojected, and clipped urban rasters to the data drive for use in ArcGIS
@@ -252,6 +258,14 @@ saverast <- function(x){
   writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/urban_rasters", name), filetype = "GTiff", overwrite=TRUE)
 }
 
+saverast(ua13)
+
+saverast(ua16)
+
+saverast(ua19)
+
+#outside our time frame
+
 #saverast(ua01)
 
 #saverast(ua04)
@@ -261,12 +275,6 @@ saverast <- function(x){
 #saverast(ua08)
 
 #saverast(ua11)
-
-saverast(ua13)
-
-saverast(ua16)
-
-saverast(ua19)
 
 ```
 
@@ -283,6 +291,14 @@ saverast(ua19)
 
 #read in land cover rasters - we will convert these to hold only forest cover
 
+lc13 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc13_reclassed.tif"))
+
+lc16 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc16_reclassed.tif"))
+
+lc19 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc19_reclassed.tif"))
+
+#these ones are outside our time frame
+
 #lc01 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc01_reclassed.tif"))
 
 #lc04 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc04_reclassed.tif"))
@@ -293,11 +309,6 @@ saverast(ua19)
 
 #lc11 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc11_reclassed.tif"))
 
-lc13 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc13_reclassed.tif"))
-
-lc16 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc16_reclassed.tif"))
-
-lc19 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc19_reclassed.tif"))
 
 #list out the from, to values in an object
 m <- c(0, NA,
@@ -341,6 +352,14 @@ reclassify <- function(x){
 
 #reclassify lc rasters to forest cover and then resample to correct resolution
 
+fc13 <- reclassify(lc13)
+
+fc16 <- reclassify(lc16)
+
+fc19 <- reclassify(lc19)
+
+#outside our time frame
+
 #fc01 <- reclassify(lc01)
 
 #fc04 <- reclassify(lc04)
@@ -350,12 +369,6 @@ reclassify <- function(x){
 #fc08 <- reclassify(lc08)
 
 #fc11 <- reclassify(lc11)
-
-fc13 <- reclassify(lc13)
-
-fc16 <- reclassify(lc16)
-
-fc19 <- reclassify(lc19)
 
 ```
 
@@ -373,6 +386,14 @@ saverast <- function(x){
   writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/forest_rasters", name), filetype = "GTiff", overwrite=TRUE)
 }
 
+saverast(fc13)
+
+saverast(fc16)
+
+saverast(fc19)
+
+#outside our time frame
+
 #saverast(fc01)
 
 #saverast(fc04)
@@ -382,11 +403,5 @@ saverast <- function(x){
 #saverast(fc08)
 
 #saverast(fc11)
-
-saverast(fc13)
-
-saverast(fc16)
-
-saverast(fc19)
 
 ```
