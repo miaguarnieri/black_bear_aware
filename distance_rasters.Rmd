@@ -19,13 +19,12 @@ library(sf)
 library(tmap)
 library(rgrass7)
 
-#mia and claire's file path
+#mia and claire's and chase's file path
 gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #sam's file path
 #gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 
-#chase's file path
 
 ```
 
@@ -282,8 +281,119 @@ saverast(ua19)
 
 ##Distance to recreational areas
 
+###Park Entry Points
 ```{r}
+rec_areas_PEP <- vect(here(gdrive_data, "/InputData/InputData_Files/recreational_areas/parkentrypoints/ParkEntryPoints.shp"))
 
+rec_areas_PEP_calbers <- project(rec_areas_PEP, ca_raster)
+
+rec_areas_PEP_mask <- crop(rec_areas_PEP_calbers, ca_raster)
+
+rec_areas_PEP_raster <- rasterize(rec_areas_PEP_mask, ca_raster)
+
+```
+
+
+
+###Parking Points
+```{r}
+rec_areas_parking <- vect(here(gdrive_data, "/InputData/InputData_Files/recreational_areas/parkingpoints/ParkingPoints.shp"))
+
+rec_areas_parking_calbers <- project(rec_areas_parking, ca_raster)
+
+rec_areas_parking_mask <- crop(rec_areas_parking_calbers, ca_raster)
+
+rec_areas_parking_raster <- rasterize(rec_areas_parking_mask, ca_raster)
+
+
+```
+
+
+###Campgrounds
+```{r}
+rec_areas_camp <- vect(here(gdrive_data, "/InputData/InputData_Files/recreational_areas/campgrounds/Campgrounds.shp"))
+
+rec_areas_camp_calbers <- project(rec_areas_camp, ca_raster)
+
+rec_areas_camp_mask <- crop(rec_areas_camp_calbers, ca_raster)
+
+rec_areas_camp_raster <- rasterize(rec_areas_camp_mask, ca_raster)
+```
+
+###Picnic Grounds
+```{r}
+rec_areas_picnic <- vect(here(gdrive_data, "/InputData/InputData_Files/recreational_areas/picnicgrounds/PicnicGrounds.shp"))
+
+rec_areas_picnic_calbers <- project(rec_areas_picnic, ca_raster)
+
+rec_areas_picnic_mask <- crop(rec_areas_picnic_calbers, ca_raster)
+
+rec_areas_picnic_raster <- rasterize(rec_areas_picnic_mask, ca_raster)
+```
+
+###Structures
+```{r}
+rec_areas_structures <- vect(here(gdrive_data, "/InputData/InputData_Files/recreational_areas/structures/Structures.shp"))
+
+rec_areas_structures_calbers <- project(rec_areas_structures, ca_raster)
+
+rec_areas_structures_mask <- crop(rec_areas_structures_calbers, ca_raster)
+
+rec_areas_structures_raster <- rasterize(rec_areas_structures_mask, ca_raster)
+```
+
+###Buildings
+```{r}
+rec_areas_buildings <- vect(here(gdrive_data, "/InputData/InputData_Files/recreational_areas/buildings/Buildings.shp"))
+
+rec_areas_buildings_calbers <- project(rec_areas_buildings, ca_raster)
+
+rec_areas_buildings_mask <- crop(rec_areas_buildings_calbers, ca_raster)
+
+rec_areas_buildings_raster <- rasterize(rec_areas_buildings_mask, ca_raster)
+```
+
+###Recreational Routes
+```{r}
+rec_areas_rr <- vect(here(gdrive_data, "/InputData/InputData_Files/recreational_areas/recreationalroutes/RecreationalRoutes.shp"))
+
+rec_areas_rr_calbers <- project(rec_areas_rr, ca_raster)
+
+rec_areas_rr_mask <- crop(rec_areas_rr_calbers, ca_raster)
+
+rec_areas_rr_raster <- rasterize(rec_areas_rr_mask, ca_raster)
+```
+
+###Park Boundaries
+```{r}
+rec_areas_pb <- vect(here(gdrive_data, "/InputData/InputData_Files/recreational_areas/parkboundaries/ParkBoundaries.shp"))
+
+rec_areas_pb_calbers <- project(rec_areas_pb, ca_raster)
+
+rec_areas_pb_mask <- crop(rec_areas_pb_calbers, ca_raster)
+
+rec_areas_pb_raster <- rasterize(rec_areas_pb_mask, ca_raster)
+```
+
+#####Saving Rec Areas to Distance Rasters
+```{r}
+saverast <- function(x){
+  
+  name <- paste0(deparse(substitute(x)), ".shp") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/recreational_rasters", name), filetype = "GTiff", overwrite=TRUE)
+}
+
+saverast(rec_areas_pb_raster)
+saverast(rec_areas_rr_raster)
+saverast(rec_areas_buildings_raster)
+saverast(rec_areas_structures_raster)
+saverast(rec_areas_parking_raster)
+saverast(rec_areas_PEP_raster)
+saverast(rec_areas_picnic_raster)
+saverast(rec_areas_camp_raster)
 ```
 
 ##Distance to forest cover
