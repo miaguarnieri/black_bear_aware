@@ -99,13 +99,31 @@ conflict_points_buffered <- st_buffer(conflict_points_albers,dist = 5000)
 ```{r}
 #add a year column to confict point data
 
-con_year <- conflict_points_albers %>% 
+con_year <- conflict_points_buffered %>% 
   separate(incident_date, into = c("inc_date", "inc_time"), sep = " ") %>% 
   separate(inc_date, into = c("month", "day", "year"), sep = "/") %>% 
   mutate(year = as.character.Date(year))
 
-#filter for 2001
-con_01 <- con_year %>% 
-  filter(year == "2001")
-2```
+#filter for 2016
+con_16 <- con_year %>% 
+  filter(year == "2016") %>% 
+  filter(wir_id != "WIR-2016-001081") #removing an erroneous point (was showing up in Israel)
+
+con_16_sv <- vect(con_16)
+
+con16_back <- st_as_sf(con_16_sv)
+
+#read in data for that year
+
+dem <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/Elevation_Formatted/dem_formatted.tif"))
+
+lc <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc16_reclassed.tif"))
+
+
+#extract data points from these rasters and add them to the shapefile dataframe
+
+dem_ex <- extract(dem, con_16_sv, method = "simple", bind = TRUE, ID = TRUE) %>% 
+  st_as_sf()
+
+```
 
