@@ -48,6 +48,8 @@ tm_shape(ca_raster) +
   tm_raster() +
   tmap_mode("view")
 
+
+
 ```
 
 ##Conflict data
@@ -120,11 +122,32 @@ tm_shape(dem_ca) +
 ##Road density
 
 ```{r}
-road_density_2014 <- rast(here(gdrive_data,"/InputData/InputData_Files/2014_UsaRoadDensity_ESRI/2014_UsaRoadDensity_ESRI.tif"))
+#road_density_2014 <- rast(here(gdrive_data,"/InputData/InputData_Files/2014_UsaRoadDensity_ESRI/2014_UsaRoadDensity_ESRI.tif"))
+
+#We're no longer using above road_density_2014 layer. Instead we'll read in the roads layer, reproject it, and export it to ArcGIS to use tool line density
+
+#reading in roads polyline: 
+roads_2015_tiger <- vect(here(gdrive_data,"/InputData/InputData_Files/2015_roads_TIGER/tl_2015_06_prisecroads.shp"))
+
+#Reprojecting roads layer
+albers_roads_2015_tiger <- project(roads_2015_tiger, ca_raster)
+
+#Check coordinate system
+crs(albers_roads_2015_tiger)
+
+#export roads density - ONLY NEED TO DO ONCE, HAS BEEN DONE
+# writeVector(albers_roads_2015_tiger,filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/2015_roads_TIGER_Formatted/albers_roads_2015_tiger"))
+
+
+#read in newly created road density. Road density was created in ArcGIS Pro from Roads 2015 Tiger layer. It was created by Claire on 10/23/2022 using the ArcGIS Pro tool line density 
+
+road_density <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/road_density_arc_2022_10_23/road_density.tif"))
 ```
 
 
 #Adjust the data to the same geographic extent and projection
+
+
 
 ##Conflict
 
@@ -162,6 +185,9 @@ saverast(dem_formatted)
 
 ```{r}
 
+
+# reproject roads to same crs(NAD 83, CA Albers (2011))
+roads_reprojected <- project()
 ```
 
 
