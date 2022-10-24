@@ -134,6 +134,7 @@ NLCD Legend Land Cover Class Descriptions
 ```{r}
 #data are by year, from 2001 - 2016 (1 file per year)
 
+<<<<<<< HEAD
 # land_cover_2001 <- rast(here(gdrive_data, "/InputData/InputData_Files/LandCover_NLCD/2001_LandCover_NLCD/2001_LandCover_NLCD.img"))
 
 # land_cover_2004 <- rast(here(gdrive_data, "/InputData/InputData_Files/LandCover_NLCD/2004_LandCover_NLCD/nlcd_2004_land_cover_l48_20210604.img"))
@@ -143,6 +144,21 @@ NLCD Legend Land Cover Class Descriptions
 #land_cover_2008 <- rast(here(gdrive_data, "/InputData/InputData_Files/LandCover_NLCD/2008_LandCover_NLCD/nlcd_2008_land_cover_l48_20210604.img"))
 
 #land_cover_2011 <- rast(here(gdrive_data, "/InputData/InputData_Files/LandCover_NLCD/2011_LandCover_NLCD/nlcd_2011_land_cover_l48_20210604.img"))
+=======
+#we will save these just in case, but we do not need them as they are outside of our temporal extent
+
+# land_cover_2001 <- rast(here(gdrive_data, "/InputData/InputData_Files/LandCover_NLCD/2001_LandCover_NLCD/2001_LandCover_NLCD.img"))
+# 
+# land_cover_2004 <- rast(here(gdrive_data, "/InputData/InputData_Files/LandCover_NLCD/2004_LandCover_NLCD/nlcd_2004_land_cover_l48_20210604.img"))
+# 
+# land_cover_2006 <- rast(here(gdrive_data, "/InputData/InputData_Files/LandCover_NLCD/2006_LandCover_NLCD/nlcd_2006_land_cover_l48_20210604.img"))
+# 
+# land_cover_2008 <- rast(here(gdrive_data, "/InputData/InputData_Files/LandCover_NLCD/2008_LandCover_NLCD/nlcd_2008_land_cover_l48_20210604.img"))
+# 
+# land_cover_2011 <- rast(here(gdrive_data, "/InputData/InputData_Files/LandCover_NLCD/2011_LandCover_NLCD/nlcd_2011_land_cover_l48_20210604.img"))
+
+#run these
+>>>>>>> 72cb868fc8372eed2825ce4762e60bd6e0826167
 
 land_cover_2013 <- rast(here(gdrive_data, "/InputData/InputData_Files/LandCover_NLCD/2013_LandCover_NLCD/nlcd_2013_land_cover_l48_20210604.img"))
 
@@ -159,6 +175,7 @@ We will additionally reclassify land cover rasters after they are clipped, to av
 
 ```{r}
 #reproject to the same crs (NAD 83, CA Albers (2011))
+<<<<<<< HEAD
 # lc_2001_calbers <- project(land_cover_2001, ca_raster)
 
 # lc_2004_calbers <- project(land_cover_2004, ca_raster)
@@ -168,6 +185,8 @@ We will additionally reclassify land cover rasters after they are clipped, to av
 # lc_2008_calbers <- project(land_cover_2008, ca_raster)
 
 # lc_2011_calbers <- project(land_cover_2011, ca_raster)
+=======
+>>>>>>> 72cb868fc8372eed2825ce4762e60bd6e0826167
 
 lc_2013_calbers <- project(land_cover_2013, ca_raster)
 
@@ -176,6 +195,7 @@ lc_2016_calbers <- project(land_cover_2016, ca_raster)
 lc_2019_calbers <- project(land_cover_2019, ca_raster)
 
 
+<<<<<<< HEAD
 #cropping the files to the spatial extent of CA
 # lc_2001_mask <- mask(lc_2001_calbers, ca_raster)
 
@@ -186,12 +206,40 @@ lc_2019_calbers <- project(land_cover_2019, ca_raster)
 # lc_2008_mask <- mask(lc_2004_calbers, ca_raster)
 
 # lc_2011_mask <- mask(lc_2004_calbers, ca_raster)
+=======
+#old files - do not need them anymore as they are outside our temporal extent
 
-lc_2013_mask <- mask(lc_2004_calbers, ca_raster)
+# lc_2001_calbers <- project(land_cover_2001, ca_raster)
+# 
+# lc_2004_calbers <- project(land_cover_2004, ca_raster)
+# 
+# lc_2006_calbers <- project(land_cover_2006, ca_raster)
+# 
+# lc_2008_calbers <- project(land_cover_2008, ca_raster)
+# 
+# lc_2011_calbers <- project(land_cover_2011, ca_raster)
 
-lc_2016_mask <- mask(lc_2004_calbers, ca_raster)
 
-lc_2019_mask <- mask(lc_2004_calbers, ca_raster)
+#cropping the files to the spatial extent of CA
+
+lc_2013_mask <- mask(lc_2013_calbers, ca_raster)
+
+lc_2016_mask <- mask(lc_2016_calbers, ca_raster)
+>>>>>>> 72cb868fc8372eed2825ce4762e60bd6e0826167
+
+lc_2019_mask <- mask(lc_2019_calbers, ca_raster)
+
+#old files - do not need them anymore as they are outside our temporal extent
+
+# lc_2001_mask <- mask(lc_2001_calbers, ca_raster)
+# 
+# lc_2004_mask <- mask(lc_2004_calbers, ca_raster)
+# 
+# lc_2006_mask <- mask(lc_2006_calbers, ca_raster)
+# 
+# lc_2008_mask <- mask(lc_2008_calbers, ca_raster)
+# 
+# lc_2011_mask <- mask(lc_2011_calbers, ca_raster)
 
 #Create reclassification matrix for land cover values (from, to)
 
@@ -241,6 +289,7 @@ reclassify <- function(x){
 
 #Apply function to each layer
 
+<<<<<<< HEAD
 #lc01_reclassed <- reclassify(lc_2001_mask)
 
 #lc04_reclassed <- reclassify(lc_2004_mask)
@@ -251,13 +300,29 @@ reclassify <- function(x){
 
 #lc11_reclassed <- reclassify(lc_2011_mask)
 
+=======
+>>>>>>> 72cb868fc8372eed2825ce4762e60bd6e0826167
 lc13_reclassed <- reclassify(lc_2013_mask)
 
 lc16_reclassed <- reclassify(lc_2016_mask)
 
 lc19_reclassed <- reclassify(lc_2019_mask)
 
+<<<<<<< HEAD
 beep(3)
+=======
+#don't need these; they are outside our temporal extent
+
+# lc01_reclassed <- reclassify(lc_2001_mask)
+# 
+# lc04_reclassed <- reclassify(lc_2004_mask)
+# 
+# lc06_reclassed <- reclassify(lc_2006_mask)
+# 
+# lc08_reclassed <- reclassify(lc_2008_mask)
+# 
+# lc11_reclassed <- reclassify(lc_2011_mask)
+>>>>>>> 72cb868fc8372eed2825ce4762e60bd6e0826167
 
 ```
 
@@ -276,21 +341,23 @@ saverast <- function(x){
   
 }
 
-saverast(lc01_reclassed)
-
-saverast(lc04_reclassed)
-
-saverast(lc06_reclassed)
-
-saverast(lc08_reclassed)
-
-saverast(lc11_reclassed)
-
 saverast(lc13_reclassed)
 
 saverast(lc16_reclassed)
 
 saverast(lc19_reclassed)
+
+#outside our temporal extent - don't run these
+
+# saverast(lc01_reclassed)
+# 
+# saverast(lc04_reclassed)
+# 
+# saverast(lc06_reclassed)
+# 
+# saverast(lc08_reclassed)
+# 
+# saverast(lc11_reclassed)
 
 ```
 
