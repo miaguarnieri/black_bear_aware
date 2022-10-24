@@ -20,10 +20,10 @@ library(tmap)
 library(rgrass7)
 
 #mia and claire's file path
-#gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #sam's file path
-gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
+#gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #chase's file path
 
@@ -51,6 +51,8 @@ crs(ca_raster)
 tm_shape(ca_raster) +
   tm_raster() +
   tmap_mode("view")
+
+res(ca_raster)
 
 ```
 
