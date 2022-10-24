@@ -19,7 +19,7 @@ library(terra)
 library(sf)
 library(tmap)
 
-#mia and claire's file path
+#mia and claire's and Chase's file path 
 #gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #sam's file path

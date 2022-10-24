@@ -5,26 +5,107 @@ date: '2022-10-19'
 output: html_document
 ---
 
+##Setup and packages
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+#attach packages
+#note - Loading all of the ones Jason used, I don't think we will need all of them 
+
+library(tidyverse)
+library(here)
+library(terra)
+library(sf)
+library(tmap)
+library(lubridate)
+
+#mia, chase, and claire's file path
+gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+
+#sam's file path
+#gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
+
 ```
 
-## R Markdown
+#Data Wrangling Prior to Coding
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+*Data Sources*: Please see ReadMe file for metadata and citations.
+*Reference Paper*: Insert hagani citation here
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+#Load in existing data layers
 
-```{r cars}
-summary(cars)
+##California raster
+
+Insert info about CA raster layer here
+
+```{r}
+
+ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Reclassed/CARaster_Tiger_Reclassed.img"))
+
+#check the coordinate reference system 
+crs(ca_raster)
+
+#plot CA raster to confirm
+tm_shape(ca_raster) +
+  tm_raster() +
+  tmap_mode("view")
+
 ```
 
-## Including Plots
+##Conflict data
 
-You can also embed plots, for example:
+Insert info about WIR data here
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r}
+
+#Buffer conflict points to create conflict raster
+# first loading in conflict data 
+conflict_points <- read_csv(here(gdrive_data,"/IntermediateData/IntermediateData_Files/2022_07_18_WIRClean_CDFW.csv"))
+
+# Turning conflict_points into a sf object from data frame 
+
+#st_as_sf(conflict_points, coords = "latitude","longitude")
+conflict_points_sf <- st_as_sf(conflict_points,coords = c("longitude","latitude"), crs = 4326)
+#4326 is code for WGS 84- map does not render properly otherwise, so we need to reproject  to 6414 (NAD83(2011) / California Albers) (but also I think this issue might go away when I remove the error points that are outside CA)
+
+#reprojecting to NAD83(2011) / California Albers
+conflict_points_albers <- st_transform(conflict_points_sf,crs = 6414)
+
+#buffering points using SF fuction st_buffer. Units are in meters
+conflict_points_buffered <- st_buffer(conflict_points_albers,dist = 5000)
+
+ tm_shape(conflict_points_buffered) +
+   tm_dots()+
+   tmap_mode("view")
+
+ #need to set conflict crs 
+#need to set extent 
+#Need to buffer 
+
+#test plot
+#how to turn data frame with lat and long columns into an sf object 
+
+
+
+# use this if I want to plot
+# tm_shape(conflict_points_sf) +
+ # tm_dots()+
+#  tmap_mode("view")
+# class(conflict_points_sf) use this if I need to check class
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+#Extract raster values by year for conflict points (test)
+
+```{r}
+#add a year column to confict point data
+
+con_year <- conflict_points_albers %>% 
+  separate(incident_date, into = c("inc_date", "inc_time"), sep = " ") %>% 
+  separate(inc_date, into = c("month", "day", "year"), sep = "/") %>% 
+  mutate(year = as.character.Date(year))
+
+#filter for 2001
+con_01 <- con_year %>% 
+  filter(year == "2001")
+2```
+
