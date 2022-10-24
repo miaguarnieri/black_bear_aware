@@ -51,6 +51,8 @@ tm_shape(ca_raster) +
   tm_raster() +
   tmap_mode("view")
 
+
+
 ```
 
 ##Conflict data
@@ -123,11 +125,28 @@ tm_shape(dem_ca) +
 ##Road density
 
 ```{r}
-road_density_2014 <- rast(here(gdrive_data,"/InputData/InputData_Files/2014_UsaRoadDensity_ESRI/2014_UsaRoadDensity_ESRI.tif"))
+#road_density_2014 <- rast(here(gdrive_data,"/InputData/InputData_Files/2014_UsaRoadDensity_ESRI/2014_UsaRoadDensity_ESRI.tif"))
+
+#We're no longer using above road_density_2014 layer. Instead we'll read in the roads layer, reproject it, and export it to ArcGIS to use tool line density
+
+#reading in roads polyline: 
+roads_2015_tiger <- vect(here(gdrive_data,"/InputData/InputData_Files/2015_roads_TIGER/tl_2015_06_prisecroads.shp"))
+
+#Reprojecting roads layer
+albers_roads_2015_tiger <- project(roads_2015_tiger, ca_raster)
+
+#Check coordinate system
+crs(albers_roads_2015_tiger)
+
+#export roads density 
+writeVector(albers_roads_2015_tiger,filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/2015_roads_TIGER_Formatted/albers_roads_2015_tiger"))
+  
 ```
 
 
 #Adjust the data to the same geographic extent and projection
+
+
 
 ##Conflict
 
@@ -149,6 +168,9 @@ dem_mask <- mask(dem_calbers, ca_raster)
 
 ```{r}
 
+
+# reproject roads to same crs(NAD 83, CA Albers (2011))
+roads_reprojected <- project()
 ```
 
 

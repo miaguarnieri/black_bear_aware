@@ -16,7 +16,7 @@ library(here)
 library(terra)
 library(sf)
 library(tmap)
-
+library(beepr)
 #mia and claire's file path
 gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
@@ -52,6 +52,8 @@ res(ca_raster)
 tm_shape(ca_raster) +
   tm_raster() +
   tmap_mode("view")
+
+res(ca_raster)
 
 ```
 
@@ -132,15 +134,15 @@ NLCD Legend Land Cover Class Descriptions
 ```{r}
 #data are by year, from 2001 - 2016 (1 file per year)
 
-land_cover_2001 <- rast(here(gdrive_data, "/InputData/InputData_Files/LandCover_NLCD/2001_LandCover_NLCD/2001_LandCover_NLCD.img"))
+# land_cover_2001 <- rast(here(gdrive_data, "/InputData/InputData_Files/LandCover_NLCD/2001_LandCover_NLCD/2001_LandCover_NLCD.img"))
 
-land_cover_2004 <- rast(here(gdrive_data, "/InputData/InputData_Files/LandCover_NLCD/2004_LandCover_NLCD/nlcd_2004_land_cover_l48_20210604.img"))
+# land_cover_2004 <- rast(here(gdrive_data, "/InputData/InputData_Files/LandCover_NLCD/2004_LandCover_NLCD/nlcd_2004_land_cover_l48_20210604.img"))
 
-land_cover_2006 <- rast(here(gdrive_data, "/InputData/InputData_Files/LandCover_NLCD/2006_LandCover_NLCD/nlcd_2006_land_cover_l48_20210604.img"))
+#land_cover_2006 <- rast(here(gdrive_data, "/InputData/InputData_Files/LandCover_NLCD/2006_LandCover_NLCD/nlcd_2006_land_cover_l48_20210604.img"))
 
-land_cover_2008 <- rast(here(gdrive_data, "/InputData/InputData_Files/LandCover_NLCD/2008_LandCover_NLCD/nlcd_2008_land_cover_l48_20210604.img"))
+#land_cover_2008 <- rast(here(gdrive_data, "/InputData/InputData_Files/LandCover_NLCD/2008_LandCover_NLCD/nlcd_2008_land_cover_l48_20210604.img"))
 
-land_cover_2011 <- rast(here(gdrive_data, "/InputData/InputData_Files/LandCover_NLCD/2011_LandCover_NLCD/nlcd_2011_land_cover_l48_20210604.img"))
+#land_cover_2011 <- rast(here(gdrive_data, "/InputData/InputData_Files/LandCover_NLCD/2011_LandCover_NLCD/nlcd_2011_land_cover_l48_20210604.img"))
 
 land_cover_2013 <- rast(here(gdrive_data, "/InputData/InputData_Files/LandCover_NLCD/2013_LandCover_NLCD/nlcd_2013_land_cover_l48_20210604.img"))
 
@@ -148,6 +150,7 @@ land_cover_2016 <- rast(here(gdrive_data, "/InputData/InputData_Files/LandCover_
 
 land_cover_2019 <- rast(here(gdrive_data, "/InputData/InputData_Files/LandCover_NLCD/2019_LandCover_NLCD/nlcd_2019_land_cover_l48_20210604.img"))
 
+beep(3)
 ```
 
 #Adjust the data to the same geographic extent and projection
@@ -156,15 +159,15 @@ We will additionally reclassify land cover rasters after they are clipped, to av
 
 ```{r}
 #reproject to the same crs (NAD 83, CA Albers (2011))
-lc_2001_calbers <- project(land_cover_2001, ca_raster)
+# lc_2001_calbers <- project(land_cover_2001, ca_raster)
 
-lc_2004_calbers <- project(land_cover_2004, ca_raster)
+# lc_2004_calbers <- project(land_cover_2004, ca_raster)
 
-lc_2006_calbers <- project(land_cover_2006, ca_raster)
+# lc_2006_calbers <- project(land_cover_2006, ca_raster)
 
-lc_2008_calbers <- project(land_cover_2008, ca_raster)
+# lc_2008_calbers <- project(land_cover_2008, ca_raster)
 
-lc_2011_calbers <- project(land_cover_2011, ca_raster)
+# lc_2011_calbers <- project(land_cover_2011, ca_raster)
 
 lc_2013_calbers <- project(land_cover_2013, ca_raster)
 
@@ -174,15 +177,15 @@ lc_2019_calbers <- project(land_cover_2019, ca_raster)
 
 
 #cropping the files to the spatial extent of CA
-lc_2001_mask <- mask(lc_2001_calbers, ca_raster)
+# lc_2001_mask <- mask(lc_2001_calbers, ca_raster)
 
-lc_2004_mask <- mask(lc_2004_calbers, ca_raster)
+# lc_2004_mask <- mask(lc_2004_calbers, ca_raster)
 
-lc_2006_mask <- mask(lc_2004_calbers, ca_raster)
+# lc_2006_mask <- mask(lc_2004_calbers, ca_raster)
 
-lc_2008_mask <- mask(lc_2004_calbers, ca_raster)
+# lc_2008_mask <- mask(lc_2004_calbers, ca_raster)
 
-lc_2011_mask <- mask(lc_2004_calbers, ca_raster)
+# lc_2011_mask <- mask(lc_2004_calbers, ca_raster)
 
 lc_2013_mask <- mask(lc_2004_calbers, ca_raster)
 
@@ -238,21 +241,24 @@ reclassify <- function(x){
 
 #Apply function to each layer
 
-lc01_reclassed <- reclassify(lc_2001_mask)
+#lc01_reclassed <- reclassify(lc_2001_mask)
 
-lc04_reclassed <- reclassify(lc_2004_mask)
+#lc04_reclassed <- reclassify(lc_2004_mask)
 
-lc06_reclassed <- reclassify(lc_2006_mask)
+#lc06_reclassed <- reclassify(lc_2006_mask)
 
-lc08_reclassed <- reclassify(lc_2008_mask)
+#lc08_reclassed <- reclassify(lc_2008_mask)
 
-lc11_reclassed <- reclassify(lc_2011_mask)
+#lc11_reclassed <- reclassify(lc_2011_mask)
 
 lc13_reclassed <- reclassify(lc_2013_mask)
 
 lc16_reclassed <- reclassify(lc_2016_mask)
 
 lc19_reclassed <- reclassify(lc_2019_mask)
+
+beep(3)
+
 ```
 
 #Save reclassified, reprojected, and clipped rasters to the data drive
