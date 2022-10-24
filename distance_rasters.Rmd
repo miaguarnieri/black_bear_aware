@@ -19,11 +19,11 @@ library(sf)
 library(tmap)
 library(rgrass7)
 
-#mia and claire's file path
+#mia and claire's and chase's file path
 gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #sam's file path
-#gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
+# gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #chase's file path
 
@@ -42,7 +42,7 @@ Insert info about CA raster layer here
 
 ```{r}
 
-ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Reclassed/CARaster_Tiger_Reclassed.img"))
+ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
 
 #check the coordinate reference system 
 crs(ca_raster)
@@ -58,20 +58,26 @@ tm_shape(ca_raster) +
 ```{r}
 streams_2017 <- vect(here(gdrive_data, "/InputData/InputData_Files/2017_Streams_CDFW/California_Streams.shp"))
 
+
 streams_2017_calbers <- project(streams_2017, ca_raster)
 
 streams_2017_mask <- crop(streams_2017_calbers, ca_raster)
 
+streams_2017_raster <- rasterize(streams_2017_mask, ca_raster)
 ```
+
+
 
 #Roads Layer 
 
 ```{r}
 roads_2015 <- vect(here(gdrive_data, "/InputData/InputData_Files/2015_roads_TIGER/tl_2015_06_prisecroads.shp"))
 
-roads_2015_calbers <- project(roads_2015, ca_raster)
+roads_2015_raster <- rasterize(roads_2015, ca_raster)
 
-roads_2015_mask <- crop(roads_2015_calbers, ca_raster)
+roads_2015_calbers <- project(roads_2015_raster, ca_raster)
+
+roads_2015_mask <- mask(roads_2015_calbers, ca_raster)
 ```
 
 
@@ -84,17 +90,55 @@ roads_2015_mask <- crop(roads_2015_calbers, ca_raster)
 
 ##Distance to road
 
+
 ```{r}
-distance_to_roads <- distance(roads_2015_mask)
+#savevect <- function(x){
+  
+  #name <- paste0(deparse(substitute(x)), ".shp") #the name of the file will be the same as the input object, plus '.hp' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a shapefile
+  
+ # writeVector(x, filename = here(gdrive_data, #"/IntermediateData/IntermediateData_Files/distance_rasters/road_shapefile", #name), filetype = "ESRI Shapefile")
+#}
+
+#save the file
+#savevect(roads_2015_mask)
 
 ```
+
+```{r}
+saverast <- function(x){
+  
+  name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/road_rasters", name), filetype = "GTiff", overwrite=TRUE)
+}
+
+saverast(roads_2015_mask)
+```
+
+
 
 ##Distance to streams
 
+
+##Save to Google Drive
 ```{r}
-distance_to_streams <- distance(streams_2017_mask)
+saverast <- function(x){
+  
+  name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/stream_rasters", name), filetype = "GTiff", overwrite=TRUE)
+}
+
+saverast(streams_2017_raster)
 
 ```
+
 
 ##Distance to urban areas
 
@@ -103,15 +147,15 @@ distance_to_streams <- distance(streams_2017_mask)
 
 #read in land cover rasters - we will convert these to hold only developed areas
 
-lc01 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc01_reclassed.tif"))
+#lc01 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc01_reclassed.tif"))
 
-lc04 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc04_reclassed.tif"))
+#lc04 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc04_reclassed.tif"))
 
-lc06 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc06_reclassed.tif"))
+#lc06 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc06_reclassed.tif"))
 
-lc08 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc08_reclassed.tif"))
+#lc08 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc08_reclassed.tif"))
 
-lc11 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc11_reclassed.tif"))
+#lc11 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc11_reclassed.tif"))
 
 lc13 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc13_reclassed.tif"))
 
@@ -161,15 +205,15 @@ reclassify <- function(x){
 
 #reclassify lc rasters to urban areas
 
-ua01 <- reclassify(lc01)
+#ua01 <- reclassify(lc01)
 
-ua04 <- reclassify(lc04)
+#ua04 <- reclassify(lc04)
 
-ua06 <- reclassify(lc06)
+#ua06 <- reclassify(lc06)
 
-ua08 <- reclassify(lc08)
+#ua08 <- reclassify(lc08)
 
-ua11 <- reclassify(lc11)
+#ua11 <- reclassify(lc11)
 
 ua13 <- reclassify(lc13)
 
@@ -190,18 +234,18 @@ saverast <- function(x){
   
 #write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
   
-  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/urban_rasters", name), filetype = "GTiff")
+  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/urban_rasters", name), filetype = "GTiff", overwrite=TRUE)
 }
 
-saverast(ua01)
+#saverast(ua01)
 
-saverast(ua04)
+#saverast(ua04)
 
-saverast(ua06)
+#saverast(ua06)
 
-saverast(ua08)
+#saverast(ua08)
 
-saverast(ua11)
+#saverast(ua11)
 
 saverast(ua13)
 
@@ -213,9 +257,121 @@ saverast(ua19)
 
 ##Distance to recreational areas
 
+###Park Entry Points
 ```{r}
+rec_areas_PEP <- vect(here(gdrive_data, "/InputData/InputData_Files/recreational_areas/parkentrypoints/ParkEntryPoints.shp"))
+
+rec_areas_PEP_calbers <- project(rec_areas_PEP, ca_raster)
+
+rec_areas_PEP_mask <- crop(rec_areas_PEP_calbers, ca_raster)
+
+rec_areas_PEP_raster <- rasterize(rec_areas_PEP_mask, ca_raster)
 
 ```
+
+
+
+###Parking Points
+```{r}
+rec_areas_parking <- vect(here(gdrive_data, "/InputData/InputData_Files/recreational_areas/parkingpoints/ParkingPoints.shp"))
+
+rec_areas_parking_calbers <- project(rec_areas_parking, ca_raster)
+
+rec_areas_parking_mask <- crop(rec_areas_parking_calbers, ca_raster)
+
+rec_areas_parking_raster <- rasterize(rec_areas_parking_mask, ca_raster)
+
+
+```
+
+
+###Campgrounds
+```{r}
+rec_areas_camp <- vect(here(gdrive_data, "/InputData/InputData_Files/recreational_areas/campgrounds/Campgrounds.shp"))
+
+rec_areas_camp_calbers <- project(rec_areas_camp, ca_raster)
+
+rec_areas_camp_mask <- crop(rec_areas_camp_calbers, ca_raster)
+
+rec_areas_camp_raster <- rasterize(rec_areas_camp_mask, ca_raster)
+```
+
+###Picnic Grounds
+```{r}
+rec_areas_picnic <- vect(here(gdrive_data, "/InputData/InputData_Files/recreational_areas/picnicgrounds/PicnicGrounds.shp"))
+
+rec_areas_picnic_calbers <- project(rec_areas_picnic, ca_raster)
+
+rec_areas_picnic_mask <- crop(rec_areas_picnic_calbers, ca_raster)
+
+rec_areas_picnic_raster <- rasterize(rec_areas_picnic_mask, ca_raster)
+```
+
+###Structures
+```{r}
+rec_areas_structures <- vect(here(gdrive_data, "/InputData/InputData_Files/recreational_areas/structures/Structures.shp"))
+
+rec_areas_structures_calbers <- project(rec_areas_structures, ca_raster)
+
+rec_areas_structures_mask <- crop(rec_areas_structures_calbers, ca_raster)
+
+rec_areas_structures_raster <- rasterize(rec_areas_structures_mask, ca_raster)
+```
+
+###Buildings
+```{r}
+rec_areas_buildings <- vect(here(gdrive_data, "/InputData/InputData_Files/recreational_areas/buildings/Buildings.shp"))
+
+rec_areas_buildings_calbers <- project(rec_areas_buildings, ca_raster)
+
+rec_areas_buildings_mask <- crop(rec_areas_buildings_calbers, ca_raster)
+
+rec_areas_buildings_raster <- rasterize(rec_areas_buildings_mask, ca_raster)
+```
+
+###Recreational Routes
+```{r}
+rec_areas_rr <- vect(here(gdrive_data, "/InputData/InputData_Files/recreational_areas/recreationalroutes/RecreationalRoutes.shp"))
+
+rec_areas_rr_calbers <- project(rec_areas_rr, ca_raster)
+
+rec_areas_rr_mask <- crop(rec_areas_rr_calbers, ca_raster)
+
+rec_areas_rr_raster <- rasterize(rec_areas_rr_mask, ca_raster)
+```
+
+###Park Boundaries
+```{r}
+rec_areas_pb <- vect(here(gdrive_data, "/InputData/InputData_Files/recreational_areas/parkboundaries/ParkBoundaries.shp"))
+
+rec_areas_pb_calbers <- project(rec_areas_pb, ca_raster)
+
+rec_areas_pb_mask <- crop(rec_areas_pb_calbers, ca_raster)
+
+rec_areas_pb_raster <- rasterize(rec_areas_pb_mask, ca_raster)
+```
+
+#####Saving Rec Areas to Distance Rasters
+```{r}
+saverast <- function(x){
+  
+  name <- paste0(deparse(substitute(x)), ".shp") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/recreational_rasters", name), filetype = "GTiff", overwrite=TRUE)
+}
+
+saverast(rec_areas_pb_raster)
+saverast(rec_areas_rr_raster)
+saverast(rec_areas_buildings_raster)
+saverast(rec_areas_structures_raster)
+saverast(rec_areas_parking_raster)
+saverast(rec_areas_PEP_raster)
+saverast(rec_areas_picnic_raster)
+saverast(rec_areas_camp_raster)
+```
+
 
 ##Distance to forest cover
 
@@ -224,15 +380,15 @@ saverast(ua19)
 
 #read in land cover rasters - we will convert these to hold only forest cover
 
-lc01 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc01_reclassed.tif"))
+#lc01 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc01_reclassed.tif"))
 
-lc04 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc04_reclassed.tif"))
+#lc04 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc04_reclassed.tif"))
 
-lc06 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc06_reclassed.tif"))
+#lc06 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc06_reclassed.tif"))
 
-lc08 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc08_reclassed.tif"))
+#lc08 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc08_reclassed.tif"))
 
-lc11 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc11_reclassed.tif"))
+#lc11 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc11_reclassed.tif"))
 
 lc13 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc13_reclassed.tif"))
 
@@ -282,15 +438,15 @@ reclassify <- function(x){
 
 #reclassify lc rasters to forest cover and then resample to correct resolution
 
-fc01 <- reclassify(lc01)
+#fc01 <- reclassify(lc01)
 
-fc04 <- reclassify(lc04)
+#fc04 <- reclassify(lc04)
 
-fc06 <- reclassify(lc06)
+#fc06 <- reclassify(lc06)
 
-fc08 <- reclassify(lc08)
+#fc08 <- reclassify(lc08)
 
-fc11 <- reclassify(lc11)
+#fc11 <- reclassify(lc11)
 
 fc13 <- reclassify(lc13)
 
@@ -311,18 +467,18 @@ saverast <- function(x){
   
 #write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
   
-  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/forest_rasters", name), filetype = "GTiff")
+  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/forest_rasters", name), filetype = "GTiff", overwrite=TRUE)
 }
 
-saverast(fc01)
+#saverast(fc01)
 
-saverast(fc04)
+#saverast(fc04)
 
-saverast(fc06)
+#saverast(fc06)
 
-saverast(fc08)
+#saverast(fc08)
 
-saverast(fc11)
+#saverast(fc11)
 
 saverast(fc13)
 
