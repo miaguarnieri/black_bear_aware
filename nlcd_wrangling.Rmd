@@ -178,17 +178,17 @@ lc_2001_mask <- mask(lc_2001_calbers, ca_raster)
 
 lc_2004_mask <- mask(lc_2004_calbers, ca_raster)
 
-lc_2006_mask <- mask(lc_2004_calbers, ca_raster)
+lc_2006_mask <- mask(lc_2006_calbers, ca_raster)
 
-lc_2008_mask <- mask(lc_2004_calbers, ca_raster)
+lc_2008_mask <- mask(lc_2008_calbers, ca_raster)
 
-lc_2011_mask <- mask(lc_2004_calbers, ca_raster)
+lc_2011_mask <- mask(lc_2011_calbers, ca_raster)
 
-lc_2013_mask <- mask(lc_2004_calbers, ca_raster)
+lc_2013_mask <- mask(lc_2013_calbers, ca_raster)
 
-lc_2016_mask <- mask(lc_2004_calbers, ca_raster)
+lc_2016_mask <- mask(lc_2016_calbers, ca_raster)
 
-lc_2019_mask <- mask(lc_2004_calbers, ca_raster)
+lc_2019_mask <- mask(lc_2019_calbers, ca_raster)
 
 #Create reclassification matrix for land cover values (from, to)
 
