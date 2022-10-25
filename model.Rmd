@@ -99,7 +99,7 @@ conflict_points_buffered <- st_buffer(conflict_points_albers,dist = 5000)
 ```{r}
 #add a year column to confict point data
 
-con_year <- conflict_points_buffered %>% 
+con_year <- conflict_points_albers %>% 
   separate(incident_date, into = c("inc_date", "inc_time"), sep = " ") %>% 
   separate(inc_date, into = c("month", "day", "year"), sep = "/") %>% 
   mutate(year = as.character.Date(year))
@@ -122,8 +122,7 @@ lc <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rast
 
 #extract data points from these rasters and add them to the shapefile dataframe
 
-dem_ex <- extract(dem, con_16_sv, method = "simple", bind = TRUE, ID = TRUE) %>% 
-  st_as_sf()
+dem_ex <- extract(dem, con_16_sv, method = "simple", bind = TRUE, ID = TRUE)
 
 ```
 
