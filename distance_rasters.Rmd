@@ -19,21 +19,13 @@ library(sf)
 library(tmap)
 library(rgrass7)
 
-<<<<<<< HEAD
 
-=======
->>>>>>> 82fccae38d6d3ce8bfa5a57e66565d07ca2678ec
 #mia and claire's and chase's file path
 gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #sam's file path
-<<<<<<< HEAD
+
 # gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
-=======
-#gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
-
-
->>>>>>> 82fccae38d6d3ce8bfa5a57e66565d07ca2678ec
 ```
 
 #Data Wrangling Prior to Coding
@@ -340,7 +332,6 @@ saverast(ua13_ca_distance)
 ##Distance to recreational areas
 
 ###Park Entry Points
-<<<<<<< HEAD
 ```{r}
 rec_areas_PEP <- vect(here(gdrive_data, "/InputData/InputData_Files/recreational_areas/parkentrypoints/ParkEntryPoints.shp"))
 
@@ -444,16 +435,6 @@ savevect <- function(x){
   
   writeVector(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/recreational_rasters", name), filetype = "ESRI SHAPEFILE", overwrite=TRUE)
 }
-=======
-```{r}
-rec_areas_PEP <- vect(here(gdrive_data, "/InputData/InputData_Files/recreational_areas/parkentrypoints/ParkEntryPoints.shp"))
-
-rec_areas_PEP_calbers <- project(rec_areas_PEP, ca_raster)
-
-rec_areas_PEP_mask <- crop(rec_areas_PEP_calbers, ca_raster)
-
-rec_areas_PEP_raster <- rasterize(rec_areas_PEP_mask, ca_raster)
->>>>>>> 82fccae38d6d3ce8bfa5a57e66565d07ca2678ec
 
 savevect(rec_areas_pb_mask)
 savevect(rec_areas_rr_mask)
@@ -463,114 +444,27 @@ savevect(rec_areas_parking_mask)
 savevect(rec_areas_PEP_mask)
 savevect(rec_areas_picnic_mask)
 savevect(rec_areas_camp_mask)
-```
 
+#merging layers 
 
-<<<<<<< HEAD
-=======
-
-###Parking Points
-```{r}
-rec_areas_parking <- vect(here(gdrive_data, "/InputData/InputData_Files/recreational_areas/parkingpoints/ParkingPoints.shp"))
-
-rec_areas_parking_calbers <- project(rec_areas_parking, ca_raster)
-
-rec_areas_parking_mask <- crop(rec_areas_parking_calbers, ca_raster)
-
-rec_areas_parking_raster <- rasterize(rec_areas_parking_mask, ca_raster)
+rec_areas_ca <- merge(rec_areas_PEP_raster, rec_areas_pb_raster, rec_areas_rr_raster, rec_areas_buildings_raster, rec_areas_structures_raster, rec_areas_picnic_raster, rec_areas_camp_raster, rec_areas_parking_raster)
 
 
 ```
 
-
-###Campgrounds
 ```{r}
-rec_areas_camp <- vect(here(gdrive_data, "/InputData/InputData_Files/recreational_areas/campgrounds/Campgrounds.shp"))
-
-rec_areas_camp_calbers <- project(rec_areas_camp, ca_raster)
-
-rec_areas_camp_mask <- crop(rec_areas_camp_calbers, ca_raster)
-
-rec_areas_camp_raster <- rasterize(rec_areas_camp_mask, ca_raster)
-```
-
-###Picnic Grounds
-```{r}
-rec_areas_picnic <- vect(here(gdrive_data, "/InputData/InputData_Files/recreational_areas/picnicgrounds/PicnicGrounds.shp"))
-
-rec_areas_picnic_calbers <- project(rec_areas_picnic, ca_raster)
-
-rec_areas_picnic_mask <- crop(rec_areas_picnic_calbers, ca_raster)
-
-rec_areas_picnic_raster <- rasterize(rec_areas_picnic_mask, ca_raster)
-```
-
-###Structures
-```{r}
-rec_areas_structures <- vect(here(gdrive_data, "/InputData/InputData_Files/recreational_areas/structures/Structures.shp"))
-
-rec_areas_structures_calbers <- project(rec_areas_structures, ca_raster)
-
-rec_areas_structures_mask <- crop(rec_areas_structures_calbers, ca_raster)
-
-rec_areas_structures_raster <- rasterize(rec_areas_structures_mask, ca_raster)
-```
-
-###Buildings
-```{r}
-rec_areas_buildings <- vect(here(gdrive_data, "/InputData/InputData_Files/recreational_areas/buildings/Buildings.shp"))
-
-rec_areas_buildings_calbers <- project(rec_areas_buildings, ca_raster)
-
-rec_areas_buildings_mask <- crop(rec_areas_buildings_calbers, ca_raster)
-
-rec_areas_buildings_raster <- rasterize(rec_areas_buildings_mask, ca_raster)
-```
-
-###Recreational Routes
-```{r}
-rec_areas_rr <- vect(here(gdrive_data, "/InputData/InputData_Files/recreational_areas/recreationalroutes/RecreationalRoutes.shp"))
-
-rec_areas_rr_calbers <- project(rec_areas_rr, ca_raster)
-
-rec_areas_rr_mask <- crop(rec_areas_rr_calbers, ca_raster)
-
-rec_areas_rr_raster <- rasterize(rec_areas_rr_mask, ca_raster)
-```
-
-###Park Boundaries
-```{r}
-rec_areas_pb <- vect(here(gdrive_data, "/InputData/InputData_Files/recreational_areas/parkboundaries/ParkBoundaries.shp"))
-
-rec_areas_pb_calbers <- project(rec_areas_pb, ca_raster)
-
-rec_areas_pb_mask <- crop(rec_areas_pb_calbers, ca_raster)
-
-rec_areas_pb_raster <- rasterize(rec_areas_pb_mask, ca_raster)
-```
-
-#####Saving Rec Areas to Distance Rasters
-```{r}
-savevect <- function(x){
+saverast <- function(x){
   
   name <- paste0(deparse(substitute(x)), ".shp") #the name of the file will be the same as the input object, plus '.tif' at the end
   
 #write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
   
-  writeVector(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/recreational_rasters", name), filetype = "ESRI SHAPEFILE", overwrite=TRUE)
+  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/recreational_rasters", name), filetype = "Gtiff", overwrite=TRUE)
 }
 
-savevect(rec_areas_pb_mask)
-savevect(rec_areas_rr_mask)
-savevect(rec_areas_buildings_mask)
-savevect(rec_areas_structures_mask)
-savevect(rec_areas_parking_mask)
-savevect(rec_areas_PEP_mask)
-savevect(rec_areas_picnic_mask)
-savevect(rec_areas_camp_mask)
+saverast(rec_areas_ca)
 ```
 
->>>>>>> 82fccae38d6d3ce8bfa5a57e66565d07ca2678ec
 ##Distance to forest cover
 
 ```{r}
