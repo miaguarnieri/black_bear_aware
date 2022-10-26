@@ -41,15 +41,11 @@ Insert info about CA raster layer here
 
 ```{r}
 
-<<<<<<< HEAD
-ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
-=======
-
 ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
 
 #check the coordinate reference system 
 crs(ca_raster)
->>>>>>> 16425af1778caf69fce04e8018be578b4a96b4b1
+
 
 #plot CA raster to confirm
 tm_shape(ca_raster) +
