@@ -41,10 +41,15 @@ Insert info about CA raster layer here
 
 ```{r}
 
-ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Reclassed/CARaster_Tiger_Reclassed.img"))
+<<<<<<< HEAD
+ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
+=======
+
+ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
 
 #check the coordinate reference system 
 crs(ca_raster)
+>>>>>>> 16425af1778caf69fce04e8018be578b4a96b4b1
 
 #plot CA raster to confirm
 tm_shape(ca_raster) +
@@ -60,41 +65,89 @@ tm_shape(ca_raster) +
 Insert info about WIR data here
 
 ```{r}
-
 #Buffer conflict points to create conflict raster
-# first loading in conflict data 
+
+# load in conflict data 
 conflict_points <- read_csv(here(gdrive_data,"/IntermediateData/IntermediateData_Files/2022_07_18_WIRClean_CDFW.csv"))
 
-# Turning conflict_points into a sf object from data frame 
+# turn conflict_points into a sf object from data frame 
 
 #st_as_sf(conflict_points, coords = "latitude","longitude")
 conflict_points_sf <- st_as_sf(conflict_points,coords = c("longitude","latitude"), crs = 4326)
+
 #4326 is code for WGS 84- map does not render properly otherwise, so we need to reproject  to 6414 (NAD83(2011) / California Albers) (but also I think this issue might go away when I remove the error points that are outside CA)
 
 #reprojecting to NAD83(2011) / California Albers
 conflict_points_albers <- st_transform(conflict_points_sf,crs = 6414)
 
+#plot to check for erroneous points
+
+tm_shape(conflict_points_albers) +
+  tm_dots() +
+  tmap_mode("view")
+
+#wir_id of erroneous points: WIR-2016-001081, WIR-2017-002420
+
+#filter erroneous points out of the WIR data
+
+conflict <- conflict_points_albers %>% 
+  filter(wir_id != "WIR-2016-001081",
+         wir_id != "WIR-2017-002420")
+
+#plot to double check
+tm_shape(conflict) +
+  tm_dots() +
+  tmap_mode("view")
+
+#saving the file to intermediate data in the gdrive
+
+st_write(conflict, dsn = here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_points", "conflict_points.shp"))
+
+#test: reading from the gdrive to make sure it works and plotting it
+
+con_points <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_points/conflict_points.shp"))
+
+tm_shape(con_points) +
+  tm_dots() +
+  tmap_mode("view")
+
 #buffering points using SF fuction st_buffer. Units are in meters
-conflict_points_buffered <- st_buffer(conflict_points_albers,dist = 5000)
+conflict_points_buffered <- st_buffer(con_points, dist = 5000)
+
+#plot to confirm
 
  tm_shape(conflict_points_buffered) +
-   tm_dots()+
+   tm_polygons() +
+  tm_shape(con_points) +
+   tm_dots(col  = "blue") +
    tmap_mode("view")
+ 
+#saving the file to intermediate data in the gdrive
 
- #need to set conflict crs 
-#need to set extent 
-#Need to buffer 
+ st_write(conflict_points_buffered, dsn = here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_buffered", "conflict_buffered.shp"))
 
-#test plot
-#how to turn data frame with lat and long columns into an sf object 
+#test: reading from the gdrive to make sure it works and plotting it
 
+con_buffer <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_buffered/conflict_buffered.shp"))
 
+tm_shape(con_buffer) +
+  tm_polygons() +
+tm_shape(con_points) +
+   tm_dots(col  = "blue") +
+tmap_mode("view")
 
-# use this if I want to plot
-# tm_shape(conflict_points_sf) +
- # tm_dots()+
-#  tmap_mode("view")
-# class(conflict_points_sf) use this if I need to check class
+#comparing arc vs r generated buffers
+
+arc_buffers <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_buffer_test/conflict_points_buffer_arctest.shp"))
+
+conflict_buffer <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_buffered/conflict_buffered.shp"))
+
+tm_shape(conflict_buffer) +
+  tm_polygons() +
+tm_shape(arc_buffers) +
+  tm_polygons(col = "blue") +
+tmap_mode("view")
+
 ```
 
 ##Elevation (DEM, mean elevation)
@@ -160,11 +213,27 @@ road_density <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files
 
 ##Elevation
 ```{r}
-#reproject to the same crs (NAD 83, CA Albers (2011))
+#reproject to the same crs (NAD 83, CA Albers (2011)) and resolution (~230 m) as all other data
 dem_calbers <- project(dem_ca, ca_raster)
 
 #cropping to the spatial extent of CA
-dem_mask <- mask(dem_calbers, ca_raster)
+dem_formatted <- mask(dem_calbers, ca_raster)
+
+#save the new file in intermediate data
+
+#function to save rasters, updated with correct filepath
+
+saverast <- function(x){
+  
+  name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+  #write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/Elevation_Formatted", name), filetype = "GTiff", overwrite = TRUE)
+  
+}
+
+saverast(dem_formatted)
 
 ```
 
@@ -182,13 +251,29 @@ roads_reprojected <- project()
 ```{r}
 #aspect
 # reading in elevation data 
-elev <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/Elevation_Formatted/dem_clipped.tif"))
+elev <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/Elevation_Formatted/dem_formatted.tif"))
 
-elev_aspect <- terrain(elev,v = "aspect",neighbors = 8)
+aspect <- terrain(elev,v = "aspect",neighbors = 8)
 #I think this worked? 
+
+#save the raster
+
+aspect_name <- paste0(deparse(substitute(aspect)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+
+writeRaster(aspect, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/aspect", aspect_name), filetype = "GTiff", overwrite = TRUE)
 
 
 # terrian ruggedness
-elev_tr <- terrain(elev,v = "TRI",neighbors = 8)
+terrain_ruggedness <- terrain(elev,v = "TRI",neighbors = 8)
+
+#save the raster
+
+tr_name <- paste0(deparse(substitute(terrain_ruggedness)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+
+writeRaster(terrain_ruggedness, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/terrain_ruggedness", tr_name), filetype = "GTiff", overwrite = TRUE)
 ```
 

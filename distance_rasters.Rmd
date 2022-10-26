@@ -19,12 +19,21 @@ library(sf)
 library(tmap)
 library(rgrass7)
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 82fccae38d6d3ce8bfa5a57e66565d07ca2678ec
 #mia and claire's and chase's file path
 gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #sam's file path
+<<<<<<< HEAD
 # gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
+=======
+#gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
+
+
+>>>>>>> 82fccae38d6d3ce8bfa5a57e66565d07ca2678ec
 ```
 
 #Data Wrangling Prior to Coding
@@ -241,6 +250,8 @@ ua19 <- reclassify(lc19)
 
 #ua11 <- reclassify(lc11)
 
+
+
 ```
 
 ##Save reclassified, reprojected, and clipped urban rasters to the data drive for use in ArcGIS
@@ -276,11 +287,60 @@ saverast(ua19)
 
 #saverast(ua11)
 
+#these saved raster layers were processed in ArcGIS Pro using the Euclidean distance tool 
 ```
+
+
+## reading urban distance rasters and masking them to CA
+```{r}
+#Now we need to read back in the distance raster created in ArcGIS pro and mask these layers to match our CA extent again. Layers are already in the correct projection and resolution
+
+dist_ua19 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_urban/urban19_dist.tif"))
+
+dist_ua16 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_urban/urban16_dist.tif"))
+
+dist_ua13 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_urban/urban13_dist.tif"))
+
+# Now we need to mask these layers to just the CA extent 
+ua19_ca_distance <- mask(dist_ua19, ca_raster)
+
+ua16_ca_distance <- mask(dist_ua16, ca_raster)
+
+ua13_ca_distance <- mask(dist_ua13, ca_raster)
+
+#now we will save them back to the google drive to be referenced later 
+
+```
+##Save clipped urban DISTANCE rasters to the data drive for use in model and easy access
+
+
+**ONLY RUN THIS ONE TIME; IT WILL NOT RUN ONCE THE FILES ARE SAVED**
+
+```{r}
+saverast <- function(x){
+  
+  name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_urban/model_ready", name), filetype = "GTiff", overwrite=TRUE)
+}
+
+saverast(ua19_ca_distance)
+
+saverast(ua16_ca_distance)
+
+saverast(ua13_ca_distance)
+
+
+```
+
+
 
 ##Distance to recreational areas
 
 ###Park Entry Points
+<<<<<<< HEAD
 ```{r}
 rec_areas_PEP <- vect(here(gdrive_data, "/InputData/InputData_Files/recreational_areas/parkentrypoints/ParkEntryPoints.shp"))
 
@@ -384,6 +444,16 @@ savevect <- function(x){
   
   writeVector(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/recreational_rasters", name), filetype = "ESRI SHAPEFILE", overwrite=TRUE)
 }
+=======
+```{r}
+rec_areas_PEP <- vect(here(gdrive_data, "/InputData/InputData_Files/recreational_areas/parkentrypoints/ParkEntryPoints.shp"))
+
+rec_areas_PEP_calbers <- project(rec_areas_PEP, ca_raster)
+
+rec_areas_PEP_mask <- crop(rec_areas_PEP_calbers, ca_raster)
+
+rec_areas_PEP_raster <- rasterize(rec_areas_PEP_mask, ca_raster)
+>>>>>>> 82fccae38d6d3ce8bfa5a57e66565d07ca2678ec
 
 savevect(rec_areas_pb_mask)
 savevect(rec_areas_rr_mask)
@@ -396,6 +466,111 @@ savevect(rec_areas_camp_mask)
 ```
 
 
+<<<<<<< HEAD
+=======
+
+###Parking Points
+```{r}
+rec_areas_parking <- vect(here(gdrive_data, "/InputData/InputData_Files/recreational_areas/parkingpoints/ParkingPoints.shp"))
+
+rec_areas_parking_calbers <- project(rec_areas_parking, ca_raster)
+
+rec_areas_parking_mask <- crop(rec_areas_parking_calbers, ca_raster)
+
+rec_areas_parking_raster <- rasterize(rec_areas_parking_mask, ca_raster)
+
+
+```
+
+
+###Campgrounds
+```{r}
+rec_areas_camp <- vect(here(gdrive_data, "/InputData/InputData_Files/recreational_areas/campgrounds/Campgrounds.shp"))
+
+rec_areas_camp_calbers <- project(rec_areas_camp, ca_raster)
+
+rec_areas_camp_mask <- crop(rec_areas_camp_calbers, ca_raster)
+
+rec_areas_camp_raster <- rasterize(rec_areas_camp_mask, ca_raster)
+```
+
+###Picnic Grounds
+```{r}
+rec_areas_picnic <- vect(here(gdrive_data, "/InputData/InputData_Files/recreational_areas/picnicgrounds/PicnicGrounds.shp"))
+
+rec_areas_picnic_calbers <- project(rec_areas_picnic, ca_raster)
+
+rec_areas_picnic_mask <- crop(rec_areas_picnic_calbers, ca_raster)
+
+rec_areas_picnic_raster <- rasterize(rec_areas_picnic_mask, ca_raster)
+```
+
+###Structures
+```{r}
+rec_areas_structures <- vect(here(gdrive_data, "/InputData/InputData_Files/recreational_areas/structures/Structures.shp"))
+
+rec_areas_structures_calbers <- project(rec_areas_structures, ca_raster)
+
+rec_areas_structures_mask <- crop(rec_areas_structures_calbers, ca_raster)
+
+rec_areas_structures_raster <- rasterize(rec_areas_structures_mask, ca_raster)
+```
+
+###Buildings
+```{r}
+rec_areas_buildings <- vect(here(gdrive_data, "/InputData/InputData_Files/recreational_areas/buildings/Buildings.shp"))
+
+rec_areas_buildings_calbers <- project(rec_areas_buildings, ca_raster)
+
+rec_areas_buildings_mask <- crop(rec_areas_buildings_calbers, ca_raster)
+
+rec_areas_buildings_raster <- rasterize(rec_areas_buildings_mask, ca_raster)
+```
+
+###Recreational Routes
+```{r}
+rec_areas_rr <- vect(here(gdrive_data, "/InputData/InputData_Files/recreational_areas/recreationalroutes/RecreationalRoutes.shp"))
+
+rec_areas_rr_calbers <- project(rec_areas_rr, ca_raster)
+
+rec_areas_rr_mask <- crop(rec_areas_rr_calbers, ca_raster)
+
+rec_areas_rr_raster <- rasterize(rec_areas_rr_mask, ca_raster)
+```
+
+###Park Boundaries
+```{r}
+rec_areas_pb <- vect(here(gdrive_data, "/InputData/InputData_Files/recreational_areas/parkboundaries/ParkBoundaries.shp"))
+
+rec_areas_pb_calbers <- project(rec_areas_pb, ca_raster)
+
+rec_areas_pb_mask <- crop(rec_areas_pb_calbers, ca_raster)
+
+rec_areas_pb_raster <- rasterize(rec_areas_pb_mask, ca_raster)
+```
+
+#####Saving Rec Areas to Distance Rasters
+```{r}
+savevect <- function(x){
+  
+  name <- paste0(deparse(substitute(x)), ".shp") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+  writeVector(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/recreational_rasters", name), filetype = "ESRI SHAPEFILE", overwrite=TRUE)
+}
+
+savevect(rec_areas_pb_mask)
+savevect(rec_areas_rr_mask)
+savevect(rec_areas_buildings_mask)
+savevect(rec_areas_structures_mask)
+savevect(rec_areas_parking_mask)
+savevect(rec_areas_PEP_mask)
+savevect(rec_areas_picnic_mask)
+savevect(rec_areas_camp_mask)
+```
+
+>>>>>>> 82fccae38d6d3ce8bfa5a57e66565d07ca2678ec
 ##Distance to forest cover
 
 ```{r}
@@ -482,6 +657,14 @@ fc19 <- reclassify(lc19)
 
 #fc11 <- reclassify(lc11)
 
+#Notes on distance rasters
+
+# fc13_lowres <- terra::aggregate(fc13, 5, fun = "sum", na.rm = TRUE) - make the distance raster lower resolution
+# 
+# fc13_lowres_dist <- distance(fc13_lowres) #then the distance would run
+
+#system.time({x <- distance(blah)}) to see the runtime/cpu time used
+
 ```
 
 ##Save reclassified, reprojected, and clipped forest rasters to the data drive for use in ArcGIS
@@ -517,3 +700,57 @@ saverast(fc19)
 #saverast(fc11)
 
 ```
+
+
+## reading forest cover distance rasters and masking them to CA
+```{r}
+#Now we need to read back in the distance raster created in ArcGIS pro and mask these layers to match our CA extent again. Layers are already in the correct projection and resolution
+
+dist_fc19 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_forest/dist_fc19.tif"))
+
+dist_fc16 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_forest/dist_fc16.tif"))
+
+dist_fc13 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_forest/dist_fc13.tif"))
+
+#added step, was having issue with distance raster from arc not matching ca_raster extent. This work around fixes the error 
+dist_19_mask = resample(dist_fc19, ca_raster)
+
+dist_16_mask = resample(dist_fc16, ca_raster)
+
+dist_13_mask = resample(dist_fc13, ca_raster)
+
+# Now we need to mask these layers to just the CA extent 
+fc19_ca_distance <- mask(dist_19_mask, ca_raster)
+
+fc16_ca_distance <- mask(dist_16_mask, ca_raster)
+
+fc13_ca_distance <- mask(dist_13_mask, ca_raster)
+
+#now we will save them back to the google drive to be referenced later 
+
+```
+##Save clipped forest cover DISTANCE rasters to the data drive for use in model and easy access
+
+
+**ONLY RUN THIS ONE TIME; IT WILL NOT RUN ONCE THE FILES ARE SAVED**
+
+```{r}
+saverast <- function(x){
+  
+  name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_forest/model_ready", name), filetype = "GTiff", overwrite=TRUE)
+}
+
+saverast(fc19_ca_distance )
+
+saverast(fc16_ca_distance )
+
+saverast(fc13_ca_distance )
+
+
+
+```
+
