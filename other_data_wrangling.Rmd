@@ -57,41 +57,89 @@ tm_shape(ca_raster) +
 Insert info about WIR data here
 
 ```{r}
-
 #Buffer conflict points to create conflict raster
-# first loading in conflict data 
+
+# load in conflict data 
 conflict_points <- read_csv(here(gdrive_data,"/IntermediateData/IntermediateData_Files/2022_07_18_WIRClean_CDFW.csv"))
 
-# Turning conflict_points into a sf object from data frame 
+# turn conflict_points into a sf object from data frame 
 
 #st_as_sf(conflict_points, coords = "latitude","longitude")
 conflict_points_sf <- st_as_sf(conflict_points,coords = c("longitude","latitude"), crs = 4326)
+
 #4326 is code for WGS 84- map does not render properly otherwise, so we need to reproject  to 6414 (NAD83(2011) / California Albers) (but also I think this issue might go away when I remove the error points that are outside CA)
 
 #reprojecting to NAD83(2011) / California Albers
 conflict_points_albers <- st_transform(conflict_points_sf,crs = 6414)
 
+#plot to check for erroneous points
+
+tm_shape(conflict_points_albers) +
+  tm_dots() +
+  tmap_mode("view")
+
+#wir_id of erroneous points: WIR-2016-001081, WIR-2017-002420
+
+#filter erroneous points out of the WIR data
+
+conflict <- conflict_points_albers %>% 
+  filter(wir_id != "WIR-2016-001081",
+         wir_id != "WIR-2017-002420")
+
+#plot to double check
+tm_shape(conflict) +
+  tm_dots() +
+  tmap_mode("view")
+
+#saving the file to intermediate data in the gdrive
+
+st_write(conflict, dsn = here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_points", "conflict_points.shp"))
+
+#test: reading from the gdrive to make sure it works and plotting it
+
+con_points <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_points/conflict_points.shp"))
+
+tm_shape(con_points) +
+  tm_dots() +
+  tmap_mode("view")
+
 #buffering points using SF fuction st_buffer. Units are in meters
-conflict_points_buffered <- st_buffer(conflict_points_albers,dist = 5000)
+conflict_points_buffered <- st_buffer(con_points, dist = 5000)
+
+#plot to confirm
 
  tm_shape(conflict_points_buffered) +
-   tm_dots()+
+   tm_polygons() +
+  tm_shape(con_points) +
+   tm_dots(col  = "blue") +
    tmap_mode("view")
+ 
+#saving the file to intermediate data in the gdrive
 
- #need to set conflict crs 
-#need to set extent 
-#Need to buffer 
+ st_write(conflict_points_buffered, dsn = here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_buffered", "conflict_buffered.shp"))
 
-#test plot
-#how to turn data frame with lat and long columns into an sf object 
+#test: reading from the gdrive to make sure it works and plotting it
 
+con_buffer <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_buffered/conflict_buffered.shp"))
 
+tm_shape(con_buffer) +
+  tm_polygons() +
+tm_shape(con_points) +
+   tm_dots(col  = "blue") +
+tmap_mode("view")
 
-# use this if I want to plot
-# tm_shape(conflict_points_sf) +
- # tm_dots()+
-#  tmap_mode("view")
-# class(conflict_points_sf) use this if I need to check class
+#comparing arc vs r generated buffers
+
+arc_buffers <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_buffer_test/conflict_points_buffer_arctest.shp"))
+
+conflict_buffer <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_buffered/conflict_buffered.shp"))
+
+tm_shape(conflict_buffer) +
+  tm_polygons() +
+tm_shape(arc_buffers) +
+  tm_polygons(col = "blue") +
+tmap_mode("view")
+
 ```
 
 ##Elevation (DEM, mean elevation)
