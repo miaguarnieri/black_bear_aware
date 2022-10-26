@@ -235,14 +235,6 @@ saverast(dem_formatted)
 
 ```
 
-##Road density
-
-```{r}
-
-
-# reproject roads to same crs(NAD 83, CA Albers (2011))
-roads_reprojected <- project()
-```
 
 
 ## Creating aspect and terrian 
