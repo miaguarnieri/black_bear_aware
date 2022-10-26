@@ -52,7 +52,6 @@ tm_shape(ca_raster) +
   tm_raster() +
   tmap_mode("view")
 
-
 ```
 
 ##Conflict data
