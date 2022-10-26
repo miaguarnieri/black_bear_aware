@@ -71,7 +71,7 @@ forest_dens_2016 <- rast(here(gdrive_data,"/InputData/InputData_Files/TreeCanopy
 ##Forest density (canopy cover)
 
 ```{r}
-#reproject to the correct 
+#reproject to the correct crs and resolution
 
 forest_dens_2011_calbers <- project(forest_dens_2011, ca_raster)
 

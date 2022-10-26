@@ -19,13 +19,13 @@ library(sf)
 library(tmap)
 library(rgrass7)
 
+
 #mia and claire's and chase's file path
 gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #sam's file path
-#gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 
-
+# gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 ```
 
 #Data Wrangling Prior to Coding
@@ -444,6 +444,25 @@ savevect(rec_areas_parking_mask)
 savevect(rec_areas_PEP_mask)
 savevect(rec_areas_picnic_mask)
 savevect(rec_areas_camp_mask)
+
+#merging layers 
+
+rec_areas_ca <- merge(rec_areas_PEP_raster, rec_areas_pb_raster, rec_areas_rr_raster, rec_areas_buildings_raster, rec_areas_structures_raster, rec_areas_picnic_raster, rec_areas_camp_raster, rec_areas_parking_raster)
+
+
+```
+
+```{r}
+saverast <- function(x){
+  
+  name <- paste0(deparse(substitute(x)), ".shp") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/recreational_rasters", name), filetype = "Gtiff", overwrite=TRUE)
+}
+
+saverast(rec_areas_ca)
 ```
 
 ##Distance to forest cover
@@ -531,6 +550,14 @@ fc19 <- reclassify(lc19)
 #fc08 <- reclassify(lc08)
 
 #fc11 <- reclassify(lc11)
+
+#Notes on distance rasters
+
+# fc13_lowres <- terra::aggregate(fc13, 5, fun = "sum", na.rm = TRUE) - make the distance raster lower resolution
+# 
+# fc13_lowres_dist <- distance(fc13_lowres) #then the distance would run
+
+#system.time({x <- distance(blah)}) to see the runtime/cpu time used
 
 ```
 

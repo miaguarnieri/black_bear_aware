@@ -57,42 +57,18 @@ tm_shape(ca_raster) +
 Insert info about WIR data here
 
 ```{r}
+conflict_points <- vect(here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_points/conflict_points.shp"))
 
-#Buffer conflict points to create conflict raster
-# first loading in conflict data 
-conflict_points <- read_csv(here(gdrive_data,"/IntermediateData/IntermediateData_Files/2022_07_18_WIRClean_CDFW.csv"))
+conflict_buffer <- vect(here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_buffered/conflict_buffered.shp"))
 
-# Turning conflict_points into a sf object from data frame 
-
-#st_as_sf(conflict_points, coords = "latitude","longitude")
-conflict_points_sf <- st_as_sf(conflict_points,coords = c("longitude","latitude"), crs = 4326)
-#4326 is code for WGS 84- map does not render properly otherwise, so we need to reproject  to 6414 (NAD83(2011) / California Albers) (but also I think this issue might go away when I remove the error points that are outside CA)
-
-#reprojecting to NAD83(2011) / California Albers
-conflict_points_albers <- st_transform(conflict_points_sf,crs = 6414)
-
-#buffering points using SF fuction st_buffer. Units are in meters
-conflict_points_buffered <- st_buffer(conflict_points_albers,dist = 5000)
-
- tm_shape(conflict_points_buffered) +
-   tm_dots()+
-   tmap_mode("view")
-
- #need to set conflict crs 
-#need to set extent 
-#Need to buffer 
-
-#test plot
-#how to turn data frame with lat and long columns into an sf object 
-
-
-
-# use this if I want to plot
-# tm_shape(conflict_points_sf) +
- # tm_dots()+
-#  tmap_mode("view")
-# class(conflict_points_sf) use this if I need to check class
 ```
+
+#Stack environmental rasters for easy extraction
+
+```{r}
+
+```
+
 
 #Extract raster values by year for conflict points (test)
 
@@ -104,8 +80,25 @@ con_year <- conflict_points_albers %>%
   separate(inc_date, into = c("month", "day", "year"), sep = "/") %>% 
   mutate(year = as.character.Date(year))
 
-#filter for 2001
-con_01 <- con_year %>% 
-  filter(year == "2001")
-2```
+#filter for 2016
+con_16 <- con_year %>% 
+  filter(year == "2016") %>% 
+  filter(wir_id != "WIR-2016-001081") #removing an erroneous point (was showing up in Israel)
+
+con_16_sv <- vect(con_16)
+
+con16_back <- st_as_sf(con_16_sv)
+
+#read in data for that year
+
+dem <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/Elevation_Formatted/dem_formatted.tif"))
+
+lc <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc16_reclassed.tif"))
+
+
+#extract data points from these rasters and add them to the shapefile dataframe
+
+dem_ex <- extract(dem, con_16_sv, method = "simple", bind = TRUE, ID = TRUE)
+
+```
 
