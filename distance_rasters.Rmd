@@ -242,6 +242,8 @@ ua19 <- reclassify(lc19)
 
 #ua11 <- reclassify(lc11)
 
+
+
 ```
 
 ##Save reclassified, reprojected, and clipped urban rasters to the data drive for use in ArcGIS
@@ -277,7 +279,55 @@ saverast(ua19)
 
 #saverast(ua11)
 
+#these saved raster layers were processed in ArcGIS Pro using the Euclidean distance tool 
 ```
+
+
+## reading urban distance rasters and masking them to CA
+```{r}
+#Now we need to read back in the distance raster created in ArcGIS pro and mask these layers to match our CA extent again. Layers are already in the correct projection and resolution
+
+dist_ua19 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_urban/urban19_dist.tif"))
+
+dist_ua16 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_urban/urban16_dist.tif"))
+
+dist_ua13 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_urban/urban13_dist.tif"))
+
+# Now we need to mask these layers to just the CA extent 
+ua19_ca_distance <- mask(dist_ua19, ca_raster)
+
+ua16_ca_distance <- mask(dist_ua16, ca_raster)
+
+ua13_ca_distance <- mask(dist_ua13, ca_raster)
+
+#now we will save them back to the google drive to be referenced later 
+
+```
+##Save clipped urban DISTANCE rasters to the data drive for use in model and easy access
+
+
+**ONLY RUN THIS ONE TIME; IT WILL NOT RUN ONCE THE FILES ARE SAVED**
+
+```{r}
+saverast <- function(x){
+  
+  name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_urban/model_ready", name), filetype = "GTiff", overwrite=TRUE)
+}
+
+saverast(ua19_ca_distance)
+
+saverast(ua16_ca_distance)
+
+saverast(ua13_ca_distance)
+
+
+```
+
+
 
 ##Distance to recreational areas
 
