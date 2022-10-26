@@ -532,6 +532,14 @@ fc19 <- reclassify(lc19)
 
 #fc11 <- reclassify(lc11)
 
+#Notes on distance rasters
+
+# fc13_lowres <- terra::aggregate(fc13, 5, fun = "sum", na.rm = TRUE) - make the distance raster lower resolution
+# 
+# fc13_lowres_dist <- distance(fc13_lowres) #then the distance would run
+
+#system.time({x <- distance(blah)}) to see the runtime/cpu time used
+
 ```
 
 ##Save reclassified, reprojected, and clipped forest rasters to the data drive for use in ArcGIS
