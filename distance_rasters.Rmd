@@ -567,3 +567,57 @@ saverast(fc19)
 #saverast(fc11)
 
 ```
+
+
+## reading forest cover distance rasters and masking them to CA
+```{r}
+#Now we need to read back in the distance raster created in ArcGIS pro and mask these layers to match our CA extent again. Layers are already in the correct projection and resolution
+
+dist_fc19 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_forest/dist_fc19.tif"))
+
+dist_fc16 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_forest/dist_fc16.tif"))
+
+dist_fc13 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_forest/dist_fc13.tif"))
+
+#added step, was having issue with distance raster from arc not matching ca_raster extent. This work around fixes the error 
+dist_19_mask = resample(dist_fc19, ca_raster)
+
+dist_16_mask = resample(dist_fc16, ca_raster)
+
+dist_13_mask = resample(dist_fc13, ca_raster)
+
+# Now we need to mask these layers to just the CA extent 
+fc19_ca_distance <- mask(dist_19_mask, ca_raster)
+
+fc16_ca_distance <- mask(dist_16_mask, ca_raster)
+
+fc13_ca_distance <- mask(dist_13_mask, ca_raster)
+
+#now we will save them back to the google drive to be referenced later 
+
+```
+##Save clipped forest cover DISTANCE rasters to the data drive for use in model and easy access
+
+
+**ONLY RUN THIS ONE TIME; IT WILL NOT RUN ONCE THE FILES ARE SAVED**
+
+```{r}
+saverast <- function(x){
+  
+  name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_forest/model_ready", name), filetype = "GTiff", overwrite=TRUE)
+}
+
+saverast(fc19_ca_distance )
+
+saverast(fc16_ca_distance )
+
+saverast(fc13_ca_distance )
+
+
+
+```
+
