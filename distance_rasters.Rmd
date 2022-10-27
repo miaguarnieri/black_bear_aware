@@ -21,11 +21,10 @@ library(rgrass7)
 
 
 #mia and claire's and chase's file path
-gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+#gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #sam's file path
-
-# gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
+gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 ```
 
 #Data Wrangling Prior to Coding
@@ -95,7 +94,6 @@ roads_2015_raster <- rasterize(roads_2015_mask, ca_raster)
 
 ##Distance to road
 
-
 ```{r}
 savevect <- function(x){
   
@@ -124,10 +122,43 @@ saverast <- function(x){
 saverast(roads_2015_raster)
 ```
 
+##Distance to Roads Arc Layer
+```{r}
+#read in eucledian distance layer from ARC
+dist_to_roads_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_road/dist_to_road_raster.tif"))
+
+#Resample to fix error
+dist_roads_mask = resample(dist_to_roads_raster, ca_raster)
+
+#crop to CA 
+roads15_ca_distance <- mask(dist_roads_mask, ca_raster)
+
+tm_shape(roads15_ca_distance) +
+  tm_raster() +
+  tmap_mode("view")
+
+```
+##Save clipped roads DISTANCE rasters to the data drive for use in model and easy access
+
+**ONLY RUN THIS ONE TIME; IT WILL NOT RUN ONCE THE FILES ARE SAVED**
+
+```{r}
+saverast <- function(x){
+  
+  name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_road/model_ready", name), filetype = "GTiff", overwrite=TRUE)
+}
+
+saverast(roads15_ca_distance)
+
+```
 
 
 ##Distance to streams
-#Save vector to Gdrive
+###Save vector to Gdrive
 ```{r}
 savevect <- function(x){
   
@@ -158,7 +189,39 @@ saverast(streams_2017_raster)
 
 ```
 
+##Distance to Streams Arc Layer
+```{r}
+#read in eucledian distance layer from ARC
+dist_to_stream_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_stream/dist_to_streams_raster.tif"))
 
+#Resample to fix error
+dist_stream_mask = resample(dist_to_stream_raster, ca_raster)
+
+#crop to CA 
+stream17_ca_distance <- mask(dist_stream_mask, ca_raster)
+
+tm_shape(stream17_ca_distance) +
+  tm_raster() +
+  tmap_mode("view")
+
+```
+##Save clipped streams DISTANCE rasters to the data drive for use in model and easy access
+
+**ONLY RUN THIS ONE TIME; IT WILL NOT RUN ONCE THE FILES ARE SAVED**
+
+```{r}
+saverast <- function(x){
+  
+  name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_stream/model_ready", name), filetype = "GTiff", overwrite=TRUE)
+}
+
+saverast(stream17_ca_distance)
+
+```
 ##Distance to urban areas
 
 ```{r}
