@@ -141,20 +141,6 @@ tm_shape(arc_buffers) +
   tm_polygons(col = "blue") +
 tmap_mode("view")
 
-#refining buffer data; only keeping columns we need and sorting the dates to be readable by R
-
-conflict_buffer_refined <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_buffered/conflict_buffered.shp")) %>% 
-  separate(incdnt_d, into = c("inc_date", "inc_time"), sep = " ") %>% 
-  separate(inc_date, into = c("month", "day", "year"), sep = "/") %>% 
-  mutate(year = as.character.Date(year),
-         "type" = cnfrmd_,
-         "county" = cnty_nm,
-         "conflict" = 1) %>% 
-  select(conflict, wir_id:year, type, county, geometry)
-
-#saving the file to intermediate data in the gdrive
-
- st_write(conflict_buffer_refined, dsn = here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_buffered_refined", "conflict_buffered_refined.shp"))
 ```
 
 ##Elevation (DEM, mean elevation)
