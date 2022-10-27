@@ -21,10 +21,10 @@ library(rgrass7)
 
 
 #mia and claire's and chase's file path
-#gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #sam's file path
-gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
+#gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 ```
 
 #Data Wrangling Prior to Coding
@@ -529,6 +529,30 @@ writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_
 }
 
 saverast(rec_areas_ca)
+```
+
+
+#masking rec areas from gis to california
+```{r}
+dist_rec_areas <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_rec/distance_rec.tif"))
+
+dist_rec_mask = resample(dist_rec_areas, ca_raster)
+
+rec_ca_distance <- mask(dist_rec_mask, ca_raster)
+```
+
+#saving rec distance for ca to model ready
+```{r}
+saverast <- function(x){
+  
+  name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_rec/model_ready", name), filetype = "GTiff", overwrite=TRUE)
+}
+
+saverast(rec_ca_distance )
 ```
 
 ##Distance to forest cover
