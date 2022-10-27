@@ -40,7 +40,6 @@ gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 Insert info about CA raster layer here
 
 ```{r}
-
 ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
 
 #check the coordinate reference system 
@@ -191,7 +190,11 @@ crs(albers_roads_2015_tiger)
 
 #read in newly created road density. Road density was created in ArcGIS Pro from Roads 2015 Tiger layer. It was created by Claire on 10/23/2022 using the ArcGIS Pro tool line density 
 
-road_density <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/road_density_arc_2022_10_23/road_density.tif"))
+road_density <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/road_density_arc/2022_10_26_RoadDensity_ClaireERSI.tif"))
+
+#masking the layer to CA
+road_density_ca <- mask(road_density, ca_raster)
+
 ```
 
 
@@ -231,14 +234,6 @@ saverast(dem_formatted)
 
 ```
 
-##Road density
-
-```{r}
-
-
-# reproject roads to same crs(NAD 83, CA Albers (2011))
-roads_reprojected <- project()
-```
 
 
 ## Creating aspect and terrian 

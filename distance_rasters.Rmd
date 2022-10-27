@@ -19,13 +19,13 @@ library(sf)
 library(tmap)
 library(rgrass7)
 
+
 #mia and claire's and chase's file path
 gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #sam's file path
-#gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 
-
+# gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 ```
 
 #Data Wrangling Prior to Coding
@@ -59,14 +59,16 @@ res(ca_raster)
 ```{r}
 streams_2017 <- vect(here(gdrive_data, "/InputData/InputData_Files/2017_Streams_CDFW/California_Streams.shp"))
 
+#ca_extent <- ext(ca_raster)
 
 streams_2017_calbers <- project(streams_2017, ca_raster)
 
-streams_2017_mask <- crop(streams_2017_calbers, ca_raster)
+ca_vector <- as.polygons(ca_raster)
+
+streams_2017_mask <- crop(streams_2017_calbers, ca_vector)
 
 streams_2017_raster <- rasterize(streams_2017_mask, ca_raster)
 ```
-
 
 
 #Roads Layer 
@@ -81,6 +83,7 @@ roads_2015_mask <- crop(roads_2015_calbers, ca_raster)
 roads_2015_raster <- rasterize(roads_2015_mask, ca_raster)
 
 ```
+
 
 
 #Create remaining data layers
@@ -444,6 +447,25 @@ savevect(rec_areas_parking_mask)
 savevect(rec_areas_PEP_mask)
 savevect(rec_areas_picnic_mask)
 savevect(rec_areas_camp_mask)
+
+#merging layers 
+
+rec_areas_ca <- merge(rec_areas_PEP_raster, rec_areas_pb_raster, rec_areas_rr_raster, rec_areas_buildings_raster, rec_areas_structures_raster, rec_areas_picnic_raster, rec_areas_camp_raster, rec_areas_parking_raster)
+
+
+```
+
+```{r}
+saverast <- function(x){
+  
+  name <- paste0(deparse(substitute(x)), ".shp") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/recreational_rasters", name), filetype = "Gtiff", overwrite=TRUE)
+}
+
+saverast(rec_areas_ca)
 ```
 
 ##Distance to forest cover
@@ -624,6 +646,7 @@ saverast(fc19_ca_distance )
 saverast(fc16_ca_distance )
 
 saverast(fc13_ca_distance )
+
 
 
 
