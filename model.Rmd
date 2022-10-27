@@ -9,9 +9,8 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-#attach packages
-#note - Loading all of the ones Jason used, I don't think we will need all of them 
 
+#attach packages
 library(tidyverse)
 library(here)
 library(terra)
@@ -27,6 +26,7 @@ gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 
 ```
 
+<<<<<<< HEAD
 #Data Wrangling Prior to Coding
 
 *Data Sources*: Please see ReadMe file for metadata and citations.
@@ -51,57 +51,113 @@ tm_shape(ca_raster) +
   tmap_mode("view")
 
 ```
+=======
+#Load in data layers
+>>>>>>> 02f073ea33c4b10d8a189895c95352cb65d84553
 
 ##Conflict data
 
-Insert info about WIR data here
-
 ```{r}
-conflict_points <- vect(here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_points/conflict_points.shp"))
+#conflict data
+conflict <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_buffered_refined/conflict_buffered_refined.shp"))
 
-conflict_buffer <- vect(here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_buffered/conflict_buffered.shp"))
+#elevation
+dem <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/elevation/dem_formatted.tif"))
+
+#aspect
+aspect <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/aspect/aspect.tif"))
+
+#terrain ruggedness
+ter_rug <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/terrain_ruggedness/terrain_ruggedness.tif"))
+
+#human pop density
+
+pop16 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/population_density/pop_den_2016_mask.tif"))
+
+pop17 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/population_density/pop_den_2017_mask.tif"))
+
+pop18 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/population_density/pop_den_2018_mask.tif"))
+
+pop19 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/population_density/pop_den_2019_mask.tif"))
+
+pop20 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/population_density/pop_den_2020_mask.tif"))
+
+pop21 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/population_density/pop_den_2021_mask.tif"))
+
+#land cover
+
+lc13 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc13_reclassed.tif"))
+
+lc16 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc16_reclassed.tif"))
+
+lc19 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc19_reclassed.tif"))
+
+#road density
+
+road_dens <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/road_density_arc/2022_10_26_RoadDensity_ClaireERSI.tif"))
+
+#distance to roads
+
+road_dist <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_road/model_ready/roads15_ca_distance.tif"))
+
+#distance to streams
+
+streams_dist <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_stream/model_ready/stream17_ca_distance.tif"))
+
+#distance to urban areas
+
+urban_dist_13 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_urban/model_ready/ua13_ca_distance.tif"))
+
+urban_dist_16 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_urban/model_ready/ua16_ca_distance.tif"))
+
+urban_dist_19 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_urban/model_ready/ua19_ca_distance.tif"))
+
+#distance to recreational areas
+
+rec_dist <- rast(here(gdrive_data, ""))
+
+#distance to forest cover
+
+fc_dist_13 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_forest/model_ready/fc13_ca_distance.tif"))
+
+fc_dist_16 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_forest/model_ready/fc16_ca_distance.tif"))
+
+fc_dist_19 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_forest/model_ready/fc19_ca_distance.tif"))
+
+#forest density
+
+fdens <- rast(here(gdrive_data, ""))
 
 ```
 
-#Stack environmental rasters for easy extraction
+#Process data by year
+
+##2016
 
 ```{r}
 
-```
+#extract values for 2016
 
+con_16 <- conflict_buffer %>% 
+  filter(year == 2016)
 
-#Extract raster values by year for conflict points (test)
-
-```{r}
-#add a year column to confict point data
-
-con_year <- conflict_points_albers %>% 
-  separate(incident_date, into = c("inc_date", "inc_time"), sep = " ") %>% 
-  separate(inc_date, into = c("month", "day", "year"), sep = "/") %>% 
-  mutate(year = as.character.Date(year))
-
-#filter for 2016
-con_16 <- con_year %>% 
-  filter(year == "2016") %>% 
-  filter(wir_id != "WIR-2016-001081") #removing an erroneous point (was showing up in Israel)
+#create a spatvector for processing in terra
 
 con_16_sv <- vect(con_16)
 
-con16_back <- st_as_sf(con_16_sv)
+#create a raster stack of all variables
 
-#read in data for that year
-
-dem <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/Elevation_Formatted/dem_formatted.tif"))
-
-lc <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc16_reclassed.tif"))
-
+stack16 <- 
 
 #extract data points from these rasters and add them to the shapefile dataframe
 
-dem_ex <- extract(dem, con_16_sv, method = "simple", bind = TRUE, ID = TRUE)
+var_ex <- extract(dem, con_16_sv, method = "simple", bind = TRUE, ID = TRUE)
+
+#
 
 ```
 
+<<<<<<< HEAD
 #Sam is playing around with the code here:
 ```{r}
 #try to stack rasters
@@ -113,5 +169,18 @@ tm_shape(raster_stack_test) +
   tmap_mode("view")
 
 raster_test_df <- as.data.frame(raster_stack_test)
+
 ```
+=======
+##2017
+
+##2018
+
+##2019
+
+##2020
+
+##2021
+
+>>>>>>> 02f073ea33c4b10d8a189895c95352cb65d84553
 
