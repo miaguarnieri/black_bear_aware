@@ -117,7 +117,7 @@ urban_dist_19 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_File
 
 #distance to recreational areas
 
-rec_dist <- rast(here(gdrive_data, ""))
+rec_dist <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_rec/model_ready/rec_ca_distance.tif"))
 
 #distance to forest cover
 
