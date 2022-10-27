@@ -20,10 +20,10 @@ library(lubridate)
 library(ResourceSelection)
 
 #mia, chase, and claire's file path
-gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+#gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #sam's file path
-#gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
+gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 
 ```
 
@@ -180,6 +180,34 @@ raster_test_df <- as.data.frame(raster_stack_test)
 ```
 
 ##2017
+
+```{r}
+
+#extract values for 2016
+
+con_17 <- conflict_buffer %>% 
+  filter(year == 2017)
+
+#create a spatvector for processing in terra
+
+con_17_sv <- vect(con_17)
+
+#create a raster stack of all variables
+
+stack17 <- c(dem, aspect, ter_rug, pop17, lc16, road_dens2, road_dist, urban_dist_16, fc_dist_16)
+#note - I had to change the extent for road density which is why its road_dens2 
+
+#extract data points from these rasters and add them to the shapefile dataframe
+
+var_ex <- extract(stack17, con_17_sv, method = "simple", bind = TRUE, ID = TRUE)
+
+var_df_17 <- as.data.frame(var_ex)
+
+#run it in the model
+
+model <- rspf(ID ~ aspect + TRI + category, family = "binomial", m = 0, B = 1000, data = var_df_17)
+
+```
 
 ##2018
 
