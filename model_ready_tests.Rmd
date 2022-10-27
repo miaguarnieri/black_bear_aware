@@ -11,20 +11,55 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## In this rmarkdown we will double check that model inputs are in correct and ready to be fed into model stack 
 
+#CA raster layer (not in model but our ideal projection, extent and resolution)
+```{r}
+#read in layer 
+ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
+#check the coordinate reference system, resolution, extent 
+crs(ca_raster)
+res(ca_raster)
+ext(ca_raster)
+
+# SpatExtent : -380101.0666, 540047.238885548, -605327.054, 450346.970898149 (xmin, xmax, ymin, ymax)
+```
+
 
 # Elevation
 ```{r}
+#just skeleton code- not up to date actually 
+#read in layer 
+elevation <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
+#check the coordinate reference system, resolution, extent 
+crs(elevation)
+res(elevation)
+ext(elevation)
 
+# SpatExtent : -380101.0666, 540047.238885548, -605327.054, 450346.970898149 (xmin, xmax, ymin, ymax)
 ```
 
 # Aspect
 ```{r}
+#read in aspect layer from google drive 
+#read in layer 
+aspect <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/aspect/aspect.tif"))
+#check the coordinate reference system, resolution, extent 
+crs(aspect)
+res(aspect)
+ext(aspect)
 
+# SpatExtent : -380101.0666, 540047.238885548, -605327.054, 450346.970898149 (xmin, xmax, ymin, ymax)
 ```
 
 #Terrian ruggedness
 ```{r}
+#read in layer 
+terrian <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/terrain_ruggedness/terrain_ruggedness.tif"))
+#check the coordinate reference system, resolution, extent 
+crs(terrian)
+res(terrian)
+ext(terrian)
 
+# SpatExtent : -380101.0666, 540047.238885548, -605327.054, 450346.970898149 (xmin, xmax, ymin, ymax)
 ```
 
 # Human population density 

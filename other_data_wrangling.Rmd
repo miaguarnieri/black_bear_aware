@@ -197,8 +197,12 @@ crs(albers_roads_2015_tiger)
 
 road_density <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/road_density_arc/2022_10_26_RoadDensity_ClaireERSI.tif"))
 
+#need to fix extents do not match error code
+road_density_resample  = resample(road_density, ca_raster)
+
 #masking the layer to CA
-road_density_ca <- mask(road_density, ca_raster)
+road_density_ca <- mask(road_density_resample, ca_raster)
+
 
 ```
 
