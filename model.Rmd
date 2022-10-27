@@ -17,12 +17,13 @@ library(terra)
 library(sf)
 library(tmap)
 library(lubridate)
+library(ResourceSelection)
 
 #mia, chase, and claire's file path
-#gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #sam's file path
-gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
+#gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 
 ```
 
@@ -154,13 +155,16 @@ stack16 <- c(dem, aspect, ter_rug, pop16, lc16,road_dens2, road_dist, urban_dist
 
 #extract data points from these rasters and add them to the shapefile dataframe
 
-var_ex <- extract(dem, con_16_sv, method = "simple", bind = TRUE, ID = TRUE)
+var_ex <- extract(stack16, con_16_sv, method = "simple", bind = TRUE, ID = TRUE)
 
-#
+var_df <- as.data.frame(var_ex)
+
+#run it in the model
+
+model <- rspf(ID ~ aspect + TRI + category, family = "binomial", m = 0, B = 1000, data = var_df)
 
 ```
 
-<<<<<<< HEAD
 #Sam is playing around with the code here:
 ```{r}
 #try to stack rasters
@@ -174,7 +178,7 @@ tm_shape(raster_stack_test) +
 raster_test_df <- as.data.frame(raster_stack_test)
 
 ```
-=======
+
 ##2017
 
 ##2018
@@ -184,6 +188,4 @@ raster_test_df <- as.data.frame(raster_stack_test)
 ##2020
 
 ##2021
-
->>>>>>> 02f073ea33c4b10d8a189895c95352cb65d84553
 
