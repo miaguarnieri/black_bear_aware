@@ -7,6 +7,11 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(here)
+library(terra)
+library(sf)
+library(tmap)
 ```
 
 ## In this rmarkdown we will double check that model inputs are in correct and ready to be fed into model stack 
@@ -26,15 +31,21 @@ ext(ca_raster)
 
 # Elevation
 ```{r}
-#just skeleton code- not up to date actually 
 #read in layer 
-elevation <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
+elevation <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/Elevation_Formatted/dem_formatted.tif"))
 #check the coordinate reference system, resolution, extent 
 crs(elevation)
 res(elevation)
 ext(elevation)
 
 # SpatExtent : -380101.0666, 540047.238885548, -605327.054, 450346.970898149 (xmin, xmax, ymin, ymax)
+
+#elevation is model ready 
+#plot elevation raster to confirm
+tm_shape(elevation) +
+  tm_raster() +
+  tmap_mode("view")
+
 ```
 
 # Aspect
@@ -48,6 +59,7 @@ res(aspect)
 ext(aspect)
 
 # SpatExtent : -380101.0666, 540047.238885548, -605327.054, 450346.970898149 (xmin, xmax, ymin, ymax)
+#Aspect is model ready
 ```
 
 #Terrian ruggedness
@@ -60,11 +72,21 @@ res(terrian)
 ext(terrian)
 
 # SpatExtent : -380101.0666, 540047.238885548, -605327.054, 450346.970898149 (xmin, xmax, ymin, ymax)
+#terrian is model ready 
 ```
 
 # Human population density 
 ```{r}
+#read in layer 
+pop_den_2016 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/Pop_Den_Rasters_Formatted/pop_den_2016_mask.tif"))
 
+#check the coordinate reference system, resolution, extent 
+crs(pop_den_2016)
+res(pop_den_2016)
+ext(terrian)
+
+# SpatExtent : -380101.0666, 540047.238885548, -605327.054, 450346.970898149 (xmin, xmax, ymin, ymax)
+#terrian is model ready 
 ```
 
 #Land Cover
