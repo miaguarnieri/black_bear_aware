@@ -1,0 +1,132 @@
+---
+title: "model_ready_tests"
+author: "Claire Meuter and Mia Guarnieri"
+date: "2022-10-27"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(here)
+library(terra)
+library(sf)
+library(tmap)
+```
+
+## In this rmarkdown we will double check that model inputs are in correct and ready to be fed into model stack 
+
+#CA raster layer (not in model but our ideal projection, extent and resolution)
+```{r}
+#read in layer 
+ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
+#check the coordinate reference system, resolution, extent 
+crs(ca_raster)
+res(ca_raster)
+ext(ca_raster)
+
+# SpatExtent : -380101.0666, 540047.238885548, -605327.054, 450346.970898149 (xmin, xmax, ymin, ymax)
+```
+
+
+# Elevation
+```{r}
+#read in layer 
+elevation <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/Elevation_Formatted/dem_formatted.tif"))
+#check the coordinate reference system, resolution, extent 
+crs(elevation)
+res(elevation)
+ext(elevation)
+
+# SpatExtent : -380101.0666, 540047.238885548, -605327.054, 450346.970898149 (xmin, xmax, ymin, ymax)
+
+#elevation is model ready 
+#plot elevation raster to confirm
+tm_shape(elevation) +
+  tm_raster() +
+  tmap_mode("view")
+
+```
+
+# Aspect
+```{r}
+#read in aspect layer from google drive 
+#read in layer 
+aspect <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/aspect/aspect.tif"))
+#check the coordinate reference system, resolution, extent 
+crs(aspect)
+res(aspect)
+ext(aspect)
+
+# SpatExtent : -380101.0666, 540047.238885548, -605327.054, 450346.970898149 (xmin, xmax, ymin, ymax)
+#Aspect is model ready
+```
+
+#Terrian ruggedness
+```{r}
+#read in layer 
+terrian <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/terrain_ruggedness/terrain_ruggedness.tif"))
+#check the coordinate reference system, resolution, extent 
+crs(terrian)
+res(terrian)
+ext(terrian)
+
+# SpatExtent : -380101.0666, 540047.238885548, -605327.054, 450346.970898149 (xmin, xmax, ymin, ymax)
+#terrian is model ready 
+```
+
+# Human population density 
+```{r}
+#read in layer 
+pop_den_2016 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/Pop_Den_Rasters_Formatted/pop_den_2016_mask.tif"))
+
+#check the coordinate reference system, resolution, extent 
+crs(pop_den_2016)
+res(pop_den_2016)
+ext(terrian)
+
+# SpatExtent : -380101.0666, 540047.238885548, -605327.054, 450346.970898149 (xmin, xmax, ymin, ymax)
+#terrian is model ready 
+```
+
+#Land Cover
+```{r}
+
+```
+
+#Road Density
+```{r}
+
+```
+
+#Distance to roads
+```{r}
+
+```
+
+#Distance to streams 
+```{r}
+
+```
+
+#Distance to urban areas 
+```{r}
+
+```
+
+#Distance to reactional areas 
+```{r}
+
+```
+
+#Distance to forest cover 
+```{r}
+
+```
+
+#Forest density (canopy cover) 
+```{r}
+
+```
+
+
