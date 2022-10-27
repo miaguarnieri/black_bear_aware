@@ -96,6 +96,8 @@ lc19 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Ra
 
 road_dens <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/road_density_arc/2022_10_26_RoadDensity_ClaireERSI.tif"))
 
+road_dens2 = resample(road_dens, dem)
+
 #distance to roads
 
 road_dist <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_road/model_ready/roads15_ca_distance.tif"))
@@ -147,7 +149,8 @@ con_16_sv <- vect(con_16)
 
 #create a raster stack of all variables
 
-stack16 <- 
+stack16 <- c(dem, aspect, ter_rug, pop16, lc16,road_dens2, road_dist, urban_dist_16, fc_dist_16)
+#note - I had to change the extent for road density which is why its road_dens2 
 
 #extract data points from these rasters and add them to the shapefile dataframe
 
