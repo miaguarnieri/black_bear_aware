@@ -430,23 +430,23 @@ rec_areas_pb_raster <- rasterize(rec_areas_pb_mask, ca_raster)
 
 #####Saving Rec Areas to Distance Rasters
 ```{r}
-savevect <- function(x){
+#savevect <- function(x){
   
-  name <- paste0(deparse(substitute(x)), ".shp") #the name of the file will be the same as the input object, plus '.tif' at the end
+  #name <- paste0(deparse(substitute(x)), ".shp") #the name of the file will be the same as the input object, plus '.tif' at the end
   
 #write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
   
-  writeVector(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/recreational_rasters", name), filetype = "ESRI SHAPEFILE", overwrite=TRUE)
-}
+  #writeVector(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/recreational_rasters", name), filetype = "ESRI SHAPEFILE", overwrite=TRUE)
+#}
 
-savevect(rec_areas_pb_mask)
-savevect(rec_areas_rr_mask)
-savevect(rec_areas_buildings_mask)
-savevect(rec_areas_structures_mask)
-savevect(rec_areas_parking_mask)
-savevect(rec_areas_PEP_mask)
-savevect(rec_areas_picnic_mask)
-savevect(rec_areas_camp_mask)
+#savevect(rec_areas_pb_mask)
+#savevect(rec_areas_rr_mask)
+#savevect(rec_areas_buildings_mask)
+#savevect(rec_areas_structures_mask)
+#savevect(rec_areas_parking_mask)
+#savevect(rec_areas_PEP_mask)
+#savevect(rec_areas_picnic_mask)
+#savevect(rec_areas_camp_mask)
 
 #merging layers 
 
@@ -458,11 +458,11 @@ rec_areas_ca <- merge(rec_areas_PEP_raster, rec_areas_pb_raster, rec_areas_rr_ra
 ```{r}
 saverast <- function(x){
   
-  name <- paste0(deparse(substitute(x)), ".shp") #the name of the file will be the same as the input object, plus '.tif' at the end
+ name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
   
 #write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
   
-  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/recreational_rasters", name), filetype = "Gtiff", overwrite=TRUE)
+writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/recreational_rasters", name), filetype = "Gtiff", overwrite=TRUE)
 }
 
 saverast(rec_areas_ca)
