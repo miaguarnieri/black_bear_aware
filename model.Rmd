@@ -20,10 +20,10 @@ library(tmap)
 library(lubridate)
 
 #mia, chase, and claire's file path
-gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+#gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #sam's file path
-#gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
+gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 
 ```
 
@@ -40,7 +40,7 @@ Insert info about CA raster layer here
 
 ```{r}
 
-ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Reclassed/CARaster_Tiger_Reclassed.img"))
+ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Reclassed/CARaster_Tiger_Reclassed.img")) #I think this is the wrong CA raster?
 
 #check the coordinate reference system 
 crs(ca_raster)
@@ -100,5 +100,18 @@ lc <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rast
 
 dem_ex <- extract(dem, con_16_sv, method = "simple", bind = TRUE, ID = TRUE)
 
+```
+
+#Sam is playing around with the code here:
+```{r}
+#try to stack rasters
+
+raster_stack_test <- c(roads15_ca_distance,stream17_ca_distance)
+
+tm_shape(raster_stack_test) +
+  tm_raster() +
+  tmap_mode("view")
+
+raster_test_df <- as.data.frame(raster_stack_test)
 ```
 
