@@ -1,0 +1,75 @@
+---
+title: "model_ready_tests"
+author: "Claire Meuter and Mia Guarnieri"
+date: "2022-10-27"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## In this rmarkdown we will double check that model inputs are in correct and ready to be fed into model stack 
+
+
+# Elevation
+```{r}
+
+```
+
+# Aspect
+```{r}
+
+```
+
+#Terrian ruggedness
+```{r}
+
+```
+
+# Human population density 
+```{r}
+
+```
+
+#Land Cover
+```{r}
+
+```
+
+#Road Density
+```{r}
+
+```
+
+#Distance to roads
+```{r}
+
+```
+
+#Distance to streams 
+```{r}
+
+```
+
+#Distance to urban areas 
+```{r}
+
+```
+
+#Distance to reactional areas 
+```{r}
+
+```
+
+#Distance to forest cover 
+```{r}
+
+```
+
+#Forest density (canopy cover) 
+```{r}
+
+```
+
+
