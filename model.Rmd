@@ -130,7 +130,14 @@ var_ex <- extract(dem, con_16_sv, method = "simple", bind = TRUE, ID = TRUE)
 
 ```
 
-###2016
+##2017
 
+##2018
+
+##2019
+
+##2020
+
+##2021
 
 
