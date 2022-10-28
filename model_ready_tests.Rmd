@@ -32,11 +32,11 @@ ext(ca_raster)
 # Elevation
 ```{r}
 #read in layer 
-elevation <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/Elevation_Formatted/dem_formatted.tif"))
+elevation_test <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/Elevation_Formatted/dem_formatted.tif"))
 #check the coordinate reference system, resolution, extent 
-crs(elevation)
-res(elevation)
-ext(elevation)
+crs(elevation_test)
+res(elevation_test)
+ext(elevation_test)
 
 # SpatExtent : -380101.0666, 540047.238885548, -605327.054, 450346.970898149 (xmin, xmax, ymin, ymax)
 
@@ -52,11 +52,11 @@ tm_shape(elevation) +
 ```{r}
 #read in aspect layer from google drive 
 #read in layer 
-aspect <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/aspect/aspect.tif"))
+aspect_test <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/aspect/aspect.tif"))
 #check the coordinate reference system, resolution, extent 
-crs(aspect)
-res(aspect)
-ext(aspect)
+crs(aspect_test)
+res(aspect_test)
+ext(aspect_test)
 
 # SpatExtent : -380101.0666, 540047.238885548, -605327.054, 450346.970898149 (xmin, xmax, ymin, ymax)
 #Aspect is model ready
@@ -65,11 +65,11 @@ ext(aspect)
 #Terrian ruggedness
 ```{r}
 #read in layer 
-terrian <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/terrain_ruggedness/terrain_ruggedness.tif"))
+terrian_test <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/terrain_ruggedness/terrain_ruggedness.tif"))
 #check the coordinate reference system, resolution, extent 
-crs(terrian)
-res(terrian)
-ext(terrian)
+crs(terrian_test)
+res(terrian_test)
+ext(terrian_test)
 
 # SpatExtent : -380101.0666, 540047.238885548, -605327.054, 450346.970898149 (xmin, xmax, ymin, ymax)
 #terrian is model ready 
@@ -78,22 +78,22 @@ ext(terrian)
 # Human population density 
 ```{r}
 #read in layer 
-pop_den_2016 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/Pop_Den_Rasters_Formatted/pop_den_2016_mask.tif"))
+pop_den_2016_test <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/Pop_Den_Rasters_Formatted/pop_den_2016_mask.tif"))
 
-pop_den_2017 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/Pop_Den_Rasters_Formatted/pop_den_2017_mask.tif"))
+pop_den_2017_test <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/Pop_Den_Rasters_Formatted/pop_den_2017_mask.tif"))
 
-pop_den_2018 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/Pop_Den_Rasters_Formatted/pop_den_2018_mask.tif"))
+pop_den_2018_test <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/Pop_Den_Rasters_Formatted/pop_den_2018_mask.tif"))
 
-pop_den_2019 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/Pop_Den_Rasters_Formatted/pop_den_2019_mask.tif"))
+pop_den_2019_test <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/Pop_Den_Rasters_Formatted/pop_den_2019_mask.tif"))
 
-pop_den_2020 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/Pop_Den_Rasters_Formatted/pop_den_2020_mask.tif"))
+pop_den_2020_test <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/Pop_Den_Rasters_Formatted/pop_den_2020_mask.tif"))
 
-pop_den_2021 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/Pop_Den_Rasters_Formatted/pop_den_2021_mask.tif"))
+pop_den_2021_test <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/Pop_Den_Rasters_Formatted/pop_den_2021_mask.tif"))
 
 #check the coordinate reference system, resolution, extent 
-crs(pop_den_2018)
-res(pop_den_2018)
-ext(pop_den_2018)
+crs(pop_den_2018_test)
+res(pop_den_2018_test)
+ext(pop_den_2018_test)
 
 # SpatExtent : -380101.0666, 540047.238885548, -605327.054, 450346.970898149 (xmin, xmax, ymin, ymax)
 #terrian is model ready 
@@ -103,23 +103,23 @@ ext(pop_den_2018)
 ```{r}
 
 #read in layer 
-lc_13 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc13_reclassed.tif"))
+lc_13_test <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc13_reclassed.tif"))
 #check the coordinate reference system, resolution, extent 
-crs(lc_13)
-res(lc_13)
-ext(lc_13)
+crs(lc_13_test)
+res(lc_13_test)
+ext(lc_13_test)
 
-lc_16 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc16_reclassed.tif"))
+lc_16_test <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc16_reclassed.tif"))
 #check the coordinate reference system, resolution, extent 
-crs(lc_16)
-res(lc_16)
-ext(lc_16)
+crs(lc_16_test)
+res(lc_16_test)
+ext(lc_16_test)
 
-lc_19 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc19_reclassed.tif"))
+lc_19_test <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc19_reclassed.tif"))
 #check the coordinate reference system, resolution, extent 
-crs(lc_19)
-res(lc_19)
-ext(lc_19)
+crs(lc_19_test)
+res(lc_19_test)
+ext(lc_19_test)
 
 # SpatExtent : -380101.0666, 540047.238885548, -605327.054, 450346.970898149 (xmin, xmax, ymin, ymax)
 #land cover is model ready 
@@ -128,7 +128,15 @@ ext(lc_19)
 
 #Road Density
 ```{r}
+#read in layer 
+road_density_test <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/road_density_formatted/road_density_ca.tif"))
+#check the coordinate reference system, resolution, extent 
+crs(road_density_test)
+res(road_density_test)
+ext(road_density_test)
 
+# SpatExtent : -380101.0666, 540047.238885548, -605327.054, 450346.970898149 (xmin, xmax, ymin, ymax)
+#terrian is model ready 
 ```
 
 #Distance to roads
