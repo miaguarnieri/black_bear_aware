@@ -190,13 +190,17 @@ crs(albers_roads_2015_tiger)
 
 #read in newly created road density. Road density was created in ArcGIS Pro from Roads 2015 Tiger layer. It was created by Claire on 10/23/2022 using the ArcGIS Pro tool line density 
 
-road_density <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/road_density_arc/2022_10_26_RoadDensity_ClaireERSI.tif"))
+road_density <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/road_density_arc/road_density_arc.tif"))
 
 #need to fix extents do not match error code
 road_density_resample  = resample(road_density, ca_raster)
 
 #masking the layer to CA
 road_density_ca <- mask(road_density_resample, ca_raster)
+
+#This road_density_ca is now ready to be read into the main model. Saving it back to gdrive as road density formatted 
+
+writeRaster(road_density_ca, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/road_density_formatted/road_density_ca.tif"), filetype = "GTiff", overwrite = TRUE)
 
 
 ```

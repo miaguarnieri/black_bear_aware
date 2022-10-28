@@ -80,10 +80,20 @@ ext(terrian)
 #read in layer 
 pop_den_2016 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/Pop_Den_Rasters_Formatted/pop_den_2016_mask.tif"))
 
+pop_den_2017 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/Pop_Den_Rasters_Formatted/pop_den_2017_mask.tif"))
+
+pop_den_2018 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/Pop_Den_Rasters_Formatted/pop_den_2018_mask.tif"))
+
+pop_den_2019 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/Pop_Den_Rasters_Formatted/pop_den_2019_mask.tif"))
+
+pop_den_2020 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/Pop_Den_Rasters_Formatted/pop_den_2020_mask.tif"))
+
+pop_den_2021 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/Pop_Den_Rasters_Formatted/pop_den_2021_mask.tif"))
+
 #check the coordinate reference system, resolution, extent 
-crs(pop_den_2016)
-res(pop_den_2016)
-ext(terrian)
+crs(pop_den_2018)
+res(pop_den_2018)
+ext(pop_den_2018)
 
 # SpatExtent : -380101.0666, 540047.238885548, -605327.054, 450346.970898149 (xmin, xmax, ymin, ymax)
 #terrian is model ready 
@@ -91,6 +101,28 @@ ext(terrian)
 
 #Land Cover
 ```{r}
+
+#read in layer 
+lc_13 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc13_reclassed.tif"))
+#check the coordinate reference system, resolution, extent 
+crs(lc_13)
+res(lc_13)
+ext(lc_13)
+
+lc_16 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc16_reclassed.tif"))
+#check the coordinate reference system, resolution, extent 
+crs(lc_16)
+res(lc_16)
+ext(lc_16)
+
+lc_19 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc19_reclassed.tif"))
+#check the coordinate reference system, resolution, extent 
+crs(lc_19)
+res(lc_19)
+ext(lc_19)
+
+# SpatExtent : -380101.0666, 540047.238885548, -605327.054, 450346.970898149 (xmin, xmax, ymin, ymax)
+#land cover is model ready 
 
 ```
 
