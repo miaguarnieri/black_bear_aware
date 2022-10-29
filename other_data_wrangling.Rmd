@@ -17,6 +17,7 @@ library(here)
 library(terra)
 library(sf)
 library(tmap)
+library(rmapshaper)
 
 #mia and claire's file path
 gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
@@ -168,20 +169,28 @@ ca_pol <- as.polygons(ca_raster)
 
 ca_sf <- st_as_sf(ca_pol)
 
-sample_points <- st_sample(ca_sf, 4663)
+sample_points <- st_sample(ca_sf, 4663) %>% 
+  st_as_sf()
+
+sample_buff <- st_buffer(sample_points, dist = 5000)
 
 #load in conflict buffer
 
 con_buff <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_buffered_refined/conflict_buffered_refined.shp"))
 
-#create dummy variable for intersecting points
-
-int <- st_intersects(sample_points, con_buff)
-  
 #select for the ones that are NOT intersecting
 
-zeroes <- st_difference(sample_points, con_buff)
-  
+zeroes <- st_difference(sample_buff, con_buff)
+
+#zeroes <- st_difference(sample_buff, con_buff)
+
+#non_conflict <- rmapshaper::ms_erase(sample_buff, con_buff)
+
+# tm_shape(con_buff) +
+#   tm_polygons(col = "blue") +
+# tm_shape(zeroes) +
+#   tm_polygons() +
+# tmap_mode("view")
 
 ```
 
