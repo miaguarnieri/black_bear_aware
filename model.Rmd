@@ -33,7 +33,7 @@ gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 
 ```{r}
 #conflict data - read in and merged to one layer
-conflict <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_buffered_refined/conflict_buffered_refined.shp"))
+conflict <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/conflict_buffered_refined/conflict_buffered_refined.shp"))
 
 #elevation
 dem <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/elevation/dem_formatted.tif"))
@@ -60,11 +60,11 @@ pop21 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_
 
 #land cover
 
-lc13 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc13_reclassed.tif"))
+lc13 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/land_cover/lc13_reclassed.tif"))
 
-lc16 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc16_reclassed.tif"))
+lc16 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/land_cover/lc16_reclassed.tif"))
 
-lc19 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc19_reclassed.tif"))
+lc19 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/land_cover/lc19_reclassed.tif"))
 
 #road density
 
