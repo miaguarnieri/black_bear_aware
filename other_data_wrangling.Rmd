@@ -17,6 +17,10 @@ library(here)
 library(terra)
 library(sf)
 library(tmap)
+library(beepr)
+library(rgeos)
+library(raster)
+library(rmapshaper)
 
 #mia and claire's file path
 gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
@@ -180,10 +184,87 @@ int <- st_intersects(sample_points, con_buff)
   
 #select for the ones that are NOT intersecting
 
-zeroes <- st_difference(sample_points, con_buff)
-  
+#zeroes <- st_difference(sample_points, con_buff)
+
+ zeros <- ms_erase(sample_points,con_buff)
+
 
 ```
+
+#claire's way of getting zeros
+```{r}
+#reading in CA raster 
+ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
+#reading in conflict buffer shp file
+con_buff <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_buffered_refined/conflict_buffered_refined.shp"))
+
+#Making sure con_buf is in the same projection
+con_buff <- st_transform(con_buff,crs(ca_raster))
+#Doing an inverse mask- Anything withing the conflict buffer shapefiles will be a 0 value. So we get a california raster with all the conflict buffer locations zeroed out
+con_buff_inverse <- mask(ca_raster, con_buff, inverse = TRUE)
+# Mapping just to be sure it lookes right:
+tm_shape(con_buff_inverse) +
+  tm_raster() +
+  tmap_mode("view")
+
+#making con_buff_inverse a shapefile 
+ca_buff_pol <- as.polygons(con_buff_inverse)
+
+ca_buff_sf <- st_as_sf(ca_buff_pol)
+#mapping to make sure all looks okay 
+
+tm_shape(ca_buff_sf) +
+   tm_polygons()  +
+   tmap_mode("view")
+
+#sampling random points from this misshapen california shpfile
+sample_points_claire <- st_sample(ca_buff_sf, 4663)
+
+#mappping to see what it looks like 
+tm_shape(sample_points_claire) +
+  tm_dots() +
+  tmap_mode("view")
+
+#Buffering random points out. Because we're doing this, we will need to clip the geometry one more time later on if possible (?) bc these point buffered out might mess up where are conflict points are
+
+sample_points_buffered <- st_buffer(sample_points_claire, dist = 5000)
+
+#Testing to make sure the buffer worked
+ tm_shape(sample_points_buffered) +
+   tm_polygons() +
+  tm_shape(sample_points_claire) +
+   tm_dots(col  = "blue") +
+   tmap_mode("view")+ 
+   tm_shape(con_buff)+
+   tm_polygons(col  = "red")
+ 
+ 
+ #cropping sample_points_buffered by conflict_points_buffered
+ #This is where I can't get the code to run 
+ 
+ #conflict_points <- st_difference(sample_points_buffered,con_buff)
+ 
+ #so instead I'm going to try it with the function ms_erase package rmapshaper which might be faster 
+ 
+ zeros_claire <- ms_erase(sample_points_buffered,con_buff)
+ #map to see what it looks like 
+ 
+ tm_shape(zeros_claire) +
+   tm_polygons(col  = "green") +
+   tmap_mode("view")
+ 
+ #mapping it, I can see that worked! We could probably go back to Mia's way of doing zeros now that we know this function runs faster. The nice thing about mine is we should have a lot of zeros still 
+ 
+ #Now we need to join conflict and non conflict points into one df
+#I think the first step will be to make a conflict column in the zeros_claire dataframe that has conflict = 0 
+ 
+ 
+ 
+```
+
+
+
+
 
 
 ##Elevation (DEM, mean elevation)

@@ -136,27 +136,74 @@ res(road_density_test)
 ext(road_density_test)
 
 # SpatExtent : -380101.0666, 540047.238885548, -605327.054, 450346.970898149 (xmin, xmax, ymin, ymax)
-#terrian is model ready 
+#road density is model ready 
 ```
 
 #Distance to roads
 ```{r}
+#read in layer 
+road_dist_test <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_road/model_ready/roads15_ca_distance.tif"))
+#check the coordinate reference system, resolution, extent 
+crs(road_dist_test)
+res(road_dist_test)
+ext(road_dist_test)
 
+# SpatExtent : -380101.0666, 540047.238885548, -605327.054, 450346.970898149 (xmin, xmax, ymin, ymax)
+#distance to roads is model ready 
 ```
 
 #Distance to streams 
 ```{r}
+#read in layer 
+stream_dist_test <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_stream/model_ready/stream17_ca_distance.tif"))
+#check the coordinate reference system, resolution, extent 
+crs(stream_dist_test)
+res(stream_dist_test)
+ext(stream_dist_test)
 
+# SpatExtent : -380101.0666, 540047.238885548, -605327.054, 450346.970898149 (xmin, xmax, ymin, ymax)
+#distance to streams is model ready 
 ```
 
 #Distance to urban areas 
 ```{r}
+#read in layer 
+#urban13
+urban13_dist_test <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_urban/model_ready/ua13_ca_distance.tif"))
+#check the coordinate reference system, resolution, extent 
+crs(urban13_dist_test)
+res(urban13_dist_test)
+ext(urban13_dist_test)
 
+#urban16
+urban16_dist_test <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_urban/model_ready/ua16_ca_distance.tif"))
+#check the coordinate reference system, resolution, extent 
+crs(urban16_dist_test)
+res(urban16_dist_test)
+ext(urban16_dist_test)
+
+#urban19
+urban19_dist_test <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_urban/model_ready/ua19_ca_distance.tif"))
+#check the coordinate reference system, resolution, extent 
+crs(urban19_dist_test)
+res(urban19_dist_test)
+ext(urban19_dist_test)
+
+# SpatExtent : -380101.0666, 540047.238885548, -605327.054, 450346.970898149 (xmin, xmax, ymin, ymax)
+#distance to urban is model ready 
 ```
 
 #Distance to reactional areas 
 ```{r}
+#read in layer 
+rec_dist_test <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_stream/model_ready/stream17_ca_distance.tif"))
+#check the coordinate reference system, resolution, extent 
+crs(stream_dist_test)
+res(stream_dist_test)
+ext(stream_dist_test)
 
+# SpatExtent : -380101.0666, 540047.238885548, -605327.054, 450346.970898149 (xmin, xmax, ymin, ymax)
+#distance to roads is model ready 
 ```
 
 #Distance to forest cover 
