@@ -18,12 +18,13 @@ library(sf)
 library(tmap)
 library(lubridate)
 library(ResourceSelection)
+library(rmapshaper)
 
 #mia, chase, and claire's file path
-#gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #sam's file path
-gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
+#gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 
 ```
 
@@ -33,7 +34,7 @@ gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 
 ```{r}
 #conflict data - read in and merged to one layer
-conflict <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_buffered_refined/conflict_buffered_refined.shp"))
+conflict <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/conflict_buffered_refined/conflict_buffered_refined.shp"))
 
 #elevation
 dem <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/elevation/dem_formatted.tif"))
@@ -60,17 +61,15 @@ pop21 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_
 
 #land cover
 
-lc13 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc13_reclassed.tif"))
+lc13 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/land_cover/lc13_reclassed.tif"))
 
-lc16 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc16_reclassed.tif"))
+lc16 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/land_cover/lc16_reclassed.tif"))
 
-lc19 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc19_reclassed.tif"))
+lc19 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/land_cover/lc19_reclassed.tif"))
 
 #road density
 
-road_dens <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/road_density_arc/2022_10_26_RoadDensity_ClaireERSI.tif"))
-
-road_dens2 = resample(road_dens, dem)
+road_dens <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/road_density/road_density_ca.tif"))
 
 #distance to roads
 
@@ -102,7 +101,7 @@ fc_dist_19 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/d
 
 #forest density
 
-fdens <- rast(here(gdrive_data, ""))
+fdens <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/forest_density/forest_dens_2016_mask.tif"))
 
 ```
 
@@ -116,23 +115,98 @@ fdens <- rast(here(gdrive_data, ""))
 
 con_16 <- conflict %>% 
   filter(year == 2016) %>% 
-  select(conflict, geometry) %>% 
-  st_union()
+  select(conflict, geometry)
 
 #create a spatvector for processing in terra
 
 con_16_sv <- vect(con_16)
 
+#read in the CA raster
+ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
+
+#make sure conflict is in the same projection
+con_buff16 <- project(con_16_sv,crs(ca_raster))
+
+con_buff16_sf <- st_as_sf(con_buff16)
+
+#create an inverse mask- Anything withing the conflict buffer shapefiles will be a 0 value. So we get a California raster with all the conflict buffer locations zeroed out
+
+conbuff16_inverse <- mask(ca_raster, con_buff16, inverse = TRUE)
+
+tm_shape(conbuff16_inverse) +
+  tm_raster() +
+  tmap_mode("view")
+
+#making the inverse raster a shapefile 
+cabuff16_inv_pol <- as.polygons(conbuff16_inverse)
+
+cabuff16_inv_sf <- st_as_sf(conbuff16_inv_pol)
+
+#sampling random points from this misshapen california shpfile
+sample16 <- st_sample(conbuff16_inv_sf, 427)
+
+#mappping to see what it looks like 
+tm_shape(sample16) +
+  tm_dots() +
+  tmap_mode("view")
+
+#buffer the sample points
+
+sample16_buff <- st_buffer(sample16, dist = 5000) %>% 
+  st_as_sf()
+
+#Testing to make sure the buffer worked
+ tm_shape(sample16_buff) +
+   tm_polygons() +
+tm_shape(sample16) +
+   tm_dots(col  = "blue") +
+tm_shape(con_buff16_sf)+
+   tm_polygons(col  = "red") +
+   tmap_mode("view")
+
+ 
+#removing non-conflict points that overlap
+ 
+intersect16 <- st_join(sample16_buff, con_buff16_sf, join = st_intersects, left = FALSE)
+
+#plot intersection
+
+tm_shape(intersect) +
+  tm_polygons() +
+  tmap_mode("view")
+
+#remove the intersecting polygons
+
+zeros16 <- ms_erase(target = sample16_buff, erase = intersect16, remove_slivers = FALSE)
+ 
+ #plot to check that there is no overlap
+ 
+ tm_shape(con_buff16_sf) +
+   tm_polygons(col = "blue") +
+  tm_shape(zeros16) +
+   tm_polygons() +
+  tmap_mode("view")
+
+zeros16_formatted <- zeros16 %>% 
+  mutate(conflict = 0) %>% 
+  select(conflict, geometry)
+
+conflict16_model <- rbind(con_16, zeros16_formatted) %>% 
+  st_union(by_feature = TRUE)
+
+con16_model_sv <- vect(conflict16_model)
+
 #create a raster stack of all variables
 
-stack16 <- c(dem, aspect, ter_rug, pop16, lc16,road_dens2, road_dist, streams_dist, urban_dist_16, fc_dist_16)
-#note - I had to change the extent for road density which is why its road_dens2 
+stack16 <- c(dem, aspect, ter_rug, pop16, lc16, road_dens, road_dist, streams_dist, urban_dist_16, rec_dist, fc_dist_16, fdens)
 
 #extract data points from these rasters and add them to the shapefile dataframe
 
-var_ex16 <- extract(stack16, con_16_sv, method = "simple", bind = TRUE, ID = TRUE)
+var_ex16 <- extract(stack16, conflict, method = "simple", bind = TRUE, ID = TRUE)
 
 var_df16 <- as.data.frame(var_ex16)
+
+vars16 <- colnames(var_df16)
 
 #run it in the model
 
