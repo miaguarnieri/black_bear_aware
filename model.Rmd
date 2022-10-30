@@ -189,12 +189,9 @@ zeros16 <- ms_erase(target = sample16_buff, erase = intersect16, remove_slivers 
 
 zeros16_formatted <- zeros16 %>% 
   mutate(conflict = 0) %>% 
-  select(conflict, geometry)
-
-conflict16_model <- rbind(con_16, zeros16_formatted) %>% 
-  st_union(by_feature = TRUE)
-
-con16_model_sv <- vect(conflict16_model)
+  select(conflict, geometry) %>% 
+  st_union() %>% 
+  vect()
 
 #create a raster stack of all variables
 
@@ -202,15 +199,26 @@ stack16 <- c(dem, aspect, ter_rug, pop16, lc16, road_dens, road_dist, streams_di
 
 #extract data points from these rasters and add them to the shapefile dataframe
 
-var_ex16 <- extract(stack16, conflict, method = "simple", bind = TRUE, ID = TRUE)
+#nonconflict points
+zero_vars16 <- extract(stack16, zeros16_formatted, method = "simple", bind = TRUE, ID = TRUE) %>% 
+  mutate(ID = 0)
 
-var_df16 <- as.data.frame(var_ex16)
+#union conflict points before extracting
+con_union16 <- con_16 %>% 
+  st_union() %>% 
+  vect()
 
-vars16 <- colnames(var_df16)
+con_vars16 <- extract(stack16, con_union16, method = "simple", bind = TRUE, ID = TRUE)
+
+#combine conflict and non-conflict
+
+model_df_16 <- rbind(zero_vars16, con_vars16)
+
+colnames(model_df_16) <- c("ID", "dem", "aspect", "TRI", "popdens1", "popdens2", "popdens3", "popdens4", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens")
 
 #run it in the model
 
-model16 <- rspf(ID ~ aspect + TRI + category, family = "binomial", m = 0, B = 1000, data = var_df)
+model16 <- rspf(ID ~ dem + aspect + TRI + popdens1 + popdens2 + popdens3 + popdens4 + lc + road_dens + road_dist + streams_dist + urban_dist + rec_dist + forest_dist + forest_dens, family = "binomial", m = 0, B = 1000, data = model_df_16)
 
 ```
 
