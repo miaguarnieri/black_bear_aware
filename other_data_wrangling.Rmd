@@ -19,7 +19,6 @@ library(sf)
 library(tmap)
 library(beepr)
 library(rgeos)
-library(raster)
 library(rmapshaper)
 
 #mia and claire's file path
@@ -172,7 +171,10 @@ ca_pol <- as.polygons(ca_raster)
 
 ca_sf <- st_as_sf(ca_pol)
 
-sample_points <- st_sample(ca_sf, 4663)
+sample_points <- st_sample(ca_sf, 4663) %>% 
+  st_as_sf()
+
+sample_buff <- st_buffer(sample_points, dist = 5000)
 
 #buffer sample points
 sample_points_buff <- st_buffer(sample_points_claire, dist = 5000)
@@ -181,26 +183,11 @@ sample_points_buff <- st_buffer(sample_points_claire, dist = 5000)
 
 con_buff <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_buffered_refined/conflict_buffered_refined.shp"))
 
-#create dummy variable for intersecting points
 
-int <- st_intersects(sample_points_buff, con_buff)
-  
 #select for the ones that are NOT intersecting
 
-#zeroes <- st_difference(sample_points, con_buff)
+ zeros <- ms_erase(sample_points,con_buff)
 
- zeros <- ms_erase(sample_points_buff,con_buff)
-
-#plot to check erase worked
-
- tm_shape(con_buff) +
-  tm_polygons(alpha = 0.5) +
-tm_shape(zeros) +
-   tm_polygons(col = "blue")+
-tmap_mode("view")
- 
-  
- 
 ```
 
 #claire's way of getting zeros
@@ -212,8 +199,10 @@ con_buff <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/
 
 #Making sure con_buf is in the same projection
 con_buff <- st_transform(con_buff,crs(ca_raster))
+
 #Doing an inverse mask- Anything withing the conflict buffer shapefiles will be a 0 value. So we get a california raster with all the conflict buffer locations zeroed out
 con_buff_inverse <- mask(ca_raster, con_buff, inverse = TRUE)
+
 # Mapping just to be sure it lookes right:
 tm_shape(con_buff_inverse) +
   tm_raster() +
@@ -223,6 +212,7 @@ tm_shape(con_buff_inverse) +
 ca_buff_pol <- as.polygons(con_buff_inverse)
 
 ca_buff_sf <- st_as_sf(ca_buff_pol)
+
 #mapping to make sure all looks okay 
 
 tm_shape(ca_buff_sf) +
