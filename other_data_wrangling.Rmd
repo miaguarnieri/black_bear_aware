@@ -174,21 +174,33 @@ ca_sf <- st_as_sf(ca_pol)
 
 sample_points <- st_sample(ca_sf, 4663)
 
+#buffer sample points
+sample_points_buff <- st_buffer(sample_points_claire, dist = 5000)
+
 #load in conflict buffer
 
 con_buff <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_buffered_refined/conflict_buffered_refined.shp"))
 
 #create dummy variable for intersecting points
 
-int <- st_intersects(sample_points, con_buff)
+int <- st_intersects(sample_points_buff, con_buff)
   
 #select for the ones that are NOT intersecting
 
 #zeroes <- st_difference(sample_points, con_buff)
 
- zeros <- ms_erase(sample_points,con_buff)
+ zeros <- ms_erase(sample_points_buff,con_buff)
 
+#plot to check erase worked
 
+ tm_shape(con_buff) +
+  tm_polygons(alpha = 0.5) +
+tm_shape(zeros) +
+   tm_polygons(col = "blue")+
+tmap_mode("view")
+ 
+  
+ 
 ```
 
 #claire's way of getting zeros
@@ -253,13 +265,22 @@ sample_points_buffered <- st_buffer(sample_points_claire, dist = 5000)
    tm_polygons(col  = "green") +
    tmap_mode("view")
  
+  tm_shape(con_buff) +
+  tm_polygons(alpha = 0.5) +
+tm_shape(zeros_claire) +
+   tm_polygons(col = "blue")+
+tmap_mode("view")
+ 
  #mapping it, I can see that worked! We could probably go back to Mia's way of doing zeros now that we know this function runs faster. The nice thing about mine is we should have a lot of zeros still 
  
  #Now we need to join conflict and non conflict points into one df
 #I think the first step will be to make a conflict column in the zeros_claire dataframe that has conflict = 0 
  
+zeros_df <- as(zeros_claire, "Spatial" )
  
- 
+zeros_df1 <-as(zeros_df, "SpatialPolygonsDataFrame")
+
+zeros_df2 <- as(zeros_df1, "data.frame")
 ```
 
 
