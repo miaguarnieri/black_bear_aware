@@ -431,7 +431,7 @@ cabuff19_inv_pol <- as.polygons(conbuff19_inverse)
 cabuff19_inv_sf <- st_as_sf(cabuff19_inv_pol)
 
 #sampling random points from this misshapen california shpfile
-sample19 <- st_sample(cabuff19_inv_sf, 1364) %>% 
+sample19 <- st_sample(cabuff19_inv_sf, 609) %>% 
   st_as_sf()
 
 #mappping to see what it looks like 
@@ -486,7 +486,7 @@ stack19 <- c(dem, aspect, ter_rug, pop19, lc19, road_dens, road_dist, streams_di
 #extract data points from these rasters and add them to the shapefile dataframe
 
 #nonconflict points
-zero_vars19 <- extract(stack21, zeros21_formatted, method = "simple", bind = TRUE, ID = TRUE) %>% 
+zero_vars19 <- extract(stack19, zeros19_formatted, method = "simple", bind = TRUE, ID = TRUE) %>% 
   mutate(ID = 0)
 
 #union conflict points before extracting
@@ -498,7 +498,7 @@ con_var19 <- extract(stack19, con_union19, method = "simple", bind = TRUE, ID = 
 
 #combine conflict and non-conflict
 
-model_df_19 <- rbind(zero_vars19, con_vars19)
+model_df_19 <- rbind(zero_vars19, con_var19)
 
 colnames(model_df_19) <- c("ID", "dem", "aspect", "TRI", "popdens1", "popdens2", "popdens3", "popdens4", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens")
 
