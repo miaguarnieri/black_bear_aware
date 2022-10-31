@@ -237,12 +237,24 @@ colnames(model_df_16) <- c("ID", "dem", "aspect", "TRI", "popdens1", "popdens2",
 
 #run it in the model
 
-#model16 <- rspf(ID ~ dem + aspect + TRI + popdens1 + popdens2 + popdens3 + popdens4 + lc + road_dens + road_dist + streams_dist + urban_dist + rec_dist + forest_dist + forest_dens, family = "binomial", m = 0, B = 1000, data = model_df_16)
+model16 <- rspf(ID ~ dem + aspect + TRI + popdens1 + popdens2 + popdens3 + popdens4 + lc + road_dens + road_dist + streams_dist + urban_dist + rec_dist + forest_dist + forest_dens, family = "binomial", m = 0, B = 1000, data = model_df_16)
 
 #label the year for later binding with other dfs
 modeldf_16_year <- model_df_16 %>% 
   mutate(year = 2016)
+
 ```
+
+```{r}
+#saving the files
+
+#save the csv with extracted variables
+save(modeldf_16_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/10_31_2022/modeldf_16.csv"))
+
+#save the 2016 model output
+save(model16, file = here(gdrive_data, "/AnalysisData/models/10_31_2022/model_2016_noclimate/model_2016_noclimate.RData"))
+```
+
 
 #Sam is playing around with the code here:
 ```{r}
@@ -638,5 +650,10 @@ modeldf_21_year <- model_df_21 %>%
   mutate(year = 2021)
 ```
 
+```{r}
+#saving the file
+
+save(modeldf_21_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/10_31_2022/modeldf_21.csv"))
+```
 
 ##2022
