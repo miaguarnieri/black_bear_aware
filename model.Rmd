@@ -21,10 +21,10 @@ library(ResourceSelection)
 library(rmapshaper)
 
 #mia, chase, and claire's file path
-gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+#gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #sam's file path
-#gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
+gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 
 ```
 
@@ -33,8 +33,10 @@ gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 ##Conflict data
 
 ```{r}
-#conflict data - read in and merged to one layer
-conflict <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/conflict_buffered_refined/conflict_buffered_refined.shp"))
+#conflict data
+conflict_buffers <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/conflict_buffered_refined/conflict_buffered_refined.shp"))
+
+conflict_points <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_points/conflict_points.shp"))
 
 #elevation
 dem <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/elevation/dem_formatted.tif"))
@@ -113,25 +115,42 @@ fdens <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_
 
 #extract values for 2016, select only conflict indicator and geometry, and dissolve polygons
 
-con_16 <- conflict %>% 
+con_16 <- conflict_points %>% 
+  separate(incdnt_d, into = c("inc_date", "inc_time"), sep = " ") %>% 
+  separate(inc_date, into = c("month", "day", "year"), sep = "/") %>% 
+  mutate(year = as.character.Date(year),
+         "type" = cnfrmd_,
+         "county" = cnty_nm,
+         "conflict" = 1) %>% 
+  select(conflict, wir_id:year, type, county, geometry) %>% 
+  filter(year == 2016) %>% 
+  select(conflict, geometry)
+
+con_16_buff <- conflict_buffers %>% 
   filter(year == 2016) %>% 
   select(conflict, geometry)
 
 #create a spatvector for processing in terra
 
-con_16_sv <- vect(con_16)
+conpoints_16_sv <- vect(con_16)
+
+conbuff_16_sv <- vect(con_16_buff)
 
 #read in the CA raster
 ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
 
 #make sure conflict is in the same projection
-con_buff16 <- project(con_16_sv,crs(ca_raster))
+conpoints16_reproj <- project(conpoints_16_sv,crs(ca_raster))
 
-con_buff16_sf <- st_as_sf(con_buff16)
+conbuff16_reproj <- project(conbuff_16_sv,crs(ca_raster))
+
+conpoints16_sf <- st_as_sf(conpoints16_reproj)
+
+conbuff16_sf <- st_as_sf(conbuff16_reproj)
 
 #create an inverse mask- Anything withing the conflict buffer shapefiles will be a 0 value. So we get a California raster with all the conflict buffer locations zeroed out
 
-conbuff16_inverse <- mask(ca_raster, con_buff16, inverse = TRUE)
+conbuff16_inverse <- mask(ca_raster, conbuff16_reproj, inverse = TRUE)
 
 tm_shape(conbuff16_inverse) +
   tm_raster() +
@@ -140,57 +159,55 @@ tm_shape(conbuff16_inverse) +
 #making the inverse raster a shapefile 
 cabuff16_inv_pol <- as.polygons(conbuff16_inverse)
 
-cabuff16_inv_sf <- st_as_sf(conbuff16_inv_pol)
+cabuff16_inv_sf <- st_as_sf(cabuff16_inv_pol)
 
 #sampling random points from this misshapen california shpfile
-sample16 <- st_sample(conbuff16_inv_sf, 427)
+sample16 <- st_sample(cabuff16_inv_sf, 427) %>% 
+  st_as_sf()
 
 #mappping to see what it looks like 
 tm_shape(sample16) +
   tm_dots() +
   tmap_mode("view")
 
-#buffer the sample points
+#buffer the sample points - getting rid of this part for the sake of the model
 
-sample16_buff <- st_buffer(sample16, dist = 5000) %>% 
-  st_as_sf()
+#sample16_buff <- st_buffer(sample16, dist = 5000) %>% 
+#  st_as_sf()
 
 #Testing to make sure the buffer worked
- tm_shape(sample16_buff) +
-   tm_polygons() +
-tm_shape(sample16) +
-   tm_dots(col  = "blue") +
-tm_shape(con_buff16_sf)+
-   tm_polygons(col  = "red") +
-   tmap_mode("view")
+# tm_shape(sample16) +
+#    tm_dots(col  = "blue") +
+# tm_shape(con_buff16_sf)+
+#    tm_polygons(col  = "red") +
+#    tmap_mode("view")
 
  
 #removing non-conflict points that overlap
  
-intersect16 <- st_join(sample16_buff, con_buff16_sf, join = st_intersects, left = FALSE)
+#intersect16 <- st_join(sample16, conbuff16_sf, join = st_intersects, left = FALSE)
 
 #plot intersection
-
-tm_shape(intersect) +
-  tm_polygons() +
-  tmap_mode("view")
+# 
+# tm_shape(intersect) +
+#   tm_polygons() +
+#   tmap_mode("view")
 
 #remove the intersecting polygons
 
-zeros16 <- ms_erase(target = sample16_buff, erase = intersect16, remove_slivers = FALSE)
+zeros16 <- ms_erase(target = sample16, erase = conbuff16_sf)
  
  #plot to check that there is no overlap
  
- tm_shape(con_buff16_sf) +
+ tm_shape(conbuff16_sf) +
    tm_polygons(col = "blue") +
   tm_shape(zeros16) +
-   tm_polygons() +
+   tm_dots() +
   tmap_mode("view")
 
 zeros16_formatted <- zeros16 %>% 
   mutate(conflict = 0) %>% 
   select(conflict, geometry) %>% 
-  st_union() %>% 
   vect()
 
 #create a raster stack of all variables
@@ -220,6 +237,10 @@ colnames(model_df_16) <- c("ID", "dem", "aspect", "TRI", "popdens1", "popdens2",
 
 model16 <- rspf(ID ~ dem + aspect + TRI + popdens1 + popdens2 + popdens3 + popdens4 + lc + road_dens + road_dist + streams_dist + urban_dist + rec_dist + forest_dist + forest_dens, family = "binomial", m = 0, B = 1000, data = model_df_16)
 
+
+#label the year for later binding with other dfs
+modeldf_16_year <- model_df_16 %>% 
+  mutate(year = 2016)
 ```
 
 #Sam is playing around with the code here:
@@ -239,30 +260,121 @@ raster_test_df <- as.data.frame(raster_stack_test)
 ##2017
 
 ```{r}
+#extract values for 2017, select only conflict indictor and geometry, and dissolve polygons
+con_17 <- conflict_points %>% 
+  separate(incdnt_d, into = c("inc_date", "inc_time"), sep = " ") %>% 
+  separate(inc_date, into = c("month", "day", "year"), sep = "/") %>% 
+  mutate(year = as.character.Date(year),
+         "type" = cnfrmd_,
+         "county" = cnty_nm,
+         "conflict" = 1) %>% 
+  select(conflict, wir_id:year, type, county, geometry) %>% 
+  filter(year == 2017) %>% 
+  select(conflict, geometry)
 
-#extract values for 2016
-
-con_17 <- conflict_buffer %>% 
-  filter(year == 2017)
+con_17_buff <- conflict_buffers %>% 
+  filter(year == 2017) %>% 
+  select(conflict, geometry)
 
 #create a spatvector for processing in terra
 
-con_17_sv <- vect(con_17)
+conpoints_17_sv <- vect(con_17)
+conbuff_17_sv <- vect(con_17_buff)
+
+#read in the CA raster 
+ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
+
+#reproject the conflict data 
+conpoints17_reproj <- project(conpoints_17_sv, crs(ca_raster))
+
+conbuff17_reproj <- project(conbuff_17_sv, crs(ca_raster))
+
+conpoints17_sf <- st_as_sf(conpoints17_reproj)
+conbuff17_sf <- st_as_sf(conbuff17_reproj)
+
+#create an inverse mask- Anything withing the conflict buffer shapefiles will be a 0 value. So we get a California raster with all the conflict buffer locations zeroed out
+conbuff17_inverse <- mask(ca_raster, conbuff17_reproj, inverse = TRUE)
+tm_shape(conbuff17_inverse) +
+  tm_raster() +
+  tmap_mode("view")
+
+#making the inverse raster a shapefile 
+cabuff17_inv_pol <- as.polygons(conbuff17_inverse)
+cabuff17_inv_sf <- st_as_sf(cabuff17_inv_pol)
+
+#sampling random points from this misshapen california shpfile
+sample17 <- st_sample(cabuff17_inv_sf, 669) %>% 
+  st_as_sf()
+
+#mappping to see what it looks like 
+tm_shape(sample17) +
+  tm_dots() +
+  tmap_mode("view")
+
+#buffer the sample points - getting rid of this part for the sake of the model
+#sample17_buff <- st_buffer(sample17, dist = 5000) %>% 
+#  st_as_sf()
+#Testing to make sure the buffer worked
+# tm_shape(sample17) +
+#    tm_dots(col  = "blue") +
+# tm_shape(con_buff17_sf)+
+#    tm_polygons(col  = "red") +
+#    tmap_mode("view")
+
+#removing non-conflict points that overlap
+ 
+#intersect17 <- st_join(sample17, conbuff17_sf, join = st_intersects, left = FALSE)
+#plot intersection
+# 
+# tm_shape(intersect) +
+#   tm_polygons() +
+#   tmap_mode("view")
+
+#remove the intersecting polygons
+zeros17 <- ms_erase(target = sample17, erase = conbuff17_sf)
+ 
+ #plot to check that there is no overlap
+ 
+tm_shape(conbuff17_sf) +
+   tm_polygons(col = "blue") +
+  tm_shape(zeros17) +
+   tm_dots() +
+  tmap_mode("view")
+ 
+zeros17_formatted <- zeros17 %>% 
+  mutate(conflict = 0) %>% 
+  select(conflict, geometry) %>% 
+  vect()
 
 #create a raster stack of all variables
 
-stack17 <- c(dem, aspect, ter_rug, pop17, lc16, road_dens2, road_dist, urban_dist_16, fc_dist_16)
-#note - I had to change the extent for road density which is why its road_dens2 
+
+stack17 <- c(dem, aspect, ter_rug, pop17, lc16, road_dens, road_dist, urban_dist_16,rec_dist,fc_dist_16, fdens)
+
 
 #extract data points from these rasters and add them to the shapefile dataframe
 
-var_ex <- extract(stack17, con_17_sv, method = "simple", bind = TRUE, ID = TRUE)
+#nonconflict points 
+zero_vars17 <- extract(stack17, zeros17_formatted, method = "simple", bind = TRUE, ID = TRUE) %>% 
+  mutate(ID = 0)
 
-var_df_17 <- as.data.frame(var_ex)
+#union conflict points before extracting 
+con_union17 <- con_17 %>% 
+  st_union() %>% 
+  vect()
+
+con_vars17 <- extract(stack17, con_union17, method = "simple", bind = TRUE, ID = TRUE)
+
+#combine conflict and non-conflict
+model_df_17 <- rbind(zero_vars17, con_vars17)
+
+colnames(model_df_17) <- c("ID", "dem", "aspect", "TRI", "popdens1", "popdens2", "popdens3", "popdens4", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens")
 
 #run it in the model
-
-model <- rspf(ID ~ aspect + TRI + category, family = "binomial", m = 0, B = 1000, data = var_df_17)
+model17 <- rspf(ID ~ dem + aspect + TRI + popdens1 + popdens2 + popdens3 + popdens4 + lc + road_dens + road_dist + streams_dist + urban_dist + rec_dist + forest_dist + forest_dens, family = "binomial", m = 0, B = 1000, data = model_df_16)
+#label the year for later binding with other dfs
+modeldf_17_year <- model_df_17 %>% 
+  mutate(year = 2017)
 
 ```
 
@@ -274,3 +386,131 @@ model <- rspf(ID ~ aspect + TRI + category, family = "binomial", m = 0, B = 1000
 
 ##2021
 
+```{r}
+#extract values for 2016, select only conflict indicator and geometry, and dissolve polygons
+
+con_21 <- conflict_points %>% 
+  separate(incdnt_d, into = c("inc_date", "inc_time"), sep = " ") %>% 
+  separate(inc_date, into = c("month", "day", "year"), sep = "/") %>% 
+  mutate(year = as.character.Date(year),
+         "type" = cnfrmd_,
+         "county" = cnty_nm,
+         "conflict" = 1) %>% 
+  select(conflict, wir_id:year, type, county, geometry) %>% 
+  filter(year == 2021) %>% 
+  select(conflict, geometry)
+
+con_21_buff <- conflict_buffers %>% 
+  filter(year == 2021) %>% 
+  select(conflict, geometry)
+
+#create a spatvector for processing in terra
+
+conpoints_21_sv <- vect(con_21)
+
+conbuff_21_sv <- vect(con_21_buff)
+
+#read in the CA raster
+ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
+
+#make sure conflict is in the same projection
+conpoints21_reproj <- project(conpoints_21_sv,crs(ca_raster))
+
+conbuff21_reproj <- project(conbuff_21_sv,crs(ca_raster))
+
+conpoints21_sf <- st_as_sf(conpoints21_reproj)
+
+conbuff21_sf <- st_as_sf(conbuff21_reproj)
+
+#create an inverse mask- Anything withing the conflict buffer shapefiles will be a 0 value. So we get a California raster with all the conflict buffer locations zeroed out
+
+conbuff21_inverse <- mask(ca_raster, conbuff21_reproj, inverse = TRUE)
+
+tm_shape(conbuff21_inverse) +
+  tm_raster() +
+  tmap_mode("view")
+
+#making the inverse raster a shapefile 
+cabuff21_inv_pol <- as.polygons(conbuff21_inverse)
+
+cabuff21_inv_sf <- st_as_sf(cabuff21_inv_pol)
+
+#sampling random points from this misshapen california shpfile
+sample21 <- st_sample(cabuff21_inv_sf, 1364) %>% 
+  st_as_sf()
+
+#mappping to see what it looks like 
+tm_shape(sample21) +
+  tm_dots() +
+  tmap_mode("view")
+
+#buffer the sample points - getting rid of this part for the sake of the model
+
+#sample16_buff <- st_buffer(sample16, dist = 5000) %>% 
+#  st_as_sf()
+
+#Testing to make sure the buffer worked
+# tm_shape(sample16) +
+#    tm_dots(col  = "blue") +
+# tm_shape(con_buff16_sf)+
+#    tm_polygons(col  = "red") +
+#    tmap_mode("view")
+
+ 
+#removing non-conflict points that overlap
+ 
+#intersect16 <- st_join(sample16, conbuff16_sf, join = st_intersects, left = FALSE)
+
+#plot intersection
+
+# tm_shape(intersect) +
+#   tm_polygons() +
+#   tmap_mode("view")
+
+#remove the intersecting polygons
+
+zeros21 <- ms_erase(target = sample21, erase = conbuff21_sf)
+ 
+ #plot to check that there is no overlap
+ 
+ tm_shape(conbuff21_sf) +
+   tm_polygons(col = "blue") +
+  tm_shape(zeros21) +
+   tm_dots() +
+  tmap_mode("view")
+
+zeros21_formatted <- zeros21 %>% 
+  mutate(conflict = 0) %>% 
+  select(conflict, geometry) %>% 
+  vect()
+
+#create a raster stack of all variables
+
+stack21 <- c(dem, aspect, ter_rug, pop21, lc19, road_dens, road_dist, streams_dist, urban_dist_19, rec_dist, fc_dist_19, fdens)
+
+#extract data points from these rasters and add them to the shapefile dataframe
+
+#nonconflict points
+zero_vars21 <- extract(stack21, zeros21_formatted, method = "simple", bind = TRUE, ID = TRUE) %>% 
+  mutate(ID = 0)
+
+#union conflict points before extracting
+con_union21 <- con_21 %>% 
+  st_union() %>% 
+  vect()
+
+con_vars21 <- extract(stack16, con_union16, method = "simple", bind = TRUE, ID = TRUE)
+
+#combine conflict and non-conflict
+
+model_df_21 <- rbind(zero_vars16, con_vars16)
+
+colnames(model_df_21) <- c("ID", "dem", "aspect", "TRI", "popdens1", "popdens2", "popdens3", "popdens4", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens")
+
+#label the year for later binding with other dfs
+modeldf_21_year <- model_df_21 %>% 
+  mutate(year = 2021)
+```
+
+
+##2022
