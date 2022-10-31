@@ -236,7 +236,6 @@ colnames(model_df_16) <- c("ID", "dem", "aspect", "TRI", "popdens1", "popdens2",
 
 #run it in the model
 
-
 #model16 <- rspf(ID ~ dem + aspect + TRI + popdens1 + popdens2 + popdens3 + popdens4 + lc + road_dens + road_dist + streams_dist + urban_dist + rec_dist + forest_dist + forest_dens, family = "binomial", m = 0, B = 1000, data = model_df_16)
 
 #label the year for later binding with other dfs
