@@ -1,0 +1,219 @@
+---
+title: "model_ready_tests"
+author: "Claire Meuter and Mia Guarnieri"
+date: "2022-10-27"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(here)
+library(terra)
+library(sf)
+library(tmap)
+```
+
+## In this rmarkdown we will double check that model inputs are in correct and ready to be fed into model stack 
+
+#CA raster layer (not in model but our ideal projection, extent and resolution)
+```{r}
+#read in layer 
+ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
+#check the coordinate reference system, resolution, extent 
+crs(ca_raster)
+res(ca_raster)
+ext(ca_raster)
+
+# SpatExtent : -380101.0666, 540047.238885548, -605327.054, 450346.970898149 (xmin, xmax, ymin, ymax)
+```
+
+
+# Elevation
+```{r}
+#read in layer 
+elevation_test <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/Elevation_Formatted/dem_formatted.tif"))
+#check the coordinate reference system, resolution, extent 
+crs(elevation_test)
+res(elevation_test)
+ext(elevation_test)
+
+# SpatExtent : -380101.0666, 540047.238885548, -605327.054, 450346.970898149 (xmin, xmax, ymin, ymax)
+
+#elevation is model ready 
+#plot elevation raster to confirm
+tm_shape(elevation) +
+  tm_raster() +
+  tmap_mode("view")
+
+```
+
+# Aspect
+```{r}
+#read in aspect layer from google drive 
+#read in layer 
+aspect_test <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/aspect/aspect.tif"))
+#check the coordinate reference system, resolution, extent 
+crs(aspect_test)
+res(aspect_test)
+ext(aspect_test)
+
+# SpatExtent : -380101.0666, 540047.238885548, -605327.054, 450346.970898149 (xmin, xmax, ymin, ymax)
+#Aspect is model ready
+```
+
+#Terrian ruggedness
+```{r}
+#read in layer 
+terrian_test <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/terrain_ruggedness/terrain_ruggedness.tif"))
+#check the coordinate reference system, resolution, extent 
+crs(terrian_test)
+res(terrian_test)
+ext(terrian_test)
+
+# SpatExtent : -380101.0666, 540047.238885548, -605327.054, 450346.970898149 (xmin, xmax, ymin, ymax)
+#terrian is model ready 
+```
+
+# Human population density 
+```{r}
+#read in layer 
+pop_den_2016_test <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/Pop_Den_Rasters_Formatted/pop_den_2016_mask.tif"))
+
+pop_den_2017_test <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/Pop_Den_Rasters_Formatted/pop_den_2017_mask.tif"))
+
+pop_den_2018_test <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/Pop_Den_Rasters_Formatted/pop_den_2018_mask.tif"))
+
+pop_den_2019_test <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/Pop_Den_Rasters_Formatted/pop_den_2019_mask.tif"))
+
+pop_den_2020_test <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/Pop_Den_Rasters_Formatted/pop_den_2020_mask.tif"))
+
+pop_den_2021_test <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/Pop_Den_Rasters_Formatted/pop_den_2021_mask.tif"))
+
+#check the coordinate reference system, resolution, extent 
+crs(pop_den_2018_test)
+res(pop_den_2018_test)
+ext(pop_den_2018_test)
+
+# SpatExtent : -380101.0666, 540047.238885548, -605327.054, 450346.970898149 (xmin, xmax, ymin, ymax)
+#terrian is model ready 
+```
+
+#Land Cover
+```{r}
+
+#read in layer 
+lc_13_test <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc13_reclassed.tif"))
+#check the coordinate reference system, resolution, extent 
+crs(lc_13_test)
+res(lc_13_test)
+ext(lc_13_test)
+
+lc_16_test <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc16_reclassed.tif"))
+#check the coordinate reference system, resolution, extent 
+crs(lc_16_test)
+res(lc_16_test)
+ext(lc_16_test)
+
+lc_19_test <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc19_reclassed.tif"))
+#check the coordinate reference system, resolution, extent 
+crs(lc_19_test)
+res(lc_19_test)
+ext(lc_19_test)
+
+# SpatExtent : -380101.0666, 540047.238885548, -605327.054, 450346.970898149 (xmin, xmax, ymin, ymax)
+#land cover is model ready 
+
+```
+
+#Road Density
+```{r}
+#read in layer 
+road_density_test <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/road_density_formatted/road_density_ca.tif"))
+#check the coordinate reference system, resolution, extent 
+crs(road_density_test)
+res(road_density_test)
+ext(road_density_test)
+
+# SpatExtent : -380101.0666, 540047.238885548, -605327.054, 450346.970898149 (xmin, xmax, ymin, ymax)
+#road density is model ready 
+```
+
+#Distance to roads
+```{r}
+#read in layer 
+road_dist_test <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_road/model_ready/roads15_ca_distance.tif"))
+#check the coordinate reference system, resolution, extent 
+crs(road_dist_test)
+res(road_dist_test)
+ext(road_dist_test)
+
+# SpatExtent : -380101.0666, 540047.238885548, -605327.054, 450346.970898149 (xmin, xmax, ymin, ymax)
+#distance to roads is model ready 
+```
+
+#Distance to streams 
+```{r}
+#read in layer 
+stream_dist_test <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_stream/model_ready/stream17_ca_distance.tif"))
+#check the coordinate reference system, resolution, extent 
+crs(stream_dist_test)
+res(stream_dist_test)
+ext(stream_dist_test)
+
+# SpatExtent : -380101.0666, 540047.238885548, -605327.054, 450346.970898149 (xmin, xmax, ymin, ymax)
+#distance to streams is model ready 
+```
+
+#Distance to urban areas 
+```{r}
+#read in layer 
+#urban13
+urban13_dist_test <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_urban/model_ready/ua13_ca_distance.tif"))
+#check the coordinate reference system, resolution, extent 
+crs(urban13_dist_test)
+res(urban13_dist_test)
+ext(urban13_dist_test)
+
+#urban16
+urban16_dist_test <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_urban/model_ready/ua16_ca_distance.tif"))
+#check the coordinate reference system, resolution, extent 
+crs(urban16_dist_test)
+res(urban16_dist_test)
+ext(urban16_dist_test)
+
+#urban19
+urban19_dist_test <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_urban/model_ready/ua19_ca_distance.tif"))
+#check the coordinate reference system, resolution, extent 
+crs(urban19_dist_test)
+res(urban19_dist_test)
+ext(urban19_dist_test)
+
+# SpatExtent : -380101.0666, 540047.238885548, -605327.054, 450346.970898149 (xmin, xmax, ymin, ymax)
+#distance to urban is model ready 
+```
+
+#Distance to reactional areas 
+```{r}
+#read in layer 
+rec_dist_test <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_stream/model_ready/stream17_ca_distance.tif"))
+#check the coordinate reference system, resolution, extent 
+crs(stream_dist_test)
+res(stream_dist_test)
+ext(stream_dist_test)
+
+# SpatExtent : -380101.0666, 540047.238885548, -605327.054, 450346.970898149 (xmin, xmax, ymin, ymax)
+#distance to roads is model ready 
+```
+
+#Distance to forest cover 
+```{r}
+
+```
+
+#Forest density (canopy cover) 
+```{r}
+
+```
+
+

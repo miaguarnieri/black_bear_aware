@@ -10,6 +10,10 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(janitor)
 library(here)
+
+#mia and claire's file path
+gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+
 ```
 
 ## WIR Data
@@ -18,14 +22,18 @@ Here I'll tidy up the WIR data, and remove accidental ' in coordinates
 ## Read in the data 
 
 ```{r}
-WIR_org <- read_csv(here("data", "Bear_WIR_Data_orginal.csv"))
+
+WIR_org <- read_csv(here(gdrive_data,"/InputData/InputData_Files/2022_07_05_WIRunedited_CDFW.csv"))
+
 #the column names are not very clean, lets fix that first
 ```
 ```{r}
 #code chunk to clean the column names 
 WIR_clean <- WIR_org %>% clean_names()
 
-# now all of the columns are in lower snake case, much better :) 
+# now all of the columns are in lower snake case, much better :)
+
+
 ```
 
 ```{r}
@@ -34,6 +42,13 @@ WIR_clean <- WIR_org %>% clean_names()
 WIR_clean$longitude <- gsub("'","",as.character(WIR_clean$longitude))
 
 # Cool, now that ' is taken out of our data, and we can start reading this data in Arc to map out the conflict occurrence points! 
+
+#Now I want to remove a few erronous points. I have two that have bad lat long coordinates so we need to throw out WIR-2016-001081 row 4444  and WIR-2017-002420 row 4192 
+
+WIR_clean_2 <- subset(WIR_clean,select longitude > 40 )
+
+wir_clean_2 <-subset(WIR_clean,longitude < 40)
+
 
 # Exporting.. 
 write.csv(WIR_clean,"WIR_clean.csv", row.names = FALSE)
