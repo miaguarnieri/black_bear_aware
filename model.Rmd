@@ -22,7 +22,7 @@ library(rmapshaper)
 
 #mia, chase, and claire's file path
 
-gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+#gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #sam's file path
 gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
@@ -356,6 +356,7 @@ stack17 <- c(dem, aspect, ter_rug, pop17, lc16, road_dens, road_dist, urban_dist
 
 #nonconflict points 
 zero_vars17 <- extract(stack17, zeros17_formatted, method = "simple", bind = TRUE, ID = TRUE) %>% 
+  as.data.frame() %>% 
   mutate(ID = 0)
 
 #union conflict points before extracting 
