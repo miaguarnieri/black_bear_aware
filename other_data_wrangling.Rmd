@@ -420,3 +420,27 @@ tr_name <- paste0(deparse(substitute(terrain_ruggedness)), ".tif") #the name of 
 writeRaster(terrain_ruggedness, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/terrain_ruggedness", tr_name), filetype = "GTiff", overwrite = TRUE)
 ```
 
+#Messing around with Drought Data
+```{r}
+drought_1 <- vect(here(gdrive_data, "/InputData/InputData_Files/Drought/us_drought_monitor/USDM_20221025.shp"))
+
+drought_1_calbers <- project(drought_1, ca_raster)
+
+drought_1_mask <- crop(drought_1_calbers, ca_raster)
+
+drought_1_raster <- rasterize(drought_1_mask, ca_raster)
+```
+
+```{r}
+saverast <- function(x){
+  
+ name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor", name), filetype = "Gtiff", overwrite=TRUE)
+}
+
+saverast(drought_1_raster)
+```
+
