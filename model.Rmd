@@ -33,8 +33,10 @@ gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 ##Conflict data
 
 ```{r}
-#conflict data - read in and merged to one layer
-conflict <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/conflict_buffered_refined/conflict_buffered_refined.shp"))
+#conflict data
+conflict_buffers <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/conflict_buffered_refined/conflict_buffered_refined.shp"))
+
+conflict_points <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_points/conflict_points.shp"))
 
 #elevation
 dem <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/elevation/dem_formatted.tif"))
@@ -113,25 +115,42 @@ fdens <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_
 
 #extract values for 2016, select only conflict indicator and geometry, and dissolve polygons
 
-con_16 <- conflict %>% 
+con_16 <- conflict_points %>% 
+  separate(incdnt_d, into = c("inc_date", "inc_time"), sep = " ") %>% 
+  separate(inc_date, into = c("month", "day", "year"), sep = "/") %>% 
+  mutate(year = as.character.Date(year),
+         "type" = cnfrmd_,
+         "county" = cnty_nm,
+         "conflict" = 1) %>% 
+  select(conflict, wir_id:year, type, county, geometry) %>% 
+  filter(year == 2016) %>% 
+  select(conflict, geometry)
+
+con_16_buff <- conflict_buffers %>% 
   filter(year == 2016) %>% 
   select(conflict, geometry)
 
 #create a spatvector for processing in terra
 
-con_16_sv <- vect(con_16)
+conpoints_16_sv <- vect(con_16)
+
+conbuff_16_sv <- vect(con_16_buff)
 
 #read in the CA raster
 ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
 
 #make sure conflict is in the same projection
-con_buff16 <- project(con_16_sv,crs(ca_raster))
+conpoints16_reproj <- project(con_16_sv,crs(ca_raster))
 
-con_buff16_sf <- st_as_sf(con_buff16)
+conbuff16_reproj <- project(con_16_sv,crs(ca_raster))
+
+conpoints16_sf <- st_as_sf(conpoints16_reproj)
+
+conbuff16_sf <- st_as_sf(conbuff16_reproj)
 
 #create an inverse mask- Anything withing the conflict buffer shapefiles will be a 0 value. So we get a California raster with all the conflict buffer locations zeroed out
 
-conbuff16_inverse <- mask(ca_raster, con_buff16, inverse = TRUE)
+conbuff16_inverse <- mask(ca_raster, conbuff16_reproj, inverse = TRUE)
 
 tm_shape(conbuff16_inverse) +
   tm_raster() +
@@ -143,21 +162,20 @@ cabuff16_inv_pol <- as.polygons(conbuff16_inverse)
 cabuff16_inv_sf <- st_as_sf(conbuff16_inv_pol)
 
 #sampling random points from this misshapen california shpfile
-sample16 <- st_sample(conbuff16_inv_sf, 427)
+sample16 <- st_sample(conbuff16_inv_sf, 427) %>% 
+  st_as_sf()
 
 #mappping to see what it looks like 
 tm_shape(sample16) +
   tm_dots() +
   tmap_mode("view")
 
-#buffer the sample points
+#buffer the sample points - getting rid of this part for the sake of the model
 
-sample16_buff <- st_buffer(sample16, dist = 5000) %>% 
-  st_as_sf()
+#sample16_buff <- st_buffer(sample16, dist = 5000) %>% 
+#  st_as_sf()
 
 #Testing to make sure the buffer worked
- tm_shape(sample16_buff) +
-   tm_polygons() +
 tm_shape(sample16) +
    tm_dots(col  = "blue") +
 tm_shape(con_buff16_sf)+
@@ -167,7 +185,7 @@ tm_shape(con_buff16_sf)+
  
 #removing non-conflict points that overlap
  
-intersect16 <- st_join(sample16_buff, con_buff16_sf, join = st_intersects, left = FALSE)
+#intersect16 <- st_join(sample16, conbuff16_sf, join = st_intersects, left = FALSE)
 
 #plot intersection
 
@@ -177,20 +195,19 @@ tm_shape(intersect) +
 
 #remove the intersecting polygons
 
-zeros16 <- ms_erase(target = sample16_buff, erase = intersect16, remove_slivers = FALSE)
+zeros16 <- ms_erase(target = sample16, erase = conbuff16_sf)
  
  #plot to check that there is no overlap
  
  tm_shape(con_buff16_sf) +
    tm_polygons(col = "blue") +
   tm_shape(zeros16) +
-   tm_polygons() +
+   tm_dots() +
   tmap_mode("view")
 
 zeros16_formatted <- zeros16 %>% 
   mutate(conflict = 0) %>% 
   select(conflict, geometry) %>% 
-  st_union() %>% 
   vect()
 
 #create a raster stack of all variables
