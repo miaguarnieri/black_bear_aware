@@ -394,8 +394,9 @@ modeldf_17_year <- model_df_17 %>%
 ##2018
 
 ##2019
+
 ```{r}
-#vector error for chase
+#extract values for 2016, select only conflict indicator and geometry, and dissolve polygons
 con_19 <- conflict_points %>% 
   separate(incdnt_d, into = c("inc_date", "inc_time"), sep = " ") %>% 
   separate(inc_date, into = c("month", "day", "year"), sep = "/") %>% 
@@ -499,6 +500,7 @@ stack19 <- c(dem, aspect, ter_rug, pop19, lc19, road_dens, road_dist, streams_di
 
 #nonconflict points
 zero_vars19 <- extract(stack19, zeros19_formatted, method = "simple", bind = TRUE, ID = TRUE) %>% 
+  as.data.frame() %>% 
   mutate(ID = 0)
 
 #union conflict points before extracting
@@ -518,6 +520,14 @@ colnames(model_df_19) <- c("ID", "dem", "aspect", "TRI", "popdens1", "popdens2",
 modeldf_19_year <- model_df_19 %>% 
   mutate(year = 2019)
 ```
+
+```{r}
+#save the file
+
+save(modeldf_19_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/10_31_2022/modeldf_19.csv"))
+
+```
+
 
 ##2020
 
