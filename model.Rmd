@@ -382,6 +382,7 @@ modeldf_17_year <- model_df_17 %>%
 
 ##2019
 ```{r}
+
 con_19 <- conflict_points %>% 
   separate(incdnt_d, into = c("inc_date", "inc_time"), sep = " ") %>% 
   separate(inc_date, into = c("month", "day", "year"), sep = "/") %>% 
