@@ -17,6 +17,9 @@ library(here)
 library(terra)
 library(sf)
 library(tmap)
+library(beepr)
+library(rgeos)
+library(rmapshaper)
 
 #mia and claire's file path
 gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
@@ -142,7 +145,10 @@ tm_shape(arc_buffers) +
 tmap_mode("view")
 
 #refining buffer data; only keeping columns we need and sorting the dates to be readable by R
+<<<<<<< HEAD
 
+=======
+>>>>>>> 016714a0a8b6b012acc00003ccad82419ac30233
 conflict_buffer_refined <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_buffered/conflict_buffered.shp")) %>% 
   separate(incdnt_d, into = c("inc_date", "inc_time"), sep = " ") %>% 
   separate(inc_date, into = c("month", "day", "year"), sep = "/") %>% 
@@ -151,11 +157,123 @@ conflict_buffer_refined <- read_sf(here(gdrive_data, "/IntermediateData/Intermed
          "county" = cnty_nm,
          "conflict" = 1) %>% 
   select(conflict, wir_id:year, type, county, geometry)
+<<<<<<< HEAD
 
 #saving the file to intermediate data in the gdrive
 
  st_write(conflict_buffer_refined, dsn = here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_buffered_refined", "conflict_buffered_refined.shp"))
+=======
+#saving the file to intermediate data in the gdrive
+ st_write(conflict_buffer_refined, dsn = here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_buffered_refined", "conflict_buffered_refined.shp"))
+
+>>>>>>> 016714a0a8b6b012acc00003ccad82419ac30233
 ```
+
+```{r}
+#creation of zero (non-conflict) points
+
+#generate random points within CA and buffer
+
+#make CA raster a shapefile
+
+ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
+
+ca_pol <- as.polygons(ca_raster)
+
+ca_sf <- st_as_sf(ca_pol)
+
+sample_points <- st_sample(ca_sf, 4663) %>% 
+  st_as_sf()
+
+sample_buff <- st_buffer(sample_points, dist = 5000)
+
+#load in conflict buffer
+
+con_buff <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_buffered_refined/conflict_buffered_refined.shp"))
+
+#select for the ones that are NOT intersecting
+
+ zeros <- ms_erase(sample_points,con_buff)
+```
+
+#claire's way of getting zeros
+```{r}
+#reading in CA raster 
+ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
+#reading in conflict buffer shp file
+con_buff <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_buffered_refined/conflict_buffered_refined.shp"))
+
+#Making sure con_buf is in the same projection
+con_buff <- st_transform(con_buff,crs(ca_raster))
+
+#Doing an inverse mask- Anything withing the conflict buffer shapefiles will be a 0 value. So we get a california raster with all the conflict buffer locations zeroed out
+con_buff_inverse <- mask(ca_raster, con_buff, inverse = TRUE)
+
+# Mapping just to be sure it lookes right:
+tm_shape(con_buff_inverse) +
+  tm_raster() +
+  tmap_mode("view")
+
+#making con_buff_inverse a shapefile 
+ca_buff_pol <- as.polygons(con_buff_inverse)
+
+ca_buff_sf <- st_as_sf(ca_buff_pol)
+
+#mapping to make sure all looks okay 
+
+tm_shape(ca_buff_sf) +
+   tm_polygons()  +
+   tmap_mode("view")
+
+#sampling random points from this misshapen california shpfile
+sample_points_claire <- st_sample(ca_buff_sf, 4663)
+
+#mappping to see what it looks like 
+tm_shape(sample_points_claire) +
+  tm_dots() +
+  tmap_mode("view")
+
+#Buffering random points out. Because we're doing this, we will need to clip the geometry one more time later on if possible (?) bc these point buffered out might mess up where are conflict points are
+
+sample_points_buffered <- st_buffer(sample_points_claire, dist = 5000)
+
+#Testing to make sure the buffer worked
+ tm_shape(sample_points_buffered) +
+   tm_polygons() +
+  tm_shape(sample_points_claire) +
+   tm_dots(col  = "blue") +
+   tmap_mode("view")+ 
+   tm_shape(con_buff)+
+   tm_polygons(col  = "red")
+ 
+ 
+ #cropping sample_points_buffered by conflict_points_buffered
+ #This is where I can't get the code to run 
+ 
+ #conflict_points <- st_difference(sample_points_buffered,con_buff)
+ 
+ #so instead I'm going to try it with the function ms_erase package rmapshaper which might be faster 
+ 
+ zeros_claire <- ms_erase(sample_points_buffered,con_buff)
+ #map to see what it looks like 
+ 
+ tm_shape(zeros_claire) +
+   tm_polygons(col  = "green") +
+   tmap_mode("view")
+ 
+ #mapping it, I can see that worked! We could probably go back to Mia's way of doing zeros now that we know this function runs faster. The nice thing about mine is we should have a lot of zeros still 
+ 
+ #Now we need to join conflict and non conflict points into one df
+#I think the first step will be to make a conflict column in the zeros_claire dataframe that has conflict = 0 
+ 
+ 
+ 
+```
+
+
+
+
+
 
 ##Elevation (DEM, mean elevation)
 
@@ -204,10 +322,18 @@ crs(albers_roads_2015_tiger)
 
 #read in newly created road density. Road density was created in ArcGIS Pro from Roads 2015 Tiger layer. It was created by Claire on 10/23/2022 using the ArcGIS Pro tool line density 
 
-road_density <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/road_density_arc/2022_10_26_RoadDensity_ClaireERSI.tif"))
+road_density <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/road_density_arc/road_density_arc.tif"))
+
+#need to fix extents do not match error code
+road_density_resample  = resample(road_density, ca_raster)
 
 #masking the layer to CA
-road_density_ca <- mask(road_density, ca_raster)
+road_density_ca <- mask(road_density_resample, ca_raster)
+
+#This road_density_ca is now ready to be read into the main model. Saving it back to gdrive as road density formatted 
+
+writeRaster(road_density_ca, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/road_density_formatted/road_density_ca.tif"), filetype = "GTiff", overwrite = TRUE)
+
 
 ```
 
