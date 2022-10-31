@@ -218,7 +218,8 @@ stack16 <- c(dem, aspect, ter_rug, pop16, lc16, road_dens, road_dist, streams_di
 #extract data points from these rasters and add them to the shapefile dataframe
 
 #nonconflict points
-zero_vars16 <- extract(stack16, zeros16_formatted, method = "simple", bind = TRUE, ID = TRUE) %>% 
+zero_vars16 <- extract(stack16, zeros16_formatted, method = "simple", bind = TRUE, ID = TRUE) %>%
+  as.data.frame() %>% 
   mutate(ID = 0)
 
 #union conflict points before extracting
@@ -492,6 +493,7 @@ stack21 <- c(dem, aspect, ter_rug, pop21, lc19, road_dens, road_dist, streams_di
 
 #nonconflict points
 zero_vars21 <- extract(stack21, zeros21_formatted, method = "simple", bind = TRUE, ID = TRUE) %>% 
+  as.data.frame() %>% 
   mutate(ID = 0)
 
 #union conflict points before extracting
