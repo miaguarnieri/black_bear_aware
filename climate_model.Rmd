@@ -1,0 +1,126 @@
+---
+title: "climate_model"
+author: "Chase Tarr"
+date: "10/31/2022"
+output: html_document
+---
+
+##Setup and packages
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+#attach packages
+library(tidyverse)
+library(here)
+library(terra)
+library(sf)
+library(tmap)
+library(lubridate)
+library(ResourceSelection)
+library(rmapshaper)
+
+#mia, chase, and claire's file path
+
+gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+
+#sam's file path
+#gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
+
+```
+
+#Load in data layers
+
+##Conflict data
+
+```{r}
+#conflict data
+conflict_buffers <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/conflict_buffered_refined/conflict_buffered_refined.shp"))
+
+conflict_points <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_points/conflict_points.shp"))
+
+#elevation
+dem <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/elevation/dem_formatted.tif"))
+
+#aspect
+aspect <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/aspect/aspect.tif"))
+
+#terrain ruggedness
+ter_rug <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/terrain_ruggedness/terrain_ruggedness.tif"))
+
+#human pop density
+
+pop16 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/population_density/pop_den_2016_mask.tif"))
+
+pop17 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/population_density/pop_den_2017_mask.tif"))
+
+pop18 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/population_density/pop_den_2018_mask.tif"))
+
+pop19 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/population_density/pop_den_2019_mask.tif"))
+
+pop20 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/population_density/pop_den_2020_mask.tif"))
+
+pop21 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/population_density/pop_den_2021_mask.tif"))
+
+#land cover
+
+lc13 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/land_cover/lc13_reclassed.tif"))
+
+lc16 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/land_cover/lc16_reclassed.tif"))
+
+lc19 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/land_cover/lc19_reclassed.tif"))
+
+#road density
+
+road_dens <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/road_density/road_density_ca.tif"))
+
+#distance to roads
+
+road_dist <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_road/model_ready/roads15_ca_distance.tif"))
+
+#distance to streams
+
+streams_dist <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_stream/model_ready/stream17_ca_distance.tif"))
+
+#distance to urban areas
+
+urban_dist_13 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_urban/model_ready/ua13_ca_distance.tif"))
+
+urban_dist_16 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_urban/model_ready/ua16_ca_distance.tif"))
+
+urban_dist_19 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_urban/model_ready/ua19_ca_distance.tif"))
+
+#distance to recreational areas
+
+rec_dist <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_rec/model_ready/rec_ca_distance.tif"))
+
+#distance to forest cover
+
+fc_dist_13 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_forest/model_ready/fc13_ca_distance.tif"))
+
+fc_dist_16 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_forest/model_ready/fc16_ca_distance.tif"))
+
+fc_dist_19 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_forest/model_ready/fc19_ca_distance.tif"))
+
+#forest density
+
+fdens <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/forest_density/forest_dens_2016_mask.tif"))
+
+#drought current - historical
+
+drought_2016 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2016/drought_2016_raster.tif"))
+
+drought_2017 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2017/drought_2017_raster.tif"))
+
+drought_2018 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2018/drought_2018_raster.tif"))
+
+drought_2019 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2019/drought_2019_raster.tif"))
+
+drought_2020 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2020/drought_2020_raster.tif"))
+
+drought_2021 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2021/drought_2021_raster.tif"))
+
+drought_2022 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2022/drought_2022_raster.tif"))
+
+#fire
+```
