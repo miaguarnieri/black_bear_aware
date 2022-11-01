@@ -1,0 +1,583 @@
+---
+title: "Other Data Wrangling"
+author: "Mia Guarnieri"
+date: '2022-10-19'
+output: html_document
+---
+
+##Setup and packages
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#attach packages
+#note - Loading all of the ones Jason used, I don't think we will need all of them 
+
+library(tidyverse)
+library(here)
+library(terra)
+library(sf)
+library(tmap)
+library(beepr)
+library(rgeos)
+library(rmapshaper)
+
+#mia and claire's file path
+gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+
+#sam's file path
+#gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
+
+#chase's file path
+
+```
+
+#Data Wrangling Prior to Coding
+
+*Data Sources*: Please see ReadMe file for metadata and citations.
+*Reference Paper*: Insert hagani citation here
+
+#Load in existing data layers
+
+##California raster
+
+Insert info about CA raster layer here
+
+```{r}
+ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
+
+#check the coordinate reference system 
+crs(ca_raster)
+
+
+#plot CA raster to confirm
+tm_shape(ca_raster) +
+  tm_raster() +
+  tmap_mode("view")
+
+```
+
+##Conflict data
+
+Insert info about WIR data here
+
+```{r}
+#Buffer conflict points to create conflict raster
+
+# load in conflict data 
+conflict_points <- read_csv(here(gdrive_data,"/IntermediateData/IntermediateData_Files/2022_07_18_WIRClean_CDFW.csv"))
+
+# turn conflict_points into a sf object from data frame 
+
+#st_as_sf(conflict_points, coords = "latitude","longitude")
+conflict_points_sf <- st_as_sf(conflict_points,coords = c("longitude","latitude"), crs = 4326)
+
+#4326 is code for WGS 84- map does not render properly otherwise, so we need to reproject  to 6414 (NAD83(2011) / California Albers) (but also I think this issue might go away when I remove the error points that are outside CA)
+
+#reprojecting to NAD83(2011) / California Albers
+conflict_points_albers <- st_transform(conflict_points_sf,crs = 6414)
+
+#plot to check for erroneous points
+
+tm_shape(conflict_points_albers) +
+  tm_dots() +
+  tmap_mode("view")
+
+#wir_id of erroneous points: WIR-2016-001081, WIR-2017-002420
+
+#filter erroneous points out of the WIR data
+
+conflict <- conflict_points_albers %>% 
+  filter(wir_id != "WIR-2016-001081",
+         wir_id != "WIR-2017-002420")
+
+#plot to double check
+tm_shape(conflict) +
+  tm_dots() +
+  tmap_mode("view")
+
+#saving the file to intermediate data in the gdrive
+
+st_write(conflict, dsn = here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_points", "conflict_points.shp"))
+
+#test: reading from the gdrive to make sure it works and plotting it
+
+con_points <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_points/conflict_points.shp"))
+
+tm_shape(con_points) +
+  tm_dots() +
+  tmap_mode("view")
+
+#buffering points using SF fuction st_buffer. Units are in meters
+conflict_points_buffered <- st_buffer(con_points, dist = 5000)
+
+#plot to confirm
+
+ tm_shape(conflict_points_buffered) +
+   tm_polygons() +
+  tm_shape(con_points) +
+   tm_dots(col  = "blue") +
+   tmap_mode("view")
+ 
+#saving the file to intermediate data in the gdrive
+
+ st_write(conflict_points_buffered, dsn = here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_buffered", "conflict_buffered.shp"))
+
+#test: reading from the gdrive to make sure it works and plotting it
+
+con_buffer <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_buffered/conflict_buffered.shp"))
+
+tm_shape(con_buffer) +
+  tm_polygons() +
+tm_shape(con_points) +
+   tm_dots(col  = "blue") +
+tmap_mode("view")
+
+#comparing arc vs r generated buffers
+
+arc_buffers <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_buffer_test/conflict_points_buffer_arctest.shp"))
+
+conflict_buffer <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_buffered/conflict_buffered.shp"))
+
+tm_shape(conflict_buffer) +
+  tm_polygons() +
+tm_shape(arc_buffers) +
+  tm_polygons(col = "blue") +
+tmap_mode("view")
+
+#refining buffer data; only keeping columns we need and sorting the dates to be readable by R
+
+conflict_buffer_refined <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_buffered/conflict_buffered.shp")) %>% 
+  separate(incdnt_d, into = c("inc_date", "inc_time"), sep = " ") %>% 
+  separate(inc_date, into = c("month", "day", "year"), sep = "/") %>% 
+  mutate(year = as.character.Date(year),
+         "type" = cnfrmd_,
+         "county" = cnty_nm,
+         "conflict" = 1) %>% 
+  select(conflict, wir_id:year, type, county, geometry)
+
+#saving the file to intermediate data in the gdrive
+
+ st_write(conflict_buffer_refined, dsn = here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_buffered_refined", "conflict_buffered_refined.shp"))
+
+```
+
+```{r}
+#creation of zero (non-conflict) points
+
+#generate random points within CA and buffer
+
+#make CA raster a shapefile
+
+ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
+
+ca_pol <- as.polygons(ca_raster)
+
+ca_sf <- st_as_sf(ca_pol)
+
+sample_points <- st_sample(ca_sf, 4663) %>% 
+  st_as_sf()
+
+sample_buff <- st_buffer(sample_points, dist = 5000)
+
+#buffer sample points
+sample_points_buff <- st_buffer(sample_points_claire, dist = 5000)
+
+#load in conflict buffer
+
+con_buff <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_buffered_refined/conflict_buffered_refined.shp"))
+
+
+#select for the ones that are NOT intersecting
+
+ zeros <- ms_erase(sample_points,con_buff)
+
+```
+
+#claire's way of getting zeros
+```{r}
+#reading in CA raster 
+ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
+#reading in conflict buffer shp file
+con_buff <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_buffered_refined/conflict_buffered_refined.shp"))
+
+#Making sure con_buf is in the same projection
+con_buff <- st_transform(con_buff,crs(ca_raster))
+
+#Doing an inverse mask- Anything withing the conflict buffer shapefiles will be a 0 value. So we get a california raster with all the conflict buffer locations zeroed out
+con_buff_inverse <- mask(ca_raster, con_buff, inverse = TRUE)
+
+# Mapping just to be sure it lookes right:
+tm_shape(con_buff_inverse) +
+  tm_raster() +
+  tmap_mode("view")
+
+#making con_buff_inverse a shapefile 
+ca_buff_pol <- as.polygons(con_buff_inverse)
+
+ca_buff_sf <- st_as_sf(ca_buff_pol)
+
+#mapping to make sure all looks okay 
+
+tm_shape(ca_buff_sf) +
+   tm_polygons()  +
+   tmap_mode("view")
+
+#sampling random points from this misshapen california shpfile
+sample_points_claire <- st_sample(ca_buff_sf, 4663)
+
+#mappping to see what it looks like 
+tm_shape(sample_points_claire) +
+  tm_dots() +
+  tmap_mode("view")
+
+#Buffering random points out. Because we're doing this, we will need to clip the geometry one more time later on if possible (?) bc these point buffered out might mess up where are conflict points are
+
+sample_points_buffered <- st_buffer(sample_points_claire, dist = 5000)
+
+#Testing to make sure the buffer worked
+ tm_shape(sample_points_buffered) +
+   tm_polygons() +
+  tm_shape(sample_points_claire) +
+   tm_dots(col  = "blue") +
+   tmap_mode("view")+ 
+   tm_shape(con_buff)+
+   tm_polygons(col  = "red")
+ 
+ 
+ #cropping sample_points_buffered by conflict_points_buffered
+ #This is where I can't get the code to run 
+ 
+ #conflict_points <- st_difference(sample_points_buffered,con_buff)
+ 
+ #so instead I'm going to try it with the function ms_erase package rmapshaper which might be faster 
+ 
+ zeros_claire <- ms_erase(sample_points_buffered,con_buff)
+ #map to see what it looks like 
+ 
+ tm_shape(zeros_claire) +
+   tm_polygons(col  = "green") +
+   tmap_mode("view")
+ 
+  tm_shape(con_buff) +
+  tm_polygons(alpha = 0.5) +
+tm_shape(zeros_claire) +
+   tm_polygons(col = "blue")+
+tmap_mode("view")
+ 
+ #mapping it, I can see that worked! We could probably go back to Mia's way of doing zeros now that we know this function runs faster. The nice thing about mine is we should have a lot of zeros still 
+ 
+ #Now we need to join conflict and non conflict points into one df
+#I think the first step will be to make a conflict column in the zeros_claire dataframe that has conflict = 0 
+ 
+zeros_df <- as(zeros_claire, "Spatial" )
+ 
+zeros_df1 <-as(zeros_df, "SpatialPolygonsDataFrame")
+
+zeros_df2 <- as(zeros_df1, "data.frame")
+```
+
+
+
+
+
+
+##Elevation (DEM, mean elevation)
+
+Two separate DEM rasters were available at 7.5-arc second resolution from USGS EROS. These will need to be merged togther.
+
+```{r}
+
+#northern California raster
+
+dem_norcal <- rast(here(gdrive_data, "/InputData/InputData_Files/2010_DEM_USGSEROS_Norcal/30n150w_20101117_gmted_mea075.tif"))
+
+#southern California raster
+
+dem_socal <- rast(here(gdrive_data, "/InputData/InputData_Files/2010_DEM_USGSEROS_Socal/30n120w_20101117_gmted_mea075.tif"))
+
+#merging the two rasters
+
+dem_ca <- merge(dem_norcal, dem_socal)
+
+#plot DEM raster
+tm_shape(dem_ca) +
+  tm_raster() +
+  tmap_mode("view")
+
+```
+
+##Road density
+
+```{r}
+#road_density_2014 <- rast(here(gdrive_data,"/InputData/InputData_Files/2014_UsaRoadDensity_ESRI/2014_UsaRoadDensity_ESRI.tif"))
+
+#We're no longer using above road_density_2014 layer. Instead we'll read in the roads layer, reproject it, and export it to ArcGIS to use tool line density
+
+#reading in roads polyline: 
+roads_2015_tiger <- vect(here(gdrive_data,"/InputData/InputData_Files/2015_roads_TIGER/tl_2015_06_prisecroads.shp"))
+
+#Reprojecting roads layer
+albers_roads_2015_tiger <- project(roads_2015_tiger, ca_raster)
+
+#Check coordinate system
+crs(albers_roads_2015_tiger)
+
+#export roads density - ONLY NEED TO DO ONCE, HAS BEEN DONE
+# writeVector(albers_roads_2015_tiger,filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/2015_roads_TIGER_Formatted/albers_roads_2015_tiger"))
+
+
+#read in newly created road density. Road density was created in ArcGIS Pro from Roads 2015 Tiger layer. It was created by Claire on 10/23/2022 using the ArcGIS Pro tool line density 
+
+road_density <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/road_density_arc/road_density_arc.tif"))
+
+#need to fix extents do not match error code
+road_density_resample  = resample(road_density, ca_raster)
+
+#masking the layer to CA
+road_density_ca <- mask(road_density_resample, ca_raster)
+
+#This road_density_ca is now ready to be read into the main model. Saving it back to gdrive as road density formatted 
+
+writeRaster(road_density_ca, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/road_density_formatted/road_density_ca.tif"), filetype = "GTiff", overwrite = TRUE)
+
+
+```
+
+
+#Adjust the data to the same geographic extent and projection
+
+
+
+##Conflict
+
+```{r}
+
+```
+
+##Elevation
+```{r}
+#reproject to the same crs (NAD 83, CA Albers (2011)) and resolution (~230 m) as all other data
+dem_calbers <- project(dem_ca, ca_raster)
+
+#cropping to the spatial extent of CA
+dem_formatted <- mask(dem_calbers, ca_raster)
+
+#save the new file in intermediate data
+
+#function to save rasters, updated with correct filepath
+
+saverast <- function(x){
+  
+  name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+  #write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/Elevation_Formatted", name), filetype = "GTiff", overwrite = TRUE)
+  
+}
+
+saverast(dem_formatted)
+
+```
+
+
+
+## Creating aspect and terrian 
+```{r}
+#aspect
+# reading in elevation data 
+elev <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/Elevation_Formatted/dem_formatted.tif"))
+
+aspect <- terrain(elev,v = "aspect",neighbors = 8)
+#I think this worked? 
+
+#save the raster
+
+aspect_name <- paste0(deparse(substitute(aspect)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+
+writeRaster(aspect, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/aspect", aspect_name), filetype = "GTiff", overwrite = TRUE)
+
+
+# terrian ruggedness
+terrain_ruggedness <- terrain(elev,v = "TRI",neighbors = 8)
+
+#save the raster
+
+tr_name <- paste0(deparse(substitute(terrain_ruggedness)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+
+writeRaster(terrain_ruggedness, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/terrain_ruggedness", tr_name), filetype = "GTiff", overwrite = TRUE)
+```
+
+#Messing around with Drought Data
+
+#2022
+```{r}
+drought_2022 <- vect(here(gdrive_data, "/InputData/InputData_Files/Drought/us_drought_monitor/2022/USDM_20221025.shp"))
+
+drought_2022_calbers <- project(drought_2022, ca_raster)
+
+drought_2022_mask <- crop(drought_2022_calbers, ca_raster)
+
+drought_2022_raster <- rasterize(drought_2022_mask, ca_raster)
+```
+
+```{r}
+saverast <- function(x){
+  
+ name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2022", name), filetype = "Gtiff", overwrite=TRUE)
+}
+
+saverast(drought_2022_raster)
+```
+
+# 2016
+```{r}
+drought_2016 <- vect(here(gdrive_data, "/InputData/InputData_Files/Drought/us_drought_monitor/2016/USDM_20161227.shp"))
+
+drought_2016_calbers <- project(drought_2016, ca_raster)
+
+drought_2016_mask <- crop(drought_2016_calbers, ca_raster)
+
+drought_2016_raster <- rasterize(drought_2016_mask, ca_raster)
+```
+
+```{r}
+saverast <- function(x){
+  
+ name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2016", name), filetype = "Gtiff", overwrite=TRUE)
+}
+
+saverast(drought_2016_raster)
+```
+
+#2017
+```{r}
+drought_2017 <- vect(here(gdrive_data, "/InputData/InputData_Files/Drought/us_drought_monitor/2017/USDM_20170905.shp"))
+
+drought_2017_calbers <- project(drought_2017, ca_raster)
+
+drought_2017_mask <- crop(drought_2017_calbers, ca_raster)
+
+drought_2017_raster <- rasterize(drought_2017_mask, ca_raster)
+```
+
+```{r}
+saverast <- function(x){
+  
+ name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2017", name), filetype = "Gtiff", overwrite=TRUE)
+}
+
+saverast(drought_2017_raster)
+```
+
+#2018
+```{r}
+drought_2018 <- vect(here(gdrive_data, "/InputData/InputData_Files/Drought/us_drought_monitor/2018/USDM_20180904.shp"))
+
+drought_2018_calbers <- project(drought_2018, ca_raster)
+
+drought_2018_mask <- crop(drought_2018_calbers, ca_raster)
+
+drought_2018_raster <- rasterize(drought_2018_mask, ca_raster)
+```
+
+```{r}
+saverast <- function(x){
+  
+ name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2018", name), filetype = "Gtiff", overwrite=TRUE)
+}
+
+saverast(drought_2018_raster)
+```
+
+#2019
+```{r}
+drought_2019 <- vect(here(gdrive_data, "/InputData/InputData_Files/Drought/us_drought_monitor/2019/USDM_20190903.shp"))
+
+drought_2019_calbers <- project(drought_2019, ca_raster)
+
+drought_2019_mask <- crop(drought_2019_calbers, ca_raster)
+
+drought_2019_raster <- rasterize(drought_2019_mask, ca_raster)
+```
+
+```{r}
+saverast <- function(x){
+  
+ name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2019", name), filetype = "Gtiff", overwrite=TRUE)
+}
+
+saverast(drought_2019_raster)
+```
+
+#2020
+```{r}
+drought_2020 <- vect(here(gdrive_data, "/InputData/InputData_Files/Drought/us_drought_monitor/2020/USDM_20200908.shp"))
+
+drought_2020_calbers <- project(drought_2020, ca_raster)
+
+drought_2020_mask <- crop(drought_2020_calbers, ca_raster)
+
+drought_2020_raster <- rasterize(drought_2020_mask, ca_raster)
+```
+
+```{r}
+saverast <- function(x){
+  
+ name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2020", name), filetype = "Gtiff", overwrite=TRUE)
+}
+
+saverast(drought_2020_raster)
+```
+
+#2021
+```{r}
+drought_2021 <- vect(here(gdrive_data, "/InputData/InputData_Files/Drought/us_drought_monitor/2021/USDM_20210907.shp"))
+
+drought_2021_calbers <- project(drought_2021, ca_raster)
+
+drought_2021_mask <- crop(drought_2021_calbers, ca_raster)
+
+drought_2021_raster <- rasterize(drought_2021_mask, ca_raster)
+```
+
+```{r}
+saverast <- function(x){
+  
+ name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2021", name), filetype = "Gtiff", overwrite=TRUE)
+}
+
+saverast(drought_2021_raster)
+```
