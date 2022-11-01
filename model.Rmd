@@ -22,10 +22,10 @@ library(rmapshaper)
 
 #mia, chase, and claire's file path
 
-gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+#gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #sam's file path
-#gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
+gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 
 ```
 
@@ -370,6 +370,7 @@ stack17 <- c(dem, aspect, ter_rug, pop17, lc16, road_dens, road_dist, urban_dist
 
 #nonconflict points 
 zero_vars17 <- extract(stack17, zeros17_formatted, method = "simple", bind = TRUE, ID = TRUE) %>% 
+  as.data.frame() %>% 
   mutate(ID = 0)
 
 #union conflict points before extracting 
@@ -652,6 +653,111 @@ modeldf_19_year <- model_df_19 %>%
 ```
 
 ##2020
+```{r}
+
+#extract values for 2020, select only conflict indicator and geometry, and dissolve polygons
+con_20 <- conflict_points %>% 
+  separate(incdnt_d, into = c("inc_date", "inc_time"), sep = " ") %>% 
+  separate(inc_date, into = c("month", "day", "year"), sep = "/") %>% 
+  mutate(year = as.character.Date(year),
+         "type" = cnfrmd_,
+         "county" = cnty_nm,
+         "conflict" = 1) %>% 
+  select(conflict, wir_id:year, type, county, geometry) %>% 
+  filter(year == 2020) %>% 
+  select(conflict, geometry)
+con_20_buff <- conflict_buffers %>% 
+  filter(year == 2020) %>% 
+  select(conflict, geometry)
+#create a spatvector for processing in terra
+conpoints_20_sv <- vect(con_20)
+conbuff_20_sv <- vect(con_20_buff)
+#read in the CA raster
+ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
+#make sure conflict is in the same projection
+conpoints20_reproj <- project(conpoints_20_sv,crs(ca_raster))
+conbuff20_reproj <- project(conbuff_20_sv,crs(ca_raster))
+conpoints20_sf <- st_as_sf(conpoints20_reproj)
+conbuff20_sf <- st_as_sf(conbuff20_reproj)
+
+#create an inverse mask- Anything withing the conflict buffer shapefiles will be a 0 value. So we get a California raster with all the conflict buffer locations zeroed out
+conbuff20_inverse <- mask(ca_raster, conbuff20_reproj, inverse = TRUE)
+tm_shape(conbuff20_inverse) +
+  tm_raster() +
+  tmap_mode("view")
+
+#making the inverse raster a shapefile 
+cabuff20_inv_pol <- as.polygons(conbuff20_inverse)
+cabuff20_inv_sf <- st_as_sf(cabuff20_inv_pol)
+
+#sampling random points from this misshapen california shpfile
+sample20 <- st_sample(cabuff20_inv_sf, 799) %>% 
+  st_as_sf()
+
+#mappping to see what it looks like 
+tm_shape(sample20) +
+  tm_dots() +
+  tmap_mode("view")
+#buffer the sample points - getting rid of this part for the sake of the model
+#sample16_buff <- st_buffer(sample16, dist = 5000) %>% 
+#  st_as_sf()
+#Testing to make sure the buffer worked
+# tm_shape(sample16) +
+#    tm_dots(col  = "blue") +
+# tm_shape(con_buff16_sf)+
+#    tm_polygons(col  = "red") +
+#    tmap_mode("view")
+ 
+#removing non-conflict points that overlap
+ 
+#intersect16 <- st_join(sample16, conbuff16_sf, join = st_intersects, left = FALSE)
+#plot intersection
+# 
+# tm_shape(intersect) +
+#   tm_polygons() +
+#   tmap_mode("view")
+#remove the intersecting polygons
+zeros20 <- ms_erase(target = sample20, erase = conbuff20_sf)
+ 
+ #plot to check that there is no overlap
+ 
+ tm_shape(conbuff20_sf) +
+   tm_polygons(col = "blue") +
+  tm_shape(zeros20) +
+   tm_dots() +
+  tmap_mode("view")
+ 
+
+zeros20_formatted <- zeros20 %>% 
+  mutate(conflict = 0) %>% 
+  select(conflict, geometry) %>% 
+  vect()
+
+#create a raster stack of all variables
+stack20 <- c(dem, aspect, ter_rug, pop20, lc19, road_dens, road_dist, streams_dist, urban_dist_19, rec_dist, fc_dist_19, fdens)
+#extract data points from these rasters and add them to the shapefile dataframe
+
+#nonconflict points
+zero_vars20 <- extract(stack20, zeros20_formatted, method = "simple", bind = TRUE, ID = TRUE) %>%
+  as.data.frame() %>% 
+  mutate(ID = 0)
+#union conflict points before extracting
+con_union20 <- con_20 %>% 
+  st_union() %>% 
+  vect()
+con_vars20 <- extract(stack20, con_union20, method = "simple", bind = TRUE, ID = TRUE)
+
+#combine conflict and non-conflict
+model_df_20 <- rbind(zero_vars20, con_vars20)
+colnames(model_df_20) <- c("ID", "dem", "aspect", "TRI", "popdens1", "popdens2", "popdens3", "popdens4", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens")
+
+#run it in the model
+model20 <- rspf(ID ~ dem + aspect + TRI + popdens1 + popdens2 + popdens3 + popdens4 + lc + road_dens + road_dist + streams_dist + urban_dist + rec_dist + forest_dist + forest_dens, family = "binomial", m = 0, B = 1000, data = model_df_20)
+
+#label the year for later binding with other dfs
+modeldf_20_year <- model_df_16 %>% 
+  mutate(year = 2020)
+```
 
 ##2021
 
