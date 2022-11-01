@@ -15,30 +15,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(rgdal) #for loading vector data 
 library(ggplot2)
 library(terra) #or loading raster data
-library(dismo)
-library(rJava)
-library(spThin)
-library(bbmle)
-library(Rlab)
-library(ResourceSelection)
-library(mctest)
-library(dplyr)
-library(randomForest)
-library(corrplot)
-library(ENMeval)
-library(biomod2)
-library(jtools)
-library(car)
-library(mgcv)
-library(lubridate)
-library(ROCR)
-library(Metrics)
-library(MuMIn)
-library(boot)
-library(splines)
 library(tidyverse)
-
-
 ```
 
 #Data Wrangling Prior to Coding
@@ -193,8 +170,14 @@ forest_dens_2016 <- raster("G:/Data/InputData/InputData_Files/TreeCanopyCover_NL
 
 Step 1: Adjust the data to the same geographic extent and projection
 ```{r}
+#reference raster of CA
+
+ca_raster <- raster("G:/Data/IntermediateData/IntermediateData_Files/CARaster_Tiger_Reclassed/CARaster_Tiger_Reclassed.img")
+
+
 #elevation
 
+elev_reproj <- projectRaster(dem_ca, "epsg:3310")
 
 
 ```
