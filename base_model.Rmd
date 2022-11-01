@@ -1131,6 +1131,13 @@ model_data_allyears <- rbind(df16, df17, df18, df19, df20, df21, df22)
 
 ```
 
+```{r}
+#save the all year data frame
+
+write.csv(model_data_allyears, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/11_1_2022/model_data_allyears.csv"), row.names = FALSE)
+```
+
+
 #Run the base model for all years
 
 ```{r}
