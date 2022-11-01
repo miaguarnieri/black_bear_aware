@@ -218,8 +218,9 @@ stack16 <- c(dem, aspect, ter_rug, pop16, lc16, road_dens, road_dist, streams_di
 #extract data points from these rasters and add them to the shapefile dataframe
 
 #nonconflict points
-zero_vars16 <- extract(stack16, zeros16_formatted, method = "simple", bind = TRUE, ID = TRUE) %>% 
-  as.data.frame() %>%
+
+zero_vars16 <- extract(stack16, zeros16_formatted, method = "simple", bind = TRUE, ID = TRUE) %>%
+  as.data.frame() %>% 
   mutate(ID = 0)
 
 #union conflict points before extracting
@@ -237,12 +238,24 @@ colnames(model_df_16) <- c("ID", "dem", "aspect", "TRI", "popdens1", "popdens2",
 
 #run it in the model
 
-#model16 <- rspf(ID ~ dem + aspect + TRI + popdens1 + popdens2 + popdens3 + popdens4 + lc + road_dens + road_dist + streams_dist + urban_dist + rec_dist + forest_dist + forest_dens, family = "binomial", m = 0, B = 1000, data = model_df_16)
+model16 <- rspf(ID ~ dem + aspect + TRI + popdens1 + popdens2 + popdens3 + popdens4 + lc + road_dens + road_dist + streams_dist + urban_dist + rec_dist + forest_dist + forest_dens, family = "binomial", m = 0, B = 1000, data = model_df_16)
 
 #label the year for later binding with other dfs
 modeldf_16_year <- model_df_16 %>% 
   mutate(year = 2016)
+
 ```
+
+```{r}
+#saving the files
+
+#save the csv with extracted variables
+save(modeldf_16_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/10_31_2022/modeldf_16.csv"))
+
+#save the 2016 model output
+save(model16, file = here(gdrive_data, "/AnalysisData/models/10_31_2022/model_2016_noclimate/model_2016_noclimate.RData"))
+```
+
 
 #Sam is playing around with the code here:
 ```{r}
@@ -562,7 +575,7 @@ cabuff19_inv_pol <- as.polygons(conbuff19_inverse)
 cabuff19_inv_sf <- st_as_sf(cabuff19_inv_pol)
 
 #sampling random points from this misshapen california shpfile
-sample19 <- st_sample(cabuff19_inv_sf, 1364) %>% 
+sample19 <- st_sample(cabuff19_inv_sf, 609) %>% 
   st_as_sf()
 
 #mappping to see what it looks like 
@@ -617,7 +630,7 @@ stack19 <- c(dem, aspect, ter_rug, pop19, lc19, road_dens, road_dist, streams_di
 #extract data points from these rasters and add them to the shapefile dataframe
 
 #nonconflict points
-zero_vars19 <- extract(stack21, zeros21_formatted, method = "simple", bind = TRUE, ID = TRUE) %>% 
+zero_vars19 <- extract(stack19, zeros19_formatted, method = "simple", bind = TRUE, ID = TRUE) %>% 
   mutate(ID = 0)
 
 #union conflict points before extracting
@@ -629,7 +642,7 @@ con_var19 <- extract(stack19, con_union19, method = "simple", bind = TRUE, ID = 
 
 #combine conflict and non-conflict
 
-model_df_19 <- rbind(zero_vars19, con_vars19)
+model_df_19 <- rbind(zero_vars19, con_var19)
 
 colnames(model_df_19) <- c("ID", "dem", "aspect", "TRI", "popdens1", "popdens2", "popdens3", "popdens4", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens")
 
@@ -748,6 +761,7 @@ stack21 <- c(dem, aspect, ter_rug, pop21, lc19, road_dens, road_dist, streams_di
 
 #nonconflict points
 zero_vars21 <- extract(stack21, zeros21_formatted, method = "simple", bind = TRUE, ID = TRUE) %>% 
+  as.data.frame() %>% 
   mutate(ID = 0)
 
 #union conflict points before extracting
@@ -768,6 +782,11 @@ modeldf_21_year <- model_df_21 %>%
   mutate(year = 2021)
 ```
 
+```{r}
+#saving the file
+
+save(modeldf_21_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/10_31_2022/modeldf_21.csv"))
+```
 
 ##2022
 
