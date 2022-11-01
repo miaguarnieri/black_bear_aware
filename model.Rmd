@@ -21,11 +21,10 @@ library(ResourceSelection)
 library(rmapshaper)
 
 #mia, chase, and claire's file path
-
-#gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #sam's file path
-gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
+#gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 
 ```
 
@@ -252,6 +251,11 @@ modeldf_16_year <- model_df_16 %>%
 #save the csv with extracted variables
 save(modeldf_16_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/10_31_2022/modeldf_16.csv"))
 
+
+#EDIT: that save didn't work, trying this workaround
+
+write.csv(modeldf_16_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/11_1_2022/modeldf_16.csv"), row.names = FALSE)
+
 #save the 2016 model output
 save(model16, file = here(gdrive_data, "/AnalysisData/models/10_31_2022/model_2016_noclimate/model_2016_noclimate.RData"))
 ```
@@ -363,7 +367,7 @@ zeros17_formatted <- zeros17 %>%
 #create a raster stack of all variables
 
 
-stack17 <- c(dem, aspect, ter_rug, pop17, lc16, road_dens, road_dist, urban_dist_16,rec_dist,fc_dist_16, fdens)
+stack17 <- c(dem, aspect, ter_rug, pop17, lc16, road_dens, road_dist, streams_dist, urban_dist_16,rec_dist,fc_dist_16, fdens)
 
 
 #extract data points from these rasters and add them to the shapefile dataframe
@@ -386,10 +390,23 @@ model_df_17 <- rbind(zero_vars17, con_vars17)
 colnames(model_df_17) <- c("ID", "dem", "aspect", "TRI", "popdens1", "popdens2", "popdens3", "popdens4", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens")
 
 #run it in the model
-model17 <- rspf(ID ~ dem + aspect + TRI + popdens1 + popdens2 + popdens3 + popdens4 + lc + road_dens + road_dist + streams_dist + urban_dist + rec_dist + forest_dist + forest_dens, family = "binomial", m = 0, B = 1000, data = model_df_16)
+#model17 <- rspf(ID ~ dem + aspect + TRI + popdens1 + popdens2 + popdens3 + popdens4 + lc + road_dens + road_dist + streams_dist + urban_dist + rec_dist + forest_dist + forest_dens, family = "binomial", m = 0, B = 1000, data = model_df_16)
+
 #label the year for later binding with other dfs
 modeldf_17_year <- model_df_17 %>% 
-  mutate(year = 2017)
+  mutate(year = 2017) %>% 
+  as.data.frame()
+
+```
+
+```{r}
+#save the file
+
+save(modeldf_17_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/12_1_2022/modeldf_17.csv"))
+
+#EDIT: that save didn't work, trying this workaround
+
+write.csv(modeldf_17_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/11_1_2022/modeldf_17.csv"), row.names = FALSE)
 
 ```
 
@@ -509,7 +526,7 @@ con_union18 <- con_18 %>%
   st_union() %>% 
   vect()
 
-con_vars18 <- extract(stack16, con_union18, method = "simple", bind = TRUE, ID = TRUE)
+con_vars18 <- extract(stack18, con_union18, method = "simple", bind = TRUE, ID = TRUE)
 
 #combine conflict and non-conflict
 
@@ -524,6 +541,16 @@ colnames(model_df_18) <- c("ID", "dem", "aspect", "TRI", "popdens1", "popdens2",
 #label the year for later binding with other dfs
 modeldf_18_year <- model_df_18 %>% 
   mutate(year = 2018)
+```
+
+```{r}
+#save the file
+
+save(modeldf_18_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/12_1_2022/modeldf_18.csv"))
+
+#EDIT: that save didn't work, trying this workaround
+
+write.csv(modeldf_18_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/11_1_2022/modeldf_18.csv"), row.names = FALSE)
 ```
 
 ##2019
@@ -659,6 +686,10 @@ modeldf_19_year <- model_df_19 %>%
 
 save(modeldf_19_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/10_31_2022/modeldf_19.csv"))
 
+#EDIT: that save didn't work, trying this workaround
+
+write.csv(modeldf_19_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/11_1_2022/modeldf_19.csv"), row.names = FALSE)
+
 ```
 
 
@@ -676,31 +707,44 @@ con_20 <- conflict_points %>%
   select(conflict, wir_id:year, type, county, geometry) %>% 
   filter(year == 2020) %>% 
   select(conflict, geometry)
+
 con_20_buff <- conflict_buffers %>% 
   filter(year == 2020) %>% 
   select(conflict, geometry)
+
 #create a spatvector for processing in terra
 conpoints_20_sv <- vect(con_20)
 conbuff_20_sv <- vect(con_20_buff)
+
 #read in the CA raster
 ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
+
 #make sure conflict is in the same projection
+
 conpoints20_reproj <- project(conpoints_20_sv,crs(ca_raster))
+
 conbuff20_reproj <- project(conbuff_20_sv,crs(ca_raster))
+
 conpoints20_sf <- st_as_sf(conpoints20_reproj)
+
 conbuff20_sf <- st_as_sf(conbuff20_reproj)
 
 #create an inverse mask- Anything withing the conflict buffer shapefiles will be a 0 value. So we get a California raster with all the conflict buffer locations zeroed out
+
 conbuff20_inverse <- mask(ca_raster, conbuff20_reproj, inverse = TRUE)
+
 tm_shape(conbuff20_inverse) +
   tm_raster() +
   tmap_mode("view")
 
 #making the inverse raster a shapefile 
+
 cabuff20_inv_pol <- as.polygons(conbuff20_inverse)
+
 cabuff20_inv_sf <- st_as_sf(cabuff20_inv_pol)
 
 #sampling random points from this misshapen california shpfile
+
 sample20 <- st_sample(cabuff20_inv_sf, 799) %>% 
   st_as_sf()
 
@@ -708,6 +752,7 @@ sample20 <- st_sample(cabuff20_inv_sf, 799) %>%
 tm_shape(sample20) +
   tm_dots() +
   tmap_mode("view")
+
 #buffer the sample points - getting rid of this part for the sake of the model
 #sample16_buff <- st_buffer(sample16, dist = 5000) %>% 
 #  st_as_sf()
@@ -726,7 +771,9 @@ tm_shape(sample20) +
 # tm_shape(intersect) +
 #   tm_polygons() +
 #   tmap_mode("view")
+
 #remove the intersecting polygons
+
 zeros20 <- ms_erase(target = sample20, erase = conbuff20_sf)
  
  #plot to check that there is no overlap
@@ -744,13 +791,16 @@ zeros20_formatted <- zeros20 %>%
   vect()
 
 #create a raster stack of all variables
+
 stack20 <- c(dem, aspect, ter_rug, pop20, lc19, road_dens, road_dist, streams_dist, urban_dist_19, rec_dist, fc_dist_19, fdens)
+
 #extract data points from these rasters and add them to the shapefile dataframe
 
 #nonconflict points
 zero_vars20 <- extract(stack20, zeros20_formatted, method = "simple", bind = TRUE, ID = TRUE) %>%
   as.data.frame() %>% 
   mutate(ID = 0)
+
 #union conflict points before extracting
 con_union20 <- con_20 %>% 
   st_union() %>% 
@@ -758,15 +808,27 @@ con_union20 <- con_20 %>%
 con_vars20 <- extract(stack20, con_union20, method = "simple", bind = TRUE, ID = TRUE)
 
 #combine conflict and non-conflict
+
 model_df_20 <- rbind(zero_vars20, con_vars20)
+
 colnames(model_df_20) <- c("ID", "dem", "aspect", "TRI", "popdens1", "popdens2", "popdens3", "popdens4", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens")
 
 #run it in the model
-model20 <- rspf(ID ~ dem + aspect + TRI + popdens1 + popdens2 + popdens3 + popdens4 + lc + road_dens + road_dist + streams_dist + urban_dist + rec_dist + forest_dist + forest_dens, family = "binomial", m = 0, B = 1000, data = model_df_20)
+#model20 <- rspf(ID ~ dem + aspect + TRI + popdens1 + popdens2 + popdens3 + popdens4 + lc + road_dens + road_dist + streams_dist + urban_dist + rec_dist + forest_dist + forest_dens, family = "binomial", m = 0, B = 1000, data = model_df_20)
 
 #label the year for later binding with other dfs
-modeldf_20_year <- model_df_16 %>% 
+modeldf_20_year <- model_df_20 %>% 
   mutate(year = 2020)
+```
+
+```{r}
+#save the file
+
+save(modeldf_20_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/12_1_2022/modeldf_20.csv"))
+
+#EDIT: that save didn't work, trying this workaround
+
+write.csv(modeldf_20_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/11_1_2022/modeldf_20.csv"), row.names = FALSE)
 ```
 
 ##2021
@@ -902,6 +964,10 @@ modeldf_21_year <- model_df_21 %>%
 #saving the file
 
 save(modeldf_21_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/10_31_2022/modeldf_21.csv"))
+
+#EDIT: that save didn't work, trying this workaround
+
+write.csv(modeldf_21_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/11_1_2022/modeldf_21.csv"), row.names = FALSE)
 ```
 
 ##2022
@@ -1030,5 +1096,44 @@ colnames(model_df_22) <- c("ID", "dem", "aspect", "TRI", "popdens1", "popdens2",
 #label the year for later binding with other dfs
 modeldf_22_year <- model_df_22 %>% 
   mutate(year = 2022)
+```
+
+```{r}
+#saving the file
+
+save(modeldf_22_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/12_1_2022/modeldf_22.csv"))
+
+#EDIT: that save didn't work, trying this workaround
+
+write.csv(modeldf_22_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/11_1_2022/modeldf_22.csv"), row.names = FALSE)
+```
+
+#Combine the yearly dataframes
+
+```{r}
+#read them in
+
+df16 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_noclimate/11_1_2022/modeldf_16.csv"))
+
+df17 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_noclimate/11_1_2022/modeldf_17.csv"))
+
+df18 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_noclimate/11_1_2022/modeldf_18.csv"))
+
+df19 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_noclimate/11_1_2022/modeldf_19.csv"))
+
+df20 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_noclimate/11_1_2022/modeldf_20.csv"))
+
+df21 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_noclimate/11_1_2022/modeldf_21.csv"))
+
+df22 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_noclimate/11_1_2022/modeldf_22.csv"))
+
+model_data_allyears <- rbind(df16, df17, df18, df19, df20, df21, df22)
+
+```
+
+#Run the base model for all years
+
+```{r}
+basemodel_allyears <- rspf(ID ~ dem + aspect + TRI + popdens1 + popdens2 + popdens3 + popdens4 + lc + road_dens + road_dist + streams_dist + urban_dist + rec_dist + forest_dist + forest_dens, family = "binomial", m = 0, B = 1000, data = model_data_allyears)
 ```
 
