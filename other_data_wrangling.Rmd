@@ -179,13 +179,18 @@ sample_points <- st_sample(ca_sf, 4663) %>%
 
 sample_buff <- st_buffer(sample_points, dist = 5000)
 
+#buffer sample points
+sample_points_buff <- st_buffer(sample_points_claire, dist = 5000)
+
 #load in conflict buffer
 
 con_buff <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_buffered_refined/conflict_buffered_refined.shp"))
 
+
 #select for the ones that are NOT intersecting
 
  zeros <- ms_erase(sample_points,con_buff)
+
 ```
 
 #claire's way of getting zeros
@@ -253,13 +258,22 @@ sample_points_buffered <- st_buffer(sample_points_claire, dist = 5000)
    tm_polygons(col  = "green") +
    tmap_mode("view")
  
+  tm_shape(con_buff) +
+  tm_polygons(alpha = 0.5) +
+tm_shape(zeros_claire) +
+   tm_polygons(col = "blue")+
+tmap_mode("view")
+ 
  #mapping it, I can see that worked! We could probably go back to Mia's way of doing zeros now that we know this function runs faster. The nice thing about mine is we should have a lot of zeros still 
  
  #Now we need to join conflict and non conflict points into one df
 #I think the first step will be to make a conflict column in the zeros_claire dataframe that has conflict = 0 
  
+zeros_df <- as(zeros_claire, "Spatial" )
  
- 
+zeros_df1 <-as(zeros_df, "SpatialPolygonsDataFrame")
+
+zeros_df2 <- as(zeros_df1, "data.frame")
 ```
 
 
@@ -399,14 +413,16 @@ writeRaster(terrain_ruggedness, filename = here(gdrive_data, "/IntermediateData/
 ```
 
 #Messing around with Drought Data
+
+#2022
 ```{r}
-drought_1 <- vect(here(gdrive_data, "/InputData/InputData_Files/Drought/us_drought_monitor/USDM_20221025.shp"))
+drought_2022 <- vect(here(gdrive_data, "/InputData/InputData_Files/Drought/us_drought_monitor/2022/USDM_20221025.shp"))
 
-drought_1_calbers <- project(drought_1, ca_raster)
+drought_2022_calbers <- project(drought_2022, ca_raster)
 
-drought_1_mask <- crop(drought_1_calbers, ca_raster)
+drought_2022_mask <- crop(drought_2022_calbers, ca_raster)
 
-drought_1_raster <- rasterize(drought_1_mask, ca_raster)
+drought_2022_raster <- rasterize(drought_2022_mask, ca_raster)
 ```
 
 ```{r}
@@ -416,9 +432,152 @@ saverast <- function(x){
   
 #write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
   
-writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor", name), filetype = "Gtiff", overwrite=TRUE)
+writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2022", name), filetype = "Gtiff", overwrite=TRUE)
 }
 
-saverast(drought_1_raster)
+saverast(drought_2022_raster)
 ```
 
+# 2016
+```{r}
+drought_2016 <- vect(here(gdrive_data, "/InputData/InputData_Files/Drought/us_drought_monitor/2016/USDM_20161227.shp"))
+
+drought_2016_calbers <- project(drought_2016, ca_raster)
+
+drought_2016_mask <- crop(drought_2016_calbers, ca_raster)
+
+drought_2016_raster <- rasterize(drought_2016_mask, ca_raster)
+```
+
+```{r}
+saverast <- function(x){
+  
+ name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2016", name), filetype = "Gtiff", overwrite=TRUE)
+}
+
+saverast(drought_2016_raster)
+```
+
+#2017
+```{r}
+drought_2017 <- vect(here(gdrive_data, "/InputData/InputData_Files/Drought/us_drought_monitor/2017/USDM_20170905.shp"))
+
+drought_2017_calbers <- project(drought_2017, ca_raster)
+
+drought_2017_mask <- crop(drought_2017_calbers, ca_raster)
+
+drought_2017_raster <- rasterize(drought_2017_mask, ca_raster)
+```
+
+```{r}
+saverast <- function(x){
+  
+ name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2017", name), filetype = "Gtiff", overwrite=TRUE)
+}
+
+saverast(drought_2017_raster)
+```
+
+#2018
+```{r}
+drought_2018 <- vect(here(gdrive_data, "/InputData/InputData_Files/Drought/us_drought_monitor/2018/USDM_20180904.shp"))
+
+drought_2018_calbers <- project(drought_2018, ca_raster)
+
+drought_2018_mask <- crop(drought_2018_calbers, ca_raster)
+
+drought_2018_raster <- rasterize(drought_2018_mask, ca_raster)
+```
+
+```{r}
+saverast <- function(x){
+  
+ name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2018", name), filetype = "Gtiff", overwrite=TRUE)
+}
+
+saverast(drought_2018_raster)
+```
+
+#2019
+```{r}
+drought_2019 <- vect(here(gdrive_data, "/InputData/InputData_Files/Drought/us_drought_monitor/2019/USDM_20190903.shp"))
+
+drought_2019_calbers <- project(drought_2019, ca_raster)
+
+drought_2019_mask <- crop(drought_2019_calbers, ca_raster)
+
+drought_2019_raster <- rasterize(drought_2019_mask, ca_raster)
+```
+
+```{r}
+saverast <- function(x){
+  
+ name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2019", name), filetype = "Gtiff", overwrite=TRUE)
+}
+
+saverast(drought_2019_raster)
+```
+
+#2020
+```{r}
+drought_2020 <- vect(here(gdrive_data, "/InputData/InputData_Files/Drought/us_drought_monitor/2020/USDM_20200908.shp"))
+
+drought_2020_calbers <- project(drought_2020, ca_raster)
+
+drought_2020_mask <- crop(drought_2020_calbers, ca_raster)
+
+drought_2020_raster <- rasterize(drought_2020_mask, ca_raster)
+```
+
+```{r}
+saverast <- function(x){
+  
+ name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2020", name), filetype = "Gtiff", overwrite=TRUE)
+}
+
+saverast(drought_2020_raster)
+```
+
+#2021
+```{r}
+drought_2021 <- vect(here(gdrive_data, "/InputData/InputData_Files/Drought/us_drought_monitor/2021/USDM_20210907.shp"))
+
+drought_2021_calbers <- project(drought_2021, ca_raster)
+
+drought_2021_mask <- crop(drought_2021_calbers, ca_raster)
+
+drought_2021_raster <- rasterize(drought_2021_mask, ca_raster)
+```
+
+```{r}
+saverast <- function(x){
+  
+ name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2021", name), filetype = "Gtiff", overwrite=TRUE)
+}
+
+saverast(drought_2021_raster)
+```
