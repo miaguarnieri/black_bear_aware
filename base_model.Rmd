@@ -1141,6 +1141,18 @@ write.csv(model_data_allyears, file = here(gdrive_data, "/AnalysisData/model_df_
 #Run the base model for all years
 
 ```{r}
-basemodel_allyears <- rspf(ID ~ dem + aspect + TRI + popdens1 + popdens2 + popdens3 + popdens4 + lc + road_dens + road_dist + streams_dist + urban_dist + rec_dist + forest_dist + forest_dens, family = "binomial", m = 0, B = 1000, data = model_data_allyears)
+#read in the data
+model_data <- read_csv(here(gdrive_data, "/AnalysisData/model_df_noclimate/11_1_2022/model_data_allyears.csv"))
 ```
 
+
+```{r}
+basemodel_allyears <- rspf(ID ~ dem + aspect + TRI + popdens1 + popdens2 + popdens3 + popdens4 + lc + road_dens + road_dist + streams_dist + urban_dist + rec_dist + forest_dist + forest_dens, family = "binomial", m = 0, B = 1000, data = model_data)
+```
+
+```{r}
+#save the model
+
+save(basemodel_allyears, file = here(gdrive_data, "/AnalysisData/models/11_1_2022/model_allyears_noclimate/basemodel_allyears.rda"))
+
+```
