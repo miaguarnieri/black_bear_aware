@@ -277,10 +277,6 @@ zeros_df2 <- as(zeros_df1, "data.frame")
 ```
 
 
-
-
-
-
 ##Elevation (DEM, mean elevation)
 
 Two separate DEM rasters were available at 7.5-arc second resolution from USGS EROS. These will need to be merged togther.
