@@ -20,7 +20,8 @@ library(tmap)
 library(beepr)
 library(rgeos)
 library(rmapshaper)
-
+library(rgdal)
+library(raster)
 #mia and claire's file path
 gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
@@ -401,15 +402,39 @@ writeRaster(terrain_ruggedness, filename = here(gdrive_data, "/IntermediateData/
 #Messing around with Drought Data
 
 #2022
-```{r}
-drought_2022 <- vect(here(gdrive_data, "/InputData/InputData_Files/Drought/us_drought_monitor/2022/USDM_20221025.shp"))
+#```{r}
+#drought_2022 <- vect(here(gdrive_data, "/InputData/InputData_Files/Drought/us_drought_monitor/2022/USDM_20221025.shp"))
 
 drought_2022_calbers <- project(drought_2022, ca_raster)
 
-drought_2022_mask <- crop(drought_2022_calbers, ca_raster)
+ca_vector <- as.polygons(ca_raster)
+
+drought_2022_mask <- crop(drought_2022_calbers, ca_vector)
 
 drought_2022_raster <- rasterize(drought_2022_mask, ca_raster)
+
+tm_shape(drought_2022_raster) +
+  tm_raster() +
+  tmap_mode("view")
+#```
+
+#trying to get layers to load in r
+```{r}
+drought_2022 <- lapply(c("D0", "D1", "D2", "D3", "D4"), function(i){
+  shp <- readOGR(here(gdrive_data, "/InputData/InputData_Files/Drought/us_drought_monitor/2022/USDM_20221025.shp"))
+  template <- raster(ext = extent(shp), crs = projection(shp))
+  rst <- rasterize(shp, template, fun = 'first')
+})
+
+plot(drought_2022[[2]], xlab = "lon", ylab = "lat", main = "Shape_Area_adm1")
 ```
+#masking layers to ca now
+```{r}
+drought_2022_calbers <- project(drought_2022, ca_raster)
+
+drought_2022_mask <- crop(drought_2022_calbers, ca_raster)
+```
+
 
 ```{r}
 saverast <- function(x){
