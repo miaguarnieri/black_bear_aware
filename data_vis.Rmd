@@ -7,24 +7,99 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(terra)
+library(tmap)
+library(here)
+
+#mia, chase, and claire's file path
+gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+
+#sam's file path
+#gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
+
 ```
 
-## R Markdown
+#Base Model
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+Read in the model by opening the rds file in the drive here:
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+gdrive_data, /AnalysisData/models/11_1_2022/model_allyears_noclimate/basemodel_allyears.rda
 
-```{r cars}
-summary(cars)
+```{r}
+#read in the CA raster
+
+# ca_vect <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif")) %>% 
+#   as.polygons(trunc=TRUE, dissolve=TRUE, values=TRUE, na.rm=TRUE, extent=FALSE)
+
+#read in the environmental variables (as close to 2022 as possible)
+
+#elevation
+dem <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/elevation/dem_formatted.tif"))
+
+#aspect
+aspect <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/aspect/aspect.tif"))
+
+#terrain ruggedness
+TRI <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/terrain_ruggedness/terrain_ruggedness.tif"))
+
+#human pop density
+
+pop21 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/population_density/pop_den_2021_mask.tif"))
+
+popdens1 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/population_density/pop_den_2021_mask.tif"), lyrs = 1)
+
+popdens2 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/population_density/pop_den_2021_mask.tif"), lyrs = 2)
+
+popdens3 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/population_density/pop_den_2021_mask.tif"), lyrs = 3)
+
+popdens4 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/population_density/pop_den_2021_mask.tif"), lyrs = 4)
+
+#land cover
+
+lc <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/land_cover/lc19_reclassed.tif"))
+
+#road density
+
+road_dens <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/road_density/road_density_ca.tif"))
+
+#distance to roads
+
+road_dist <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_road/model_ready/roads15_ca_distance.tif"))
+
+#distance to streams
+
+streams_dist <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_stream/model_ready/stream17_ca_distance.tif"))
+
+#distance to urban areas
+
+urban_dist <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_urban/model_ready/ua19_ca_distance.tif"))
+
+#distance to recreational areas
+
+rec_dist <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_rec/model_ready/rec_ca_distance.tif"))
+
+#distance to forest cover
+
+forest_dist <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_forest/model_ready/fc19_ca_distance.tif"))
+
+#forest density
+
+forest_dens <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/forest_density/forest_dens_2016_mask.tif"))
+
+#stack the rasters
+
+stackca <- c(dem, aspect, ter_rug, popdens1, popdens2, popdens3, popdens4, lc19, road_dens, road_dist, streams_dist, urban_dist_19, rec_dist, fc_dist_19, fdens)
+
+#extract the data for CA raster
+
+#vars_ca <- extract(stackca, ca_vect, method = "simple", bind = TRUE, ID = TRUE) %>% 
+  #rast()
+
+#use the terra predict function
+
+terra::predict(stackca, model = basemodel_allyears, fun = predict)
+
 ```
 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
