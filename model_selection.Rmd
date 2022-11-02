@@ -24,7 +24,14 @@ gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 #gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 ```
 
+
 ```{r}
-dredged_model <- dredge
+model <- load("/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data/AnalysisData/models/11_1_2022/model_allyears_noclimate/basemodel_allyears.rds")
+```
+
+
+
+```{r}
+dredged_model <- dredge(global.model = model, rank = "AIC")
 ```
 
