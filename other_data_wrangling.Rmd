@@ -21,7 +21,7 @@ library(beepr)
 library(rgeos)
 library(rmapshaper)
 library(rgdal)
-library(raster)
+
 #mia and claire's file path
 gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
