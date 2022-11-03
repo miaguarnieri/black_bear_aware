@@ -39,9 +39,9 @@ crs(ca_raster)
 
 
 #plot CA raster to confirm
-tm_shape(ca_raster) +
-  tm_raster() +
-  tmap_mode("view")
+#tm_shape(ca_raster) +
+ # tm_raster() +
+#  tmap_mode("view")
 ```
 
 # Fire 
@@ -65,17 +65,17 @@ ca_fire_2020 <- rast(here(gdrive_data, "/InputData/InputData_Files/fire_intensit
 
 ```{r}
 #reproject to the same crs (NAD 83, CA Albers (2011))
+# method = near in order to preserve categorical data
 
+ca_fire_2016_albers <- terra::project(ca_fire_2016, ca_raster, method = "near")
 
-ca_fire_2016_albers <- terra::project(ca_fire_2016, ca_raster)
+ca_fire_2017_albers <- terra::project(ca_fire_2017, ca_raster, method = "near")
 
-ca_fire_2017_albers <- terra::project(ca_fire_2017, ca_raster)
+ca_fire_2018_albers <- terra::project(ca_fire_2018, ca_raster, method = "near")
 
-ca_fire_2018_albers <- terra::project(ca_fire_2018, ca_raster)
+ca_fire_2019_albers <- terra::project(ca_fire_2019, ca_raster, method = "near")
 
-ca_fire_2019_albers <- terra::project(ca_fire_2019, ca_raster)
-
-ca_fire_2020_albers <- terra::project(ca_fire_2020, ca_raster)
+ca_fire_2020_albers <- terra::project(ca_fire_2020, ca_raster, method = "near")
 
 ```
 
