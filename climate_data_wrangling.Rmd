@@ -57,6 +57,7 @@ ca_fire_2018 <- rast(here(gdrive_data, "/InputData/InputData_Files/fire_intensit
 ca_fire_2019 <- rast(here(gdrive_data, "/InputData/InputData_Files/fire_intensity_CA_mtbs/2019_fire_intensity_CA_mtbs/mtbs_CA_2019.tif"))
 
 ca_fire_2020 <- rast(here(gdrive_data, "/InputData/InputData_Files/fire_intensity_CA_mtbs/2020_fire_intensity_CA_mtbs/mtbs_CA_2020.tif"))
+
 ```
 
 
