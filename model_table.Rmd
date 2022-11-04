@@ -1,0 +1,13 @@
+---
+title: "model_table"
+author: "Claire Meuter"
+date: "2022-11-04"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## creating a model table for CP outline 
+
