@@ -12,6 +12,9 @@ knitr::opts_chunk$set(echo = TRUE)
 ## creating a model table for CP outline 
 
 ```{r}
+basemodel_allyears <- load(here("models","basemodel_allyears.rds"))
+
+#using stargazer 
 
 ```
 
