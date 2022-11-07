@@ -120,3 +120,125 @@ saverast(fire_2020_mask)
 
 ```
 
+#read in refined fire layers: 
+```{r}
+#read in fire layers 
+fire_2016_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/fire_intensity/fire_2016_mask.tif"))
+
+fire_2017_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/fire_intensity/fire_2017_mask.tif"))
+
+fire_2018_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/fire_intensity/fire_2018_mask.tif"))
+
+fire_2019_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/fire_intensity/fire_2019_mask.tif"))
+
+fire_2020_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/fire_intensity/fire_2020_mask.tif"))
+
+```
+
+
+
+
+#reclass fire intensity layers to layers that only have moderate and high fire intensity 
+```{r}
+#list out the from, to values in an object
+m <- c(1, 0, #Unburned/Underburned/Low Burn Severity to no data
+       2, 0, #Low burn severity to no data
+       3, 4, #moderate burn severity to moderate/high burn severity
+       4, 4, #high burn severity to moderate/high burn severity
+       5, 0, #Increased Greenness/Increased Vegetation Response to no data
+       6,0) #Non-Processing Area Mask to no data
+       
+#turn those values into a matrix
+mat_fire <- matrix(m, ncol = 2, byrow = TRUE) 
+
+#set categories (labels) for each numeric index
+
+#index vector
+index_fire <- c(0, 4)
+
+#categories vector
+cats_fire <- c("undefined","mod_high_burn")
+
+#combine those into a dataframe
+catdat_fire <- data.frame(id = index_fire, category = cats_fire)
+
+#Reclassify
+
+#create reclassification function
+
+reclassify_fire <- function(x){
+  fire_reclassed <- classify(x, mat_fire) #reclassify using the matrix above
+  
+  levels(fire_reclassed) <- catdat_fire #then reassign levels (labels) using the dataframe above
+  
+  return(fire_reclassed)
+}
+
+#Apply function to each layer
+
+
+
+fire_2016_reclassed <- reclassify_fire(fire_2016_mask)
+
+fire_2017_reclassed <- reclassify_fire(fire_2017_mask)
+
+fire_2018_reclassed <- reclassify_fire(fire_2018_mask)
+
+fire_2019_reclassed <- reclassify_fire(fire_2019_mask)
+
+fire_2020_reclassed <- reclassify_fire(fire_2020_mask)
+
+
+
+
+
+
+```
+#Save reclassified, reprojected, and clipped rasters to the data drive
+
+**ONLY RUN THIS ONE TIME; IT WILL NOT RUN ONCE THE FILES ARE SAVED**
+
+```{r}
+saverast <- function(x){
+  
+  name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+  #write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/med_high_fire_rasters", name), filetype = "GTiff", overwrite = TRUE)
+  
+}
+
+saverast(fire_2016_reclassed)
+saverast(fire_2017_reclassed)
+saverast(fire_2018_reclassed)
+saverast(fire_2019_reclassed)
+saverast(fire_2020_reclassed)
+
+
+```
+
+#Fire distance raster were created in arc gis pro, readin g back in here and readjusting extent
+
+```{r}
+#Now we need to read back in the distance raster created in ArcGIS pro and mask these layers to match our CA extent again. Layers are already in the correct projection and resolution
+
+dist_fire16 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_med_high_fire/dist_fire_2016.tif"))
+
+dist_fire17 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_med_high_fire/dist_fire_2017.tif"))
+
+dist_fire18 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_med_high_fire/dist_fire_2018.tif"))
+
+dist_fire19 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_med_high_fire/dist_fire_2019.tif"))
+
+dist_fire20 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_med_high_fire/dist_fire_2020.tif"))
+
+# Now we need to mask these layers to just the CA extent 
+fire16_ca_distance <- mask(dist_fire16, ca_raster) 
+
+
+
+#now we will save them back to the google drive to be referenced later
+```
+
+
