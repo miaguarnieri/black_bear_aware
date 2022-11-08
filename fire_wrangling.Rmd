@@ -1,5 +1,5 @@
 ---
-title: "Climate Data Wrangling"
+title: "Fire Data Wrangling"
 author: "Mia Guarnieri"
 date: '2022-11-02'
 output: html_document
@@ -46,8 +46,21 @@ crs(ca_raster)
 
 # Fire 
 
+Need to add: 2011 - 2015 data
+
 ```{r}
 #read in fire layers 
+
+ca_fire_2011 <- rast(here(gdrive_data, ""))
+
+ca_fire_2012
+
+ca_fire_2013
+
+ca_fire_2014
+
+ca_fire_2015
+
 ca_fire_2016 <- rast(here(gdrive_data, "/InputData/InputData_Files/fire_intensity_CA_mtbs/2016_fire_intensity_CA_mtbs/mtbs_CA_2016.tif"))
 
 ca_fire_2017 <- rast(here(gdrive_data, "/InputData/InputData_Files/fire_intensity_CA_mtbs/2017_fire_intensity_CA_mtbs/mtbs_CA_2017.tif"))
@@ -137,7 +150,6 @@ fire_2020_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Fil
 
 
 
-
 #reclass fire intensity layers to layers that only have moderate and high fire intensity 
 ```{r}
 #list out the from, to values in an object
@@ -188,12 +200,9 @@ fire_2019_reclassed <- reclassify_fire(fire_2019_mask)
 
 fire_2020_reclassed <- reclassify_fire(fire_2020_mask)
 
-
-
-
-
-
 ```
+
+
 #Save reclassified, reprojected, and clipped rasters to the data drive
 
 **ONLY RUN THIS ONE TIME; IT WILL NOT RUN ONCE THE FILES ARE SAVED**
@@ -218,7 +227,7 @@ saverast(fire_2020_reclassed)
 
 ```
 
-#Fire distance raster were created in arc gis pro, readin g back in here and readjusting extent
+#Fire distance raster were created in arc gis pro, reading back in here and readjusting extent
 
 ```{r}
 #Now we need to read back in the distance raster created in ArcGIS pro and mask these layers to match our CA extent again. Layers are already in the correct projection and resolution
@@ -241,4 +250,9 @@ fire16_ca_distance <- mask(dist_fire16, ca_raster)
 #now we will save them back to the google drive to be referenced later
 ```
 
+#Remask the distance rasters
+
+```{r}
+
+```
 

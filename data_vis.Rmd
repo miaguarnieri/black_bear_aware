@@ -23,15 +23,15 @@ gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #Base Model
 
-Read in the model by opening the rds file in the drive here:
-
-gdrive_data, /AnalysisData/models/11_1_2022/model_allyears_noclimate/basemodel_allyears.rda
 
 ```{r}
+#read in the model
+
+model <- load(here("models", "basemodel_allyears.rds")) #you have to name the object "model or it will not read in right
+
 #read in the CA raster
 
-# ca_vect <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif")) %>% 
-#   as.polygons(trunc=TRUE, dissolve=TRUE, values=TRUE, na.rm=TRUE, extent=FALSE)
+ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
 
 #read in the environmental variables (as close to 2022 as possible)
 
@@ -90,7 +90,7 @@ forest_dens <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/
 
 #stack the rasters
 
-stackca <- c(dem, aspect, ter_rug, popdens1, popdens2, popdens3, popdens4, lc19, road_dens, road_dist, streams_dist, urban_dist_19, rec_dist, fc_dist_19, fdens)
+stackca <- c(dem, aspect, TRI, popdens1, popdens2, popdens3, popdens4, lc, road_dens, road_dist, streams_dist, urban_dist, rec_dist, forest_dist, forest_dens)
 
 #extract the data for CA raster
 
