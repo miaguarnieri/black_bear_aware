@@ -358,12 +358,41 @@ savemultirast(fire_2014_2015)
 ##2018
 
 ```{r}
+#4-5 year: 2013-2014 - this already exists from prior data wrangling
 
+#2-3 year: 2015-2016
+
+fire_2015 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/med_high_fire_rasters/fire_2015_reclassed.tif"))
+
+fire_2016 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/med_high_fire_rasters/fire_2016_reclassed.tif"))
+
+#merge those layers
+
+fire_2015_2016 <- merge(fire_2015, fire_2016)
+
+#save the layer
+
+savemultirast(fire_2015_2016)
 ```
 
 ##2019
 
 ```{r}
+#4-5 year: 2014-2015 - this already exists from prior data wrangling
+
+#2-3 year: 2016-2017
+
+fire_2016 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/med_high_fire_rasters/fire_2016_reclassed.tif"))
+
+fire_2017 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/med_high_fire_rasters/fire_2017_reclassed.tif"))
+
+#merge those layers
+
+fire_2016_2017 <- merge(fire_2016, fire_2017)
+
+#save the layer
+
+savemultirast(fire_2016_2017)
 
 ```
 
@@ -371,12 +400,41 @@ savemultirast(fire_2014_2015)
 ##2020
 
 ```{r}
+#4-5 year: 2015-2016 - this already exists from prior data wrangling
 
+#2-3 year: 2017-2018
+
+fire_2017 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/med_high_fire_rasters/fire_2017_reclassed.tif"))
+
+fire_2018 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/med_high_fire_rasters/fire_2018_reclassed.tif"))
+
+#merge the layers
+
+fire_2017_2018 <- merge(fire_2017, fire_2018)
+
+#save the layer
+
+savemultirast(fire_2017_2018)
 ```
 
 ##2021
 
 ```{r}
+#4-5 year: 2016-2017 - this already exists from prior data wrangling
+
+#2-3 years: 2018-2019
+
+fire_2018 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/med_high_fire_rasters/fire_2018_reclassed.tif"))
+
+fire_2019 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/med_high_fire_rasters/fire_2019_reclassed.tif"))
+
+#merge the layers
+
+fire_2018_2019 <- merge(fire_2018, fire_2019)
+
+#save the layer
+
+savemultirast(fire_2018_2019)
 
 ```
 
