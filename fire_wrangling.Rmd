@@ -44,22 +44,22 @@ crs(ca_raster)
 #  tmap_mode("view")
 ```
 
-# Fire 
+# Initial fire data layers
 
-Need to add: 2011 - 2015 data
+Rasters showing fire location and severity, from 0-4
 
 ```{r}
 #read in fire layers 
 
-ca_fire_2011 <- rast(here(gdrive_data, ""))
+ca_fire_2011 <- rast(here(gdrive_data, "/InputData/InputData_Files/fire_intensity_CA_mtbs/2011_fire_intensity_CA_mtbs/mtbs_CA_2011.tif"))
 
-ca_fire_2012
+ca_fire_2012 <- rast(here(gdrive_data, "/InputData/InputData_Files/fire_intensity_CA_mtbs/2012_fire_intensity_CA_mtbs/mtbs_CA_2012.tif"))
 
-ca_fire_2013
+ca_fire_2013 <- rast(here(gdrive_data, "/InputData/InputData_Files/fire_intensity_CA_mtbs/2013_fire_intensity_CA_mtbs/mtbs_CA_2013.tif"))
 
-ca_fire_2014
+ca_fire_2014 <- rast(here(gdrive_data, "/InputData/InputData_Files/fire_intensity_CA_mtbs/2014_fire_intensity_CA_mtbs/mtbs_CA_2014.tif"))
 
-ca_fire_2015
+ca_fire_2015 <- rast(here(gdrive_data, "/InputData/InputData_Files/fire_intensity_CA_mtbs/2015_fire_intensity_CA_mtbs/mtbs_CA_2015.tif"))
 
 ca_fire_2016 <- rast(here(gdrive_data, "/InputData/InputData_Files/fire_intensity_CA_mtbs/2016_fire_intensity_CA_mtbs/mtbs_CA_2016.tif"))
 
@@ -80,6 +80,16 @@ ca_fire_2020 <- rast(here(gdrive_data, "/InputData/InputData_Files/fire_intensit
 #reproject to the same crs (NAD 83, CA Albers (2011))
 # method = near in order to preserve categorical data
 
+ca_fire_2011_albers <- terra::project(ca_fire_2011, ca_raster, method = "near")
+
+ca_fire_2012_albers <- terra::project(ca_fire_2012, ca_raster, method = "near")
+
+ca_fire_2013_albers <- terra::project(ca_fire_2013, ca_raster, method = "near")
+
+ca_fire_2014_albers <- terra::project(ca_fire_2014, ca_raster, method = "near")
+
+ca_fire_2015_albers <- terra::project(ca_fire_2015, ca_raster, method = "near")
+
 ca_fire_2016_albers <- terra::project(ca_fire_2016, ca_raster, method = "near")
 
 ca_fire_2017_albers <- terra::project(ca_fire_2017, ca_raster, method = "near")
@@ -95,6 +105,16 @@ ca_fire_2020_albers <- terra::project(ca_fire_2020, ca_raster, method = "near")
 ```{r}
 #cropping to spatial extent of CA raster
 
+fire_2011_mask <- mask(ca_fire_2011_albers, ca_raster)
+
+fire_2012_mask <- mask(ca_fire_2012_albers, ca_raster)
+
+fire_2013_mask <- mask(ca_fire_2013_albers, ca_raster)
+
+fire_2014_mask <- mask(ca_fire_2014_albers, ca_raster)
+
+fire_2015_mask <- mask(ca_fire_2015_albers, ca_raster)
+
 fire_2016_mask <- mask(ca_fire_2016_albers, ca_raster)
 
 fire_2017_mask <- mask(ca_fire_2017_albers, ca_raster)
@@ -106,9 +126,7 @@ fire_2019_mask <- mask(ca_fire_2019_albers, ca_raster)
 fire_2020_mask <- mask(ca_fire_2020_albers, ca_raster)
 ```
 
-#Save reclassified, reprojected, and clipped rasters to the data drive
-
-**ONLY RUN THIS ONE TIME; IT WILL NOT RUN ONCE THE FILES ARE SAVED**
+#Save reprojected and clipped rasters to the data drive
 
 ```{r}
 saverast <- function(x){
@@ -120,6 +138,16 @@ saverast <- function(x){
   writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/fire_intensity", name), filetype = "GTiff", overwrite = TRUE)
   
 }
+
+saverast(fire_2011_mask)
+
+saverast(fire_2012_mask)
+
+saverast(fire_2013_mask)
+
+saverast(fire_2014_mask)
+
+saverast(fire_2015_mask)
 
 saverast(fire_2016_mask)
 
@@ -133,9 +161,21 @@ saverast(fire_2020_mask)
 
 ```
 
-#read in refined fire layers: 
+#Read in saved, formatted layers
+
 ```{r}
 #read in fire layers 
+
+fire_2011_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/fire_intensity/fire_2011_mask.tif"))
+
+fire_2012_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/fire_intensity/fire_2012_mask.tif"))
+
+fire_2013_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/fire_intensity/fire_2013_mask.tif"))
+
+fire_2014_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/fire_intensity/fire_2014_mask.tif"))
+
+fire_2015_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/fire_intensity/fire_2015_mask.tif"))
+
 fire_2016_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/fire_intensity/fire_2016_mask.tif"))
 
 fire_2017_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/fire_intensity/fire_2017_mask.tif"))
@@ -149,8 +189,8 @@ fire_2020_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Fil
 ```
 
 
+#Reclassify to keep only medium and high fire intensity
 
-#reclass fire intensity layers to layers that only have moderate and high fire intensity 
 ```{r}
 #list out the from, to values in an object
 m <- c(1, 0, #Unburned/Underburned/Low Burn Severity to no data
@@ -188,7 +228,15 @@ reclassify_fire <- function(x){
 
 #Apply function to each layer
 
+fire_2011_reclassed <- reclassify_fire(fire_2011_mask)
 
+fire_2012_reclassed <- reclassify_fire(fire_2012_mask)
+
+fire_2013_reclassed <- reclassify_fire(fire_2013_mask)
+
+fire_2014_reclassed <- reclassify_fire(fire_2014_mask)
+
+fire_2015_reclassed <- reclassify_fire(fire_2015_mask)
 
 fire_2016_reclassed <- reclassify_fire(fire_2016_mask)
 
@@ -203,9 +251,7 @@ fire_2020_reclassed <- reclassify_fire(fire_2020_mask)
 ```
 
 
-#Save reclassified, reprojected, and clipped rasters to the data drive
-
-**ONLY RUN THIS ONE TIME; IT WILL NOT RUN ONCE THE FILES ARE SAVED**
+#Save reclassified rasters to the data drive
 
 ```{r}
 saverast <- function(x){
@@ -218,16 +264,123 @@ saverast <- function(x){
   
 }
 
+saverast(fire_2011_reclassed)
+saverast(fire_2012_reclassed)
+saverast(fire_2013_reclassed)
+saverast(fire_2014_reclassed)
+saverast(fire_2015_reclassed)
 saverast(fire_2016_reclassed)
 saverast(fire_2017_reclassed)
 saverast(fire_2018_reclassed)
 saverast(fire_2019_reclassed)
 saverast(fire_2020_reclassed)
 
+```
+
+
+#Create multi-year merged layers for model data processing
+
+```{r}
+#function for saving multi-year rasters
+savemultirast <- function(x){
+  
+  name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+  #write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/med_high_fire_rasters/multiyear_rasters", name), filetype = "GTiff", overwrite = TRUE)
+  
+}
+```
+
+##2016
+
+```{r}
+#4-5 year: combined 2011-2012
+
+fire_2011 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/med_high_fire_rasters/fire_2011_reclassed.tif"))
+
+fire_2012 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/med_high_fire_rasters/fire_2012_reclassed.tif"))
+
+#merge those layers
+
+fire_2011_2012 <- merge(fire_2011, fire_2012)
+
+
+#2-3 year: combined 2013-2014
+
+fire_2013 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/med_high_fire_rasters/fire_2013_reclassed.tif"))
+
+fire_2014 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/med_high_fire_rasters/fire_2014_reclassed.tif"))
+
+#merge those layers
+
+fire_2013_2014 <- merge(fire_2013, fire_2014)
+
+#save the layers
+
+savemultirast(fire_2011_2012)
+
+savemultirast(fire_2013_2014)
+```
+
+##2017
+
+```{r}
+#4-5 year: 2012-2013
+
+fire_2012 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/med_high_fire_rasters/fire_2012_reclassed.tif"))
+
+fire_2013 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/med_high_fire_rasters/fire_2013_reclassed.tif"))
+
+#merge those layers
+
+fire_2012_2013 <- merge(fire_2012, fire_2013)
+
+#2-3 year: 2014-2015
+
+fire_2014 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/med_high_fire_rasters/fire_2014_reclassed.tif"))
+
+fire_2015 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/med_high_fire_rasters/fire_2015_reclassed.tif"))
+
+#merge those layers
+
+fire_2014_2015 <- merge(fire_2014, fire_2015)
+
+#save the layers
+
+savemultirast(fire_2012_2013)
+
+savemultirast(fire_2014_2015)
 
 ```
 
-#Fire distance raster were created in arc gis pro, reading back in here and readjusting extent
+##2018
+
+```{r}
+
+```
+
+##2019
+
+```{r}
+
+```
+
+
+##2020
+
+```{r}
+
+```
+
+##2021
+
+```{r}
+
+```
+
+#Fire distance rasters were created in arc gis pro, reading back in here and readjusting extent
 
 ```{r}
 #Now we need to read back in the distance raster created in ArcGIS pro and mask these layers to match our CA extent again. Layers are already in the correct projection and resolution
