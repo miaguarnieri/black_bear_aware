@@ -1,0 +1,66 @@
+---
+title: "Drought Data"
+author: "Chase Tarr"
+date: '2022-10-20'
+output: html_document
+---
+
+```{r}
+knitr::opts_chunk$set(echo = TRUE)
+#attach packages
+#note - Loading all of the ones Jason used, I don't think we will need all of them 
+
+library(tidyverse)
+library(here)
+library(terra)
+library(sf)
+library(tmap)
+library(beepr)
+library(rgeos)
+library(rmapshaper)
+library(rgdal)
+library(raster)
+library(stars)
+library(purrr)
+
+#mia and claire's file path
+gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+
+#sam's file path
+#gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
+```
+```{r}
+ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
+```
+
+
+```{r}
+drought_2022 <- lapply(c("D0", "D1", "D2", "D3", "D4"), function(i){
+  shp <- readOGR(here(gdrive_data, "/InputData/InputData_Files/Drought/us_drought_monitor/2022/USDM_20221025.shp"))
+  template <- raster(ext = extent(shp), crs = projection(shp))
+  rst <- rasterize(shp, template, fun = 'first')
+})
+
+plot(drought_2022[[2]], xlab = "lon", ylab = "lat", main = "Drought Index 2022")
+```
+```{r}
+head(drought_2022)
+
+drought_convert <- rasterize(drought_2022, r, field = droiught_2022$ID)
+
+```
+
+
+```{r}
+saverast <- function(x){
+  
+ name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2022", name), filetype = "Gtiff", overwrite=TRUE)
+}
+
+saverast(drought_2022)
+```
+
