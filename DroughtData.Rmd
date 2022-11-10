@@ -73,15 +73,144 @@ d2022_masked <- mask(drought_2022_calbers, ca_raster)
 #test plot
 plot(d2022_masked)
 
+```
+```{r}
+drought_2016 <- lapply(c("D0", "D1", "D2", "D3", "D4"), function(i){
+  shp <- readOGR(here(gdrive_data, "/InputData/InputData_Files/Drought/us_drought_monitor/2016/USDM_20161227.shp"))
+  template <- raster(ext = extent(shp), crs = projection(shp))
+  rst <- rasterize(shp, template, fun = 'first')
+})
 
-drought_2016_mask <- crop(drought_2016_calbers, ca_raster)
-
-drought_2016_raster <- rasterize(drought_2016_mask, ca_raster)
-
-drought_convert <- rasterize(drought_2022, r, field = droiught_2022$ID)
-
+plot(drought_2016[[2]], xlab = "lon", ylab = "lat", main = "Drought Index 2016")
 ```
 
+```{r}
+drought2016_merged <- terra::merge(drought_2016[[1]], drought_2016[[2]], drought_2016[[3]], drought_2016[[4]], drought_2016[[5]])
+
+#convert to a spatraster object for use in terra
+d2016_rast <- rast(drought2016_merged)
+
+#reproject
+drought_2016_calbers <- terra::project(d2016_rast, ca_raster)
+
+#mask to CA
+d2016_masked <- mask(drought_2016_calbers, ca_raster)
+```
+
+```{r}
+drought_2017 <- lapply(c("D0", "D1", "D2", "D3", "D4"), function(i){
+  shp <- readOGR(here(gdrive_data, "/InputData/InputData_Files/Drought/us_drought_monitor/2017/USDM_20170905.shp"))
+  template <- raster(ext = extent(shp), crs = projection(shp))
+  rst <- rasterize(shp, template, fun = 'first')
+})
+
+plot(drought_2017[[2]], xlab = "lon", ylab = "lat", main = "Drought Index 2017")
+```
+
+```{r}
+drought2017_merged <- terra::merge(drought_2017[[1]], drought_2017[[2]], drought_2017[[3]], drought_2017[[4]], drought_2017[[5]])
+
+#convert to a spatraster object for use in terra
+d2017_rast <- rast(drought2017_merged)
+
+#reproject
+drought_2017_calbers <- terra::project(d2017_rast, ca_raster)
+
+#mask to CA
+d2017_masked <- mask(drought_2017_calbers, ca_raster)
+```
+
+```{r}
+drought_2018 <- lapply(c("D0", "D1", "D2", "D3", "D4"), function(i){
+  shp <- readOGR(here(gdrive_data, "/InputData/InputData_Files/Drought/us_drought_monitor/2018/USDM_20180904.shp"))
+  template <- raster(ext = extent(shp), crs = projection(shp))
+  rst <- rasterize(shp, template, fun = 'first')
+})
+
+plot(drought_2018[[2]], xlab = "lon", ylab = "lat", main = "Drought Index 2022")
+```
+
+```{r}
+drought2018_merged <- terra::merge(drought_2018[[1]], drought_2018[[2]], drought_2018[[3]], drought_2018[[4]], drought_2018[[5]])
+
+#convert to a spatraster object for use in terra
+d2018_rast <- rast(drought2018_merged)
+
+#reproject
+drought_2018_calbers <- terra::project(d2018_rast, ca_raster)
+
+#mask to CA
+d2018_masked <- mask(drought_2018_calbers, ca_raster)
+```
+
+```{r}
+drought_2019 <- lapply(c("D0", "D1", "D2", "D3", "D4"), function(i){
+  shp <- readOGR(here(gdrive_data, "/InputData/InputData_Files/Drought/us_drought_monitor/2019/USDM_20190903.shp"))
+  template <- raster(ext = extent(shp), crs = projection(shp))
+  rst <- rasterize(shp, template, fun = 'first')
+})
+
+plot(drought_2019[[2]], xlab = "lon", ylab = "lat", main = "Drought Index 2019")
+```
+
+```{r}
+drought2019_merged <- terra::merge(drought_2019[[1]], drought_2019[[2]], drought_2019[[3]], drought_2019[[4]], drought_2019[[5]])
+
+#convert to a spatraster object for use in terra
+d2019_rast <- rast(drought2019_merged)
+
+#reproject
+drought_2019_calbers <- terra::project(d2019_rast, ca_raster)
+
+#mask to CA
+d2019_masked <- mask(drought_2019_calbers, ca_raster)
+```
+
+```{r}
+drought_2020 <- lapply(c("D0", "D1", "D2", "D3", "D4"), function(i){
+  shp <- readOGR(here(gdrive_data, "/InputData/InputData_Files/Drought/us_drought_monitor/2020/USDM_20200908.shp"))
+  template <- raster(ext = extent(shp), crs = projection(shp))
+  rst <- rasterize(shp, template, fun = 'first')
+})
+
+plot(drought_2020[[2]], xlab = "lon", ylab = "lat", main = "Drought Index 2020")
+```
+
+```{r}
+drought2020_merged <- terra::merge(drought_2020[[1]], drought_2020[[2]], drought_2020[[3]], drought_2020[[4]], drought_2020[[5]])
+
+#convert to a spatraster object for use in terra
+d2020_rast <- rast(drought2020_merged)
+
+#reproject
+drought_2020_calbers <- terra::project(d2020_rast, ca_raster)
+
+#mask to CA
+d2020_masked <- mask(drought_2020_calbers, ca_raster)
+```
+
+```{r}
+drought_2021 <- lapply(c("D0", "D1", "D2", "D3", "D4"), function(i){
+  shp <- readOGR(here(gdrive_data, "/InputData/InputData_Files/Drought/us_drought_monitor/2021/USDM_20210907.shp"))
+  template <- raster(ext = extent(shp), crs = projection(shp))
+  rst <- rasterize(shp, template, fun = 'first')
+})
+
+plot(drought_2021[[2]], xlab = "lon", ylab = "lat", main = "Drought Index 2022")
+```
+
+```{r}
+drought2021_merged <- terra::merge(drought_2021[[1]], drought_2021[[2]], drought_2021[[3]], drought_2021[[4]], drought_2021[[5]])
+
+#convert to a spatraster object for use in terra
+d2021_rast <- rast(drought2021_merged)
+
+#reproject
+drought_2021_calbers <- terra::project(d2021_rast, ca_raster)
+
+#mask to CA
+d2021_masked <- mask(drought_2021_calbers, ca_raster)
+```
 
 ```{r}
 saverast <- function(x){
@@ -93,6 +222,84 @@ saverast <- function(x){
 writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2022", name), filetype = "Gtiff", overwrite=TRUE)
 }
 
-saverast(drought_2022)
+saverast(d2022_masked)
+```
+
+```{r}
+saverast <- function(x){
+  
+ name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2026", name), filetype = "Gtiff", overwrite=TRUE)
+}
+
+saverast(d2016_masked)
+```
+
+```{r}
+saverast <- function(x){
+  
+ name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2017", name), filetype = "Gtiff", overwrite=TRUE)
+}
+
+saverast(d2017_masked)
+```
+
+```{r}
+saverast <- function(x){
+  
+ name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2018", name), filetype = "Gtiff", overwrite=TRUE)
+}
+
+saverast(d2018_masked)
+```
+
+```{r}
+saverast <- function(x){
+  
+ name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2019", name), filetype = "Gtiff", overwrite=TRUE)
+}
+
+saverast(d2019_masked)
+```
+
+```{r}
+saverast <- function(x){
+  
+ name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2020", name), filetype = "Gtiff", overwrite=TRUE)
+}
+
+saverast(d2020_masked)
+```
+
+```{r}
+saverast <- function(x){
+  
+ name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2021", name), filetype = "Gtiff", overwrite=TRUE)
+}
+
+saverast(d2021_masked)
 ```
 
