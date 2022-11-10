@@ -1,0 +1,35 @@
+---
+title: "model_table"
+author: "Claire Meuter"
+date: "2022-11-04"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(here)
+library(terra)
+library(sf)
+library(tmap)
+library(lubridate)
+library(ResourceSelection)
+library(rmapshaper)
+library(stargazer)
+
+```
+
+## creating a model table for CP outline 
+
+```{r}
+load(here("models","basemodel_allyears.rds"))
+
+#using stargazer we create a model table 
+
+stargazer(basemodel_allyears)
+
+# nevermind, stargazer isn't compatable with .rds
+
+summary(basemodel_allyears)
+```
+
