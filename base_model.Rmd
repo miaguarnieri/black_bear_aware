@@ -30,8 +30,6 @@ gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #Load in data layers
 
-##Conflict data
-
 ```{r}
 #conflict data
 conflict_buffers <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/conflict_buffered_refined/conflict_buffered_refined.shp"))
@@ -660,21 +658,22 @@ stack19 <- c(dem, aspect, ter_rug, pop19, lc19, road_dens, road_dist, streams_di
 
 #nonconflict points
 zero_vars19 <- extract(stack19, zeros19_formatted, method = "simple", bind = TRUE, ID = TRUE) %>% 
-  as.data.frame() %>% 
-  mutate(ID = 0)
+  as.data.frame()
 
 #union conflict points before extracting
 con_union19 <- con_19 %>% 
   st_union() %>% 
   vect()
 
-con_var19 <- extract(stack19, con_union19, method = "simple", bind = TRUE, ID = TRUE)
+con_vars19 <- extract(stack19, con_union19, method = "simple", bind = TRUE, ID = TRUE)
 
 #combine conflict and non-conflict
 
-model_df_19 <- rbind(zero_vars19, con_var19)
+colnames(zero_vars19) <- c("ID", "dem", "aspect", "TRI", "popdens", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens")
 
-colnames(model_df_19) <- c("ID", "dem", "aspect", "TRI", "popdens1", "popdens2", "popdens3", "popdens4", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens")
+colnames(con_vars19) <- c("ID", "dem", "aspect", "TRI", "popdens", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens")
+
+model_df_19 <- rbind(zero_vars19, con_vars19)
 
 #label the year for later binding with other dfs
 modeldf_19_year <- model_df_19 %>% 
@@ -688,7 +687,7 @@ save(modeldf_19_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate
 
 #EDIT: that save didn't work, trying this workaround
 
-write.csv(modeldf_19_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/11_1_2022/modeldf_19.csv"), row.names = FALSE)
+write.csv(modeldf_19_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/11_1_2022/modeldf_19_edited.csv"), row.names = FALSE)
 
 ```
 
