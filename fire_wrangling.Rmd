@@ -135,7 +135,7 @@ saverast <- function(x){
   
   #write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
   
-  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/fire_intensity", name), filetype = "GTiff", overwrite = TRUE)
+  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/fire_intensity", name), filetype = "GTiff", overwrite = TRUE)
   
 }
 
@@ -166,25 +166,25 @@ saverast(fire_2020_mask)
 ```{r}
 #read in fire layers 
 
-fire_2011_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/fire_intensity/fire_2011_mask.tif"))
+fire_2011_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/fire_intensity/fire_2011_mask.tif"))
 
-fire_2012_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/fire_intensity/fire_2012_mask.tif"))
+fire_2012_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/fire_intensity/fire_2012_mask.tif"))
 
-fire_2013_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/fire_intensity/fire_2013_mask.tif"))
+fire_2013_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/fire_intensity/fire_2013_mask.tif"))
 
-fire_2014_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/fire_intensity/fire_2014_mask.tif"))
+fire_2014_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/fire_intensity/fire_2014_mask.tif"))
 
-fire_2015_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/fire_intensity/fire_2015_mask.tif"))
+fire_2015_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/fire_intensity/fire_2015_mask.tif"))
 
-fire_2016_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/fire_intensity/fire_2016_mask.tif"))
+fire_2016_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/fire_intensity/fire_2016_mask.tif"))
 
-fire_2017_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/fire_intensity/fire_2017_mask.tif"))
+fire_2017_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/fire_intensity/fire_2017_mask.tif"))
 
-fire_2018_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/fire_intensity/fire_2018_mask.tif"))
+fire_2018_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/fire_intensity/fire_2018_mask.tif"))
 
-fire_2019_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/fire_intensity/fire_2019_mask.tif"))
+fire_2019_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/fire_intensity/fire_2019_mask.tif"))
 
-fire_2020_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/fire_intensity/fire_2020_mask.tif"))
+fire_2020_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/fire_intensity/fire_2020_mask.tif"))
 
 ```
 
