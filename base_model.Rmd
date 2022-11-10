@@ -683,11 +683,7 @@ modeldf_19_year <- model_df_19 %>%
 ```{r}
 #save the file
 
-save(modeldf_19_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/10_31_2022/modeldf_19.csv"))
-
-#EDIT: that save didn't work, trying this workaround
-
-write.csv(modeldf_19_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/11_1_2022/modeldf_19_edited.csv"), row.names = FALSE)
+write.csv(modeldf_19_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/11_10_2022/modeldf_19.csv"), row.names = FALSE)
 
 ```
 
