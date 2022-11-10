@@ -106,19 +106,17 @@ fdens <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_
 
 #drought current - historical
 
-drought_2016 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2016/drought_2016_raster.tif"))
+drought_2016 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2016/d2016_masked.tif"))
 
-drought_2017 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2017/drought_2017_raster.tif"))
+drought_2017 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2017/d2017_masked.tif"))
 
-drought_2018 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2018/drought_2018_raster.tif"))
+drought_2018 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2018/d2018_masked.tif"))
 
-drought_2019 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2019/drought_2019_raster.tif"))
+drought_2019 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2019/d2019_masked.tif"))
 
-drought_2020 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2020/drought_2020_raster.tif"))
+drought_2020 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2020/d2020_masked.tif"))
 
-drought_2021 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2021/drought_2021_raster.tif"))
-
-drought_2022 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2022/drought_2022_raster.tif"))
+drought_2021 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2021/d2021_masked.tif"))
 
 #fire
 
@@ -159,7 +157,7 @@ dist_fire20 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/
 
 ```{r}
 
-#extract values for 2016, select only conflict indicator and geometry, and dissolve polygons
+#extract values for 2016, select only conflict indicator and geometry
 
 con_16 <- conflict_points %>% 
   separate(incdnt_d, into = c("inc_date", "inc_time"), sep = " ") %>% 
@@ -190,6 +188,7 @@ conpoints16_reproj <- project(conpoints_16_sv,crs(ca_raster))
 
 conbuff16_reproj <- project(conbuff_16_sv,crs(ca_raster))
 
+#convert back to sf for creation of inverse mask
 conpoints16_sf <- st_as_sf(conpoints16_reproj)
 
 conbuff16_sf <- st_as_sf(conbuff16_reproj)
@@ -208,7 +207,7 @@ cabuff16_inv_pol <- as.polygons(conbuff16_inverse)
 cabuff16_inv_sf <- st_as_sf(cabuff16_inv_pol)
 
 #sampling random points from this misshapen california shpfile
-sample16 <- st_sample(cabuff16_inv_sf, 427) %>% 
+sample16 <- st_sample(cabuff16_inv_sf, 2135) %>% 
   st_as_sf()
 
 #mappping to see what it looks like 
@@ -218,7 +217,7 @@ tm_shape(sample16) +
 
 #remove the intersecting polygons
 
-zeros16 <- ms_erase(target = sample16, erase = conbuff16_sf)
+climzeros16 <- ms_erase(target = sample16, erase = conbuff16_sf)
  
  #plot to check that there is no overlap
  
@@ -235,32 +234,31 @@ zeros16_formatted <- zeros16 %>%
 
 #create a raster stack of all variables
 
-stack16 <- c(dem, aspect, ter_rug, pop16, lc16, road_dens, road_dist, streams_dist, urban_dist_16, rec_dist, fc_dist_16, fdens, dist_fire15, dist_fire13_14, dist_fire11_12)
+climstack16 <- c(dem, aspect, ter_rug, pop16, lc16, road_dens, road_dist, streams_dist, urban_dist_16, rec_dist, fc_dist_16, fdens, dist_fire15, dist_fire13_14, dist_fire11_12, drought_2016)
 
-#extract data points from these rasters and add them to the shapefile dataframe
+#extract data points from these rasters and convert them to a dataframe
 
-#nonconflict points
+#first nonconflict points
 
-zero_vars16 <- extract(stack16, zeros16_formatted, method = "simple", bind = TRUE, ID = TRUE) %>%
+clim_zero_vars16 <- extract(stack16, zeros16_formatted, method = "simple", bind = TRUE, ID = TRUE) %>%
   as.data.frame()
 
-#union conflict points before extracting
-con_union16 <- con_16 %>% 
-  st_union() %>% 
-  vect()
+#then conflict points
 
-con_vars16 <- extract(stack16, con_union16, method = "simple", bind = TRUE, ID = TRUE)
+con_vars16 <- extract(stack16, con_16, method = "simple", bind = TRUE, ID = TRUE) %>% 
+  as.data.frame()
 
-#combine conflict and non-conflict
+#combine conflict and non-conflict points (need to rename columns first to match - colnames MUST be in same order as raster stack in order to line up correctly with the data)
 
-colnames(zero_vars16) <- c("conflict", "dem", "aspect", "TRI", "popdens", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens", "dist_fire_1yr", "dist_fire_23yrs", "dist_fire_45yrs")
+colnames(zero_vars16) <- c("conflict", "dem", "aspect", "TRI", "popdens", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens", "dist_fire_1yr", "dist_fire_23yrs", "dist_fire_45yrs","drought")
 
-colnames(con_vars16) <- c("conflict", "dem", "aspect", "TRI", "popdens", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens", "dist_fire_1yr", "dist_fire_23yrs", "dist_fire_45yrs")
+colnames(con_vars16) <- c("conflict", "dem", "aspect", "TRI", "popdens", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens", "dist_fire_1yr", "dist_fire_23yrs", "dist_fire_45yrs", "drought")
 
-model_df_16 <- rbind(zero_vars16, con_vars16)
+clim_model_df_16 <- rbind(zero_vars16, con_vars16)
 
 #label the year for later binding with other dfs
-modeldf_16_year <- model_df_16 %>% 
+
+clim_modeldf_16_year <- model_df_16 %>% 
   mutate(year = 2016)
 
 ```
@@ -268,7 +266,7 @@ modeldf_16_year <- model_df_16 %>%
 ```{r}
 #saving the files
 
-write.csv(modeldf_16_year, file = here(gdrive_data, "/AnalysisData/model_df_climate/11_10_2022/modeldf_16.csv"), row.names = FALSE)
+write.csv(modeldf_16_year, file = here(gdrive_data, "/AnalysisData/model_df_climate/11_10_2022/climate_modeldf_16.csv"), row.names = FALSE)
 
 ```
 
@@ -345,29 +343,23 @@ zeros17_formatted <- zeros17 %>%
 
 #create a raster stack of all variables
 
-stack17 <- c(dem, aspect, ter_rug, pop17, lc16, road_dens, road_dist, streams_dist, urban_dist_16,rec_dist,fc_dist_16, fdens, dist_fire16, dist_fire14_15, dist_fire12_13)
+stack17 <- c(dem, aspect, ter_rug, pop17, lc16, road_dens, road_dist, streams_dist, urban_dist_16,rec_dist,fc_dist_16, fdens, dist_fire16, dist_fire14_15, dist_fire12_13, drought_2017)
 
+#extract data points from these rasters and convert them to a dataframe
 
-#extract data points from these rasters and add them to the shapefile dataframe
-
-#nonconflict points 
+#first nonconflict points
 zero_vars17 <- extract(stack17, zeros17_formatted, method = "simple", bind = TRUE, ID = TRUE) %>% 
   as.data.frame()
 
-#union conflict points before extracting 
-con_union17 <- con_17 %>% 
-  st_union() %>% 
-  vect()
-
-con_vars17 <- extract(stack17, con_union17, method = "simple", bind = TRUE, ID = TRUE)
+#then conflict points
+con_vars17 <- extract(stack17, con_17, method = "simple", bind = TRUE, ID = TRUE) %>% 
+  as.data.frame()
 
 #combine conflict and non-conflict
 
-#combine conflict and non-conflict
+colnames(zero_vars17) <- c("conflict", "dem", "aspect", "TRI", "popdens", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens", "dist_fire_1yr", "dist_fire_23yrs", "dist_fire_45yrs", "drought")
 
-colnames(zero_vars17) <- c("conflict", "dem", "aspect", "TRI", "popdens", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens", "dist_fire_1yr", "dist_fire_23yrs", "dist_fire_45yrs")
-
-colnames(con_vars17) <- c("conflict", "dem", "aspect", "TRI", "popdens", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens", "dist_fire_1yr", "dist_fire_23yrs", "dist_fire_45yrs")
+colnames(con_vars17) <- c("conflict", "dem", "aspect", "TRI", "popdens", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens", "dist_fire_1yr", "dist_fire_23yrs", "dist_fire_45yrs", "drought")
 
 model_df_17 <- rbind(zero_vars17, con_vars17)
 
@@ -861,6 +853,10 @@ df21 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/11_10_2022/mo
 
 climate_model_data_allyears <- rbind(df16, df17, df18, df19, df20, df21)
 
+#test that all your years are present
+
+unique(climate_model_data_allyears$year)
+
 ```
 
 ```{r}
@@ -870,16 +866,22 @@ write.csv(climate_model_data_allyears, file = here(gdrive_data, "/AnalysisData/m
 ```
 
 
-#Run the base model for all years
+#Run the base model
 
 ```{r}
 #read in the data
 climate_model_data <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/11_10_2022/climate_model_data_allyears.csv"))
 ```
 
+##All covariates
+
 ```{r}
+#run the rspf
+
 climate_model_allyears <- rspf(conflict ~ dem + aspect + TRI + popdens + lc + road_dens + road_dist + streams_dist + urban_dist + rec_dist + forest_dist + forest_dens + dist_fire_1yr + dist_fire_23yrs + dist_fire_45yrs, family = "binomial", m = 0, B = 1000, data = climate_model_data)
 ```
+
+##Jason's 5 (add here later)
 
 ```{r}
 #save the model
@@ -887,3 +889,18 @@ climate_model_allyears <- rspf(conflict ~ dem + aspect + TRI + popdens + lc + ro
 save(climate_model_allyears, file = here("models", "climate_model_allyears.rds"))
 
 ```
+
+
+
+```{r}
+#test dredge to see if the function works
+smallmod <- rspf(conflict ~ TRI + popdens, family = "binomial", m = 0, B = 1000, data = climate_model_data)
+
+library(MuMIn)
+
+dredged_model <- dredge(global.model = smallmod, rank = "AIC")
+
+model.sel(dredged_model)
+
+```
+
