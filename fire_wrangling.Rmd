@@ -26,7 +26,6 @@ gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 #sam's file path
 #gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 
-#chase's file path
 ```
 
 
@@ -135,7 +134,7 @@ saverast <- function(x){
   
   #write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
   
-  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/fire_intensity", name), filetype = "GTiff", overwrite = TRUE)
+  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/fire_intensity", name), filetype = "GTiff", overwrite = TRUE)
   
 }
 
@@ -166,25 +165,25 @@ saverast(fire_2020_mask)
 ```{r}
 #read in fire layers 
 
-fire_2011_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/fire_intensity/fire_2011_mask.tif"))
+fire_2011_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/fire_intensity/fire_2011_mask.tif"))
 
-fire_2012_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/fire_intensity/fire_2012_mask.tif"))
+fire_2012_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/fire_intensity/fire_2012_mask.tif"))
 
-fire_2013_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/fire_intensity/fire_2013_mask.tif"))
+fire_2013_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/fire_intensity/fire_2013_mask.tif"))
 
-fire_2014_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/fire_intensity/fire_2014_mask.tif"))
+fire_2014_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/fire_intensity/fire_2014_mask.tif"))
 
-fire_2015_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/fire_intensity/fire_2015_mask.tif"))
+fire_2015_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/fire_intensity/fire_2015_mask.tif"))
 
-fire_2016_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/fire_intensity/fire_2016_mask.tif"))
+fire_2016_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/fire_intensity/fire_2016_mask.tif"))
 
-fire_2017_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/fire_intensity/fire_2017_mask.tif"))
+fire_2017_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/fire_intensity/fire_2017_mask.tif"))
 
-fire_2018_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/fire_intensity/fire_2018_mask.tif"))
+fire_2018_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/fire_intensity/fire_2018_mask.tif"))
 
-fire_2019_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/fire_intensity/fire_2019_mask.tif"))
+fire_2019_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/fire_intensity/fire_2019_mask.tif"))
 
-fire_2020_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/fire_intensity/fire_2020_mask.tif"))
+fire_2020_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/fire_intensity/fire_2020_mask.tif"))
 
 ```
 
@@ -442,6 +441,8 @@ savemultirast(fire_2018_2019)
 
 ```{r}
 #Now we need to read back in the distance raster created in ArcGIS pro and mask these layers to match our CA extent again. Layers are already in the correct projection and resolution
+#reading in the single years
+dist_fire15 <-rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_med_high_fire/dist_fire_2015.tif"))
 
 dist_fire16 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_med_high_fire/dist_fire_2016.tif"))
 
@@ -453,17 +454,136 @@ dist_fire19 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/
 
 dist_fire20 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_med_high_fire/dist_fire_2020.tif"))
 
-# Now we need to mask these layers to just the CA extent 
-fire16_ca_distance <- mask(dist_fire16, ca_raster) 
+#reading in the multiyears: 
+
+#2011-2012 merged mod/high distance layer
+dist_fire11_12 <-rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_med_high_fire/multiyear_rasters/dist_fire_2011_2012.tif"))
+
+#2012-2013 merged  mod/high distance layer
+dist_fire12_13 <-rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_med_high_fire/multiyear_rasters/dist_fire_2012_2013.tif"))
+
+#2013-2014 merged mod/high distance layer
+dist_fire13_14 <-rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_med_high_fire/multiyear_rasters/dist_fire_2013_2014.tif"))
+
+#2014-2015 merged  mod/high distance layer
+dist_fire14_15 <-rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_med_high_fire/multiyear_rasters/dist_fire_2014_2015.tif"))
+
+#2015-2016 merged mod/high distance layer
+dist_fire15_16 <-rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_med_high_fire/multiyear_rasters/dist_fire_2015_2016.tif"))
+
+#2016-2017 merged mod/high distance layer
+dist_fire16_17 <-rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_med_high_fire/multiyear_rasters/dist_fire_2016_2017.tif"))
+
+#2017-2018 merged mod/high distance layer
+dist_fire17_18 <-rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_med_high_fire/multiyear_rasters/dist_fire_2017_2018.tif"))
+
+#2018-2019 merged mod/high distance layer
+
+dist_fire18_19 <-rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_med_high_fire/multiyear_rasters/dist_fire_2018_2019.tif"))
 
 
-
-#now we will save them back to the google drive to be referenced later
 ```
 
 #Remask the distance rasters
 
 ```{r}
+# Now we need to mask these layers to just the CA extent 
+
+##all the single years:
+#added step, was having issue with distance raster from arc not matching ca_raster extent. This work around fixes the error 
+dist_fire15 = resample(dist_fire15, ca_raster)
+#only ran this for 2015, because 2015 was only one throwing error code 
+
+fire15_ca_distance <- mask(dist_fire15, ca_raster) 
+
+fire16_ca_distance <- mask(dist_fire16, ca_raster) 
+
+fire17_ca_distance <- mask(dist_fire17, ca_raster) 
+
+fire18_ca_distance <- mask(dist_fire18, ca_raster) 
+
+fire19_ca_distance <- mask(dist_fire19, ca_raster) 
+
+fire20_ca_distance <- mask(dist_fire20, ca_raster) 
+
+# all the merged years 
+
+#2011-2012 merged mod/high distance layer
+
+fire11_12_ca_distance <- mask(dist_fire11_12, ca_raster) 
+
+#2012-2013 merged  mod/high distance layer
+
+fire12_13_ca_distance <- mask(dist_fire12_13, ca_raster) 
+
+#2013-2014 merged mod/high distance layer
+
+fire13_14_ca_distance <- mask(dist_fire13_14, ca_raster) 
+
+#2014-2015 merged  mod/high distance layer
+
+fire14_15_ca_distance <- mask(dist_fire14_15, ca_raster) 
+
+#2015-2016 merged mod/high distance layer
+#had to add trouble shoot work around here: 
+dist_fire15_16 = resample(dist_fire15_16, ca_raster)
+fire15_16_ca_distance <- mask(dist_fire15_16, ca_raster) 
+
+#2016-2017 merged mod/high distance layer
+dist_fire16_17 = resample(dist_fire16_17, ca_raster)
+
+fire16_17_ca_distance <- mask(dist_fire16_17, ca_raster) 
+
+#2017-2018 merged mod/high distance layer
+dist_fire17_18 = resample(dist_fire17_18, ca_raster)
+
+fire17_18_ca_distance <- mask(dist_fire17_18, ca_raster) 
+
+#2018-2019 merged mod/high distance layer
+dist_fire18_19 = resample(dist_fire18_19, ca_raster)
+
+fire18_19_ca_distance <- mask(dist_fire18_19, ca_raster) 
+```
+#now we will save them back to the google drive to be referenced later
+```{r}
+saverast <- function(x){
+  
+  name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+  #write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/dist_fire", name), filetype = "GTiff", overwrite = TRUE)
+  
+}
+
+saverast(fire15_ca_distance)
+
+saverast(fire16_ca_distance)
+
+saverast(fire17_ca_distance)
+
+saverast(fire18_ca_distance)
+
+saverast(fire19_ca_distance)
+
+saverast(fire20_ca_distance)
+
+saverast(fire11_12_ca_distance)
+
+saverast(fire12_13_ca_distance)
+
+saverast(fire13_14_ca_distance)
+
+saverast(fire14_15_ca_distance)
+
+saverast(fire15_16_ca_distance)
+
+saverast(fire16_17_ca_distance)
+
+saverast(fire17_18_ca_distance)
+
+saverast(fire18_19_ca_distance)
+
 
 ```
 
