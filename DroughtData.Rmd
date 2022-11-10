@@ -46,6 +46,12 @@ plot(drought_2022[[2]], xlab = "lon", ylab = "lat", main = "Drought Index 2022")
 ```{r}
 head(drought_2022)
 
+drought_2022_calbers <- project(drought_2022, ca_raster)
+
+drought_2016_mask <- crop(drought_2016_calbers, ca_raster)
+
+drought_2016_raster <- rasterize(drought_2016_mask, ca_raster)
+
 drought_convert <- rasterize(drought_2022, r, field = droiught_2022$ID)
 
 ```
