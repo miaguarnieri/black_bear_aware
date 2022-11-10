@@ -884,6 +884,6 @@ climate_model_allyears <- rspf(conflict ~ dem + aspect + TRI + popdens + lc + ro
 ```{r}
 #save the model
 
-save(basemodel_allyears, file = here(gdrive_data, "/AnalysisData/models/11_1_2022/model_allyears_noclimate/basemodel_allyears.rda"))
+save(climate_model_allyears, file = here("models", "climate_model_allyears.rds"))
 
 ```
