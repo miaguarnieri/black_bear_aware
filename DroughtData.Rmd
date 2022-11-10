@@ -29,9 +29,20 @@ gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 #sam's file path
 #gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 ```
+
 ```{r}
 ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
 ```
+
+# Read in drought data
+
+```{r}
+drought2016 <- vect(here(gdrive_data, "/InputData/InputData_Files/Drought/us_drought_monitor/2016/USDM_20161227.shp")) %>% 
+  terra::project(ca_raster)
+
+```
+
+
 
 
 ```{r}
@@ -43,10 +54,25 @@ drought_2022 <- lapply(c("D0", "D1", "D2", "D3", "D4"), function(i){
 
 plot(drought_2022[[2]], xlab = "lon", ylab = "lat", main = "Drought Index 2022")
 ```
+
 ```{r}
 head(drought_2022)
 
-drought_2022_calbers <- project(drought_2022, ca_raster)
+#merge the layers of the list
+drought2022_merged <- terra::merge(drought_2022[[1]], drought_2022[[2]], drought_2022[[3]], drought_2022[[4]], drought_2022[[5]])
+
+#convert to a spatraster object for use in terra
+d2022_rast <- rast(drought2022_merged)
+
+#reproject
+drought_2022_calbers <- terra::project(d2022_rast, ca_raster)
+
+#mask to CA
+d2022_masked <- mask(drought_2022_calbers, ca_raster)
+
+#test plot
+plot(d2022_masked)
+
 
 drought_2016_mask <- crop(drought_2016_calbers, ca_raster)
 
