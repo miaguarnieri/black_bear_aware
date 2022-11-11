@@ -142,6 +142,7 @@ conpoints16_reproj <- project(conpoints_16_sv,crs(ca_raster))
 
 conbuff16_reproj <- project(conbuff_16_sv,crs(ca_raster))
 
+#convert back to sf for creation of inverse mask
 conpoints16_sf <- st_as_sf(conpoints16_reproj)
 
 conbuff16_sf <- st_as_sf(conbuff16_reproj)
@@ -160,7 +161,8 @@ cabuff16_inv_pol <- as.polygons(conbuff16_inverse)
 cabuff16_inv_sf <- st_as_sf(cabuff16_inv_pol)
 
 #sampling random points from this misshapen california shpfile
-sample16 <- st_sample(cabuff16_inv_sf, 427) %>% 
+#we sample 5X the amount of zeros for how many conflict points we have 
+sample16 <- st_sample(cabuff16_inv_sf, 2135) %>% 
   st_as_sf()
 
 #mappping to see what it looks like 
@@ -221,11 +223,12 @@ zero_vars16 <- extract(stack16, zeros16_formatted, method = "simple", bind = TRU
   mutate(ID = 0)
 
 #union conflict points before extracting
-con_union16 <- con_16 %>% 
-  st_union() %>% 
-  vect()
+#con_union16 <- con_16 %>% 
+ # st_union() %>% 
+ # vect()
 
-con_vars16 <- extract(stack16, con_union16, method = "simple", bind = TRUE, ID = TRUE)
+con_vars16 <- extract(stack16, con_16, method = "simple", bind = TRUE, ID = TRUE) %>%
+  as.data.frame()
 
 #combine conflict and non-conflict
 
@@ -235,7 +238,7 @@ colnames(model_df_16) <- c("ID", "dem", "aspect", "TRI", "popdens1", "popdens2",
 
 #run it in the model
 
-model16 <- rspf(ID ~ dem + aspect + TRI + popdens1 + popdens2 + popdens3 + popdens4 + lc + road_dens + road_dist + streams_dist + urban_dist + rec_dist + forest_dist + forest_dens, family = "binomial", m = 0, B = 1000, data = model_df_16)
+#model16 <- rspf(ID ~ dem + aspect + TRI + popdens1 + popdens2 + popdens3 + popdens4 + lc + road_dens + road_dist + streams_dist + urban_dist + rec_dist + forest_dist + forest_dens, family = "binomial", m = 0, B = 1000, data = model_df_16)
 
 #label the year for later binding with other dfs
 modeldf_16_year <- model_df_16 %>% 
