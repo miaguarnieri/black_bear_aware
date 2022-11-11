@@ -219,8 +219,8 @@ stack16 <- c(dem, aspect, ter_rug, pop16, lc16, road_dens, road_dist, streams_di
 #nonconflict points
 
 zero_vars16 <- extract(stack16, zeros16_formatted, method = "simple", bind = TRUE, ID = TRUE) %>%
-  as.data.frame() %>% 
-  mutate(ID = 0)
+  as.data.frame()
+
 
 #union conflict points before extracting
 #con_union16 <- con_16 %>% 
@@ -232,9 +232,11 @@ con_vars16 <- extract(stack16, con_16, method = "simple", bind = TRUE, ID = TRUE
 
 #combine conflict and non-conflict
 
-model_df_16 <- rbind(zero_vars16, con_vars16)
+colnames(zero_vars16) <- c("ID", "dem", "aspect", "TRI", "popdens", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens")
 
-colnames(model_df_16) <- c("ID", "dem", "aspect", "TRI", "popdens1", "popdens2", "popdens3", "popdens4", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens")
+colnames(con_vars16) <- c("ID", "dem", "aspect", "TRI", "popdens", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens")
+
+model_df_16 <- rbind(zero_vars16, con_vars16)
 
 #run it in the model
 
@@ -249,32 +251,12 @@ modeldf_16_year <- model_df_16 %>%
 ```{r}
 #saving the files
 
-#save the csv with extracted variables
-save(modeldf_16_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/10_31_2022/modeldf_16.csv"))
-
-
-#EDIT: that save didn't work, trying this workaround
-
-write.csv(modeldf_16_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/11_1_2022/modeldf_16.csv"), row.names = FALSE)
+write.csv(modeldf_16_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/11_10_2022/modeldf_16.csv"), row.names = FALSE)
 
 #save the 2016 model output
-save(model16, file = here(gdrive_data, "/AnalysisData/models/10_31_2022/model_2016_noclimate/model_2016_noclimate.RData"))
+#save(model16, file = here(gdrive_data, "/AnalysisData/models/10_31_2022/model_2016_noclimate/model_2016_noclimate.RData"))
 ```
 
-
-#Sam is playing around with the code here:
-```{r}
-#try to stack rasters
-
-raster_stack_test <- c(roads15_ca_distance,stream17_ca_distance)
-
-tm_shape(raster_stack_test) +
-  tm_raster() +
-  tmap_mode("view")
-
-raster_test_df <- as.data.frame(raster_stack_test)
-
-```
 
 ##2017
 
