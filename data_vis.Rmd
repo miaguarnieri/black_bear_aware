@@ -14,6 +14,7 @@ library(tmap)
 library(here)
 library(ResourceSelection)
 
+
 #mia, chase, and claire's file path
 #gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
@@ -47,15 +48,11 @@ TRI <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_re
 
 #human pop density
 
-pop21 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/population_density/pop_den_2021_mask.tif"))
+popdens <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/population_density/pop_den_2021_mask.tif"))
 
-popdens1 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/population_density/pop_den_2021_mask.tif"), lyrs = 1)
 
-popdens2 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/population_density/pop_den_2021_mask.tif"), lyrs = 2)
 
-popdens3 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/population_density/pop_den_2021_mask.tif"), lyrs = 3)
 
-popdens4 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/population_density/pop_den_2021_mask.tif"), lyrs = 4)
 
 #land cover
 
@@ -91,7 +88,7 @@ forest_dens <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/
 
 #stack the rasters
 
-stackca <- c(dem, aspect, TRI, popdens1, popdens2, popdens3, popdens4, lc, road_dens, road_dist, streams_dist, urban_dist, rec_dist, forest_dist, forest_dens)
+stackca <- c(dem, aspect, TRI, popdens, lc, road_dens, road_dist, streams_dist, urban_dist, rec_dist, forest_dist, forest_dens)
 
 #extract the data for CA raster
 
@@ -100,7 +97,19 @@ stackca <- c(dem, aspect, TRI, popdens1, popdens2, popdens3, popdens4, lc, road_
 
 #use the terra predict function
 
-terra::predict(stackca, model = basemodel_allyears, fun = predict)
+#terra::predict(stackca, model = basemodel_allyears, fun = predict)
+
+```
+
+```{r}
+
+#use the raster predict functio
+library(raster)
+#any categorical variables used need to be identified first
+f <- list(terra::levels(stackca$category)) 
+names(f) <- "landcover"
+
+raster::predict(stackca, model = basemodel_allyears, fun = predict, factors = f)
 
 ```
 
