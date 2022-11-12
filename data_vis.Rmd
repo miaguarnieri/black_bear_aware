@@ -12,13 +12,14 @@ library(tidyverse)
 library(terra)
 library(tmap)
 library(here)
+library(ResourceSelection)
 
 
 #mia, chase, and claire's file path
-gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+#gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #sam's file path
-#gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
+gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 
 ```
 
@@ -111,4 +112,5 @@ names(f) <- "landcover"
 raster::predict(stackca, model = basemodel_allyears, fun = predict, factors = f)
 
 ```
+
 
