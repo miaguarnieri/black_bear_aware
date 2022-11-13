@@ -876,7 +876,7 @@ climate_model_data <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate
 ```{r}
 #run the rspf
 
-climate_model_allyears <- rspf(conflict ~ dem + aspect + TRI + popdens + lc + road_dens + road_dist + streams_dist + urban_dist + rec_dist + forest_dist + forest_dens + dist_fire_1yr + dist_fire_23yrs + dist_fire_45yrs, family = "binomial", m = 0, B = 1000, data = climate_model_data)
+climate_model_allyears <- rspf(conflict ~ dem + aspect + TRI + popdens + lc + road_dens + road_dist + streams_dist + urban_dist + rec_dist + forest_dist + forest_dens + dist_fire_1yr + dist_fire_23yrs + dist_fire_45yrs + drought, family = "binomial", m = 0, B = 1000, data = climate_model_data)
 ```
 
 
