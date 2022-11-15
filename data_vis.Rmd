@@ -101,7 +101,7 @@ stackca <- c(dem, aspect, TRI, popdens, lc, road_dens, road_dist, streams_dist, 
 
 ```{r}
 
-#use the raster predict functio
+#use the raster predict function
 library(raster)
 #any categorical variables used need to be identified first
 f <- list(terra::levels(stackca$category)) 
@@ -113,6 +113,7 @@ raster::predict(stackca, model = basemodel_allyears, fun = predict, factors = f)
 
 
 #Climate model 
+
 #read in model, then layers and stack them 
 ```{r}
 #read in the model
@@ -190,7 +191,7 @@ stackca_clim <- c(dem, aspect, TRI, popdens, lc, road_dens, road_dist, streams_d
 ```
 
 ```{r}
-#use the raster predict functio
+#use the raster predict function
 library(raster)
 #any categorical variables used need to be identified first
 f <- list(terra::levels(stackca_clim$category)) 
