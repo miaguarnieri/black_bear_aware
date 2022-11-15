@@ -196,7 +196,7 @@ library(raster)
 f <- list(terra::levels(stackca_clim$category)) 
 names(f) <- "landcover"
 
-raster::predict(stackca_clim, model = climate_model_allyears, fun = predict, factors = f)
+raster::predict(object = stackca_clim, model = climate_model_allyears, fun = predict, factors = f,ext=ext, progress= "windows")
 ```
 
 
