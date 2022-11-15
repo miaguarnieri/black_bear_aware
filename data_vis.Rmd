@@ -203,18 +203,6 @@ map <- raster::predict(stackca_clim_rast, model = climate_model_allyears, fun = 
 plot(map, main="Model Predictions")
 ```
 
-```{r}
-#use the raster predict function
-library(raster)
-#any categorical variables used need to be identified first
-f <- list(raster::levels(stackca_clim_rast$lc))
-names(f) <- "lc"
-
-map <- raster::predict(stackca_clim_rast, model = climate_model_allyears, fun = predict, factors = f)
-
-plot(map, main="Model Predictions")
-
-```
 
 
 
