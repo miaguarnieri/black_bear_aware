@@ -1003,5 +1003,75 @@ basemodel_allyears <- rspf(ID ~ dem + aspect + TRI + popdens + lc + road_dens + 
 
 save(basemodel_allyears, file = here(gdrive_data, "/AnalysisData/models/11_12_2022/model_allyears_noclimate/basemodel_allyears.rda"))
 
+#save the model
+
+save(climate_model_allyears, file = here("models", "basemodel_allyears.rds"))
+
+
+```
+
+#Set up 5 alternative models, with the same covariates as the Hagani et al models
+
+```{r}
+
+
+#Model 1: elevation + land cover + distance to forests + population density + distance to recreational areas+ road density + distance to urban areas
+mod1 <- rspf(ID ~ dem + lc + forest_dist + popdens + rec_dist + road_dens + urban_dist, family = "binomial", m = 0, B = 1000, data = model_data)
+
+#Model 2: elevation + forest density + land cover + distance to forests + population density + distance to recreational areas + road density + distance to urban areas
+
+mod2 <- rspf(ID ~ dem + forest_dens + lc + forest_dist + popdens + rec_dist + road_dens + urban_dist, family = "binomial", m = 0, B = 1000, data = model_data)
+
+#Model 3: elevation + land cover + distance to forests + population density + distance to recreational areas + distance to streams + terrain ruggedness + distance to urban areas
+
+mod3 <- rspf(ID ~ dem + lc + forest_dist + popdens + rec_dist + streams_dist + TRI + urban_dist, family = "binomial", m = 0, B = 1000, data = model_data)
+
+#Model 4: elevation + forest density + land cover + distance to forests + population density + distance to recreational areas + distance to streams + distance to urban areas
+
+mod4 <- rspf(ID ~ dem + forest_dens + lc + forest_dist + popdens + rec_dist + streams_dist + urban_dist, family = "binomial", m = 0, B = 1000, data = model_data)
+
+#Model 5: elevation + land cover + distance to forests + population density + distance to streams + terrain ruggedness + distance to urban areas
+
+mod5 <- rspf(ID ~ dem + lc + forest_dist + popdens + streams_dist + TRI + urban_dist, family = "binomial", m = 0, B = 1000, data = model_data)
+
+```
+#save the 5 models 
+```{r}
+#mod1
+save(mod1, file = here(gdrive_data, "/AnalysisData/models/11_12_2022/model_allyears_noclimate/mod1.rda"))
+
+#save the model
+
+save(mod1, file = here("models", "mod1.rds"))
+
+#mod2
+save(mod2, file = here(gdrive_data, "/AnalysisData/models/11_12_2022/model_allyears_noclimate/mod2.rda"))
+
+#save the model
+
+save(mod2, file = here("models", "mod2.rds"))
+
+#mod3
+save(mod3, file = here(gdrive_data, "/AnalysisData/models/11_12_2022/model_allyears_noclimate/mod3.rda"))
+
+#save the model
+
+save(mod3, file = here("models", "mod3.rds"))
+
+#mod4
+
+save(mod4, file = here(gdrive_data, "/AnalysisData/models/11_12_2022/model_allyears_noclimate/mod4.rda"))
+
+#save the model
+
+save(mod4, file = here("models", "mod4.rds"))
+
+#mod5
+save(mod5, file = here(gdrive_data, "/AnalysisData/models/11_12_2022/model_allyears_noclimate/mod5.rda"))
+
+#save the model
+
+save(mod5, file = here("models", "mod5.rds"))
+
 ```
 
