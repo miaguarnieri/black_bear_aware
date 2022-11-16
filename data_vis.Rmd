@@ -18,10 +18,10 @@ library(ResourceSelection)
 
 
 #mia, chase, and claire's file path
-#gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #sam's file path
-gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
+#gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 
 ```
 
@@ -116,6 +116,7 @@ plot(map, main="Base Model Predictions")
 
 
 #Climate model 
+
 #read in model, then layers and stack them 
 ```{r}
 #read in the model
@@ -196,9 +197,13 @@ climate_model_data <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate
 
 ```{r}
 #use the raster predict function
-library(raster)
+
+#changing names of the raster stack to match our model exactly
+
+names(stackca_clim_rast) <- c("dem", "aspect", "TRI", "popdens", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens", "dist_fire_1yr", "dist_fire_23yrs", "dist_fire_45yrs", "drought")
+
 #any categorical variables used need to be identified first
-f <- list(raster::levels(stackca_clim_rast$category))
+f <- list(raster::levels(stackca_clim_rast$lc))
 names(f) <- "category"
 
 map <- raster::predict(stackca_clim_rast, model = climate_model_allyears, fun = predict, factors = f)
