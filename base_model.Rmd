@@ -1043,21 +1043,21 @@ save(mod1, file = here(gdrive_data, "/AnalysisData/models/11_12_2022/model_allye
 
 #save the model
 
-save(mod1, file = here("models", "mod1.rds"))
+save(mod1, file = here("models", "mod1.rda"))
 
 #mod2
 save(mod2, file = here(gdrive_data, "/AnalysisData/models/11_12_2022/model_allyears_noclimate/mod2.rda"))
 
 #save the model
 
-save(mod2, file = here("models", "mod2.rds"))
+save(mod2, file = here("models", "mod2.rda"))
 
 #mod3
 save(mod3, file = here(gdrive_data, "/AnalysisData/models/11_12_2022/model_allyears_noclimate/mod3.rda"))
 
 #save the model
 
-save(mod3, file = here("models", "mod3.rds"))
+save(mod3, file = here("models", "mod3.rda"))
 
 #mod4
 
@@ -1065,14 +1065,32 @@ save(mod4, file = here(gdrive_data, "/AnalysisData/models/11_12_2022/model_allye
 
 #save the model
 
-save(mod4, file = here("models", "mod4.rds"))
+save(mod4, file = here("models", "mod4.rda"))
 
 #mod5
 save(mod5, file = here(gdrive_data, "/AnalysisData/models/11_12_2022/model_allyears_noclimate/mod5.rda"))
 
 #save the model
 
-save(mod5, file = here("models", "mod5.rds"))
+save(mod5, file = here("models", "mod5.rda"))
 
+```
+
+
+```{r}
+#comparing AIC scores
+AIC(mod1)
+
+AIC(mod2)
+
+AIC(mod3)
+
+AIC(mod4)
+
+AIC(mod5)
+
+AIC(climate_model_allyears)
+
+AIC(basemodel_allyears)
 ```
 
