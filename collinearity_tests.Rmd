@@ -62,7 +62,7 @@ cor_matrix_2 <- cor(cor_matrix, method = c("pearson"))
 corrplot(cor_matrix_2)
 cor_matrix
 
-vif(model)
+vif(climate_model_allyears)
 
 ```
 
