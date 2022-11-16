@@ -434,7 +434,67 @@ d2047 <- reproj_mask(drought_2047)
 d2048 <- reproj_mask(drought_2048)
 d2049 <- reproj_mask(drought_2049)
 d2050 <- reproj_mask(drought_2050)
+d2051 <- reproj_mask(drought_2051)
 d2052 <- reproj_mask(drought_2052)
-d2052 <- reproj_mask(drought_2053)
+```
+
+#saving these projected rasters to model ready folder
+```{r}
+saverast <- function(x){
+  
+ name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/caladapt_model_ready", name), filetype = "Gtiff", overwrite=TRUE)
+}
+
+saverast(d2006)
+saverast(d2007)
+saverast(d2008)
+saverast(d2009)
+saverast(d2010)
+saverast(d2011)
+saverast(d2012)
+saverast(d2013)
+saverast(d2014)
+saverast(d2015)
+saverast(d2016)
+saverast(d2017)
+saverast(d2018)
+saverast(d2019)
+saverast(d2020)
+saverast(d2021)
+saverast(d2022)
+saverast(d2023)
+saverast(d2024)
+saverast(d2025)
+saverast(d2026)
+saverast(d2027)
+saverast(d2028)
+saverast(d2029)
+saverast(d2030)
+saverast(d2031)
+saverast(d2032)
+saverast(d2033)
+saverast(d2034)
+saverast(d2035)
+saverast(d2036)
+saverast(d2037)
+saverast(d2038)
+saverast(d2039)
+saverast(d2040)
+saverast(d2041)
+saverast(d2042)
+saverast(d2043)
+saverast(d2044)
+saverast(d2045)
+saverast(d2046)
+saverast(d2047)
+saverast(d2048)
+saverast(d2049)
+saverast(d2050)
+saverast(d2051)
+saverast(d2052)
 ```
 
