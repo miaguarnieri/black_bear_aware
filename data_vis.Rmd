@@ -203,7 +203,7 @@ climate_model_data <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate
 names(stackca_clim_rast) <- c("dem", "aspect", "TRI", "popdens", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens", "dist_fire_1yr", "dist_fire_23yrs", "dist_fire_45yrs", "drought")
 
 #any categorical variables used need to be identified first
-f <- list(raster::levels(stackca_clim_rast$lc))
+f <- list(levels(climate_model_data$lc))
 names(f) <- "category"
 
 map <- raster::predict(stackca_clim_rast, model = climate_model_allyears, fun = predict, factors = f)
@@ -211,7 +211,11 @@ map <- raster::predict(stackca_clim_rast, model = climate_model_allyears, fun = 
 plot(map, main="Model Predictions")
 ```
 
+```{r}
+lc_rast <- terra::rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/land_cover/lc19_reclassed.tif"))
 
+lc_rl <- raster(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/land_cover/lc19_reclassed.tif"), values = TRUE)
+```
 
 
 
