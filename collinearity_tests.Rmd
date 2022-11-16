@@ -17,10 +17,10 @@ library(sf)
 library(ResourceSelection)
 
 #mia, chase, and claire's file path
-gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+#gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #sam's file path
-#gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
+gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 
 
 ```
@@ -46,13 +46,45 @@ model<- load(here("models", "climate_model_allyears.rds")) #you have to name the
 
 ```
 
+
 ```{r}
 #read in the data
 climate_model_data <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/11_10_2022/climate_model_data_allyears.csv"))
 
+```
+```{r}
+data_model_matrix <- model.matrix(~0+., data=climate_model_data) 
+cor_matrix <- cor(data_model_matrix)
+corrplot(cor_matrix)
 
+cor_matrix_2 <- cor(cor_matrix, method = c("pearson"))
+
+corrplot(cor_matrix_2)
+cor_matrix
+
+vif(model)
+
+```
+
+```{r}
+#from Jason's code: 
+##Correlation/collinearity#
+#Quick way to test for collinearity between covariates#
+cor.matrix <- cor(climate_model_data)
+#cor.matrix
+#corrplot(cor.matrix)
+#cor.matrix <- cor(data, method = c("pearson"))
+#cor.matrix
+#corrplot(cor.matrix)
+#if you want to examine VIFs, you need to build a model first (with all covariates)
+#vif(model)
+```
+
+
+```{r}
 climate_model_data_numeric <- climate_model_data$lc[, c('shrub_scrub', 'grassland_herbaceous','barren_land', 'forest', 'dev_open_space', 'planted_cultivated', 'open_water', 'dev_low_int', 'dev_med_int', 'dev_high_int', 'wetlands', 'undefined', 'perrenial_ice_snow', 'NA' )] <- sapply(climate_model_data$lc[, c('shrub_scrub', 'grassland_herbaceous','barren_land', 'forest', 'dev_open_space', 'planted_cultivated', 'open_water', 'dev_low_int', 'dev_med_int', 'dev_high_int', 'wetlands', 'undefined', 'perrenial_ice_snow', 'NA' )], unclass)
 ```
+
 ```{r}
 unclass(climate_model_data$lc[, c('shrub_scrub', 'grassland_herbaceous','barren_land', 'forest', 'dev_open_space', 'planted_cultivated', 'open_water', 'dev_low_int', 'dev_med_int', 'dev_high_int', 'wetlands', 'undefined', 'perrenial_ice_snow', 'NA' )]
 ```
