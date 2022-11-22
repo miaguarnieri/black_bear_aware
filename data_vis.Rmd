@@ -229,10 +229,9 @@ caraster <- raster(here(gdrive_data, "/IntermediateData/IntermediateData_Files/C
 map <- raster::predict(stackca_clim_rast, model = climate_model_allyears, ext = extent(caraster), fun = predict, factors = f)
 
 #new error:
-# Error in (function (classes, fdef, mtable)  : 
-#   unable to find an inherited method for function ‘trim’ for signature ‘"NULL"’
+# Warning: NAs introduced by coercionError in .local(object, ...) : cannot process these factors
 
-plot(map, main="Model Predictions")
+#plot(map, main="Model Predictions")
 
 ```
 
