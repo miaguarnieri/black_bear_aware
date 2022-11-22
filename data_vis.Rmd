@@ -143,8 +143,17 @@ popdens <- raster(here(gdrive_data, "/IntermediateData/IntermediateData_Files/mo
 
 #land cover
 
+index <- c(0, 11, 12, 21, 22, 23, 24, 31, 40, 52, 71, 80, 90)
+
+#categories vector
+cats <- c("undefined","open_water", "perrenial_ice_snow", "dev_open_space","dev_low_int", "dev_med_int", "dev_high_int", "barren_land", "forest", "shrub_scrub", "grassland_herbaceous", "planted_cultivated", "wetlands")
+
+#combine those into a dataframe
+catdat <- data.frame(ID = index, category = cats)
 
 lc <- raster(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/land_cover/lc19_reclassed.tif"))
+
+levels(lc) <- catdat
 
 #road density
 
@@ -204,17 +213,139 @@ names(stackca_clim_rast) <- c("dem", "aspect", "TRI", "popdens", "lc", "road_den
 
 #any categorical variables used need to be identified first
 
+#making land cover categories factors
 lc_factors <- as.factor(climate_model_data$lc)
 
-f <- list(levels(lc_factors))
+#turning that into a list
+f <- as.list(levels(lc_factors))
 
-names(f) <- "category"
+#naming the list "lc" so it matches the model dataframe
+names(f)[1:13] <- "lc"
 
-map <- raster::predict(stackca_clim_rast, model = climate_model_allyears, fun = predict, factors = f$category)
+#read in ca raster for extent
+
+caraster <- raster(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
+
+map <- raster::predict(stackca_clim_rast, model = climate_model_allyears, ext = extent(caraster), fun = predict, factors = f)
+
+#new error:
+# Error in (function (classes, fdef, mtable)  : 
+#   unable to find an inherited method for function ‘trim’ for signature ‘"NULL"’
 
 plot(map, main="Model Predictions")
+
 ```
 
 
+#messing around with terra
+
+```{r}
+library (terra)
+
+#read in the model
+
+model<- load(here("models", "climate_model_allyears.rds")) #you have to name the object "model or it will not read in right
+
+# dem + aspect + TRI + popdens + lc + road_dens + road_dist + 
+   # streams_dist + urban_dist + rec_dist + forest_dist + forest_dens + 
+   # dist_fire_1yr + dist_fire_23yrs + dist_fire_45yrs
 
 
+#elevation
+dem <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/elevation/dem_formatted.tif"))
+
+#aspect
+aspect <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/aspect/aspect.tif"))
+
+#terrain ruggedness
+TRI <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/terrain_ruggedness/terrain_ruggedness.tif"))
+
+#human pop density
+
+popdens <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/population_density/pop_den_2021_mask.tif"))
+
+#land cover
+
+lc <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/land_cover/lc19_reclassed.tif"))
+
+#road density
+
+road_dens <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/road_density/road_density_ca.tif"))
+
+#distance to roads
+
+road_dist <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_road/model_ready/roads15_ca_distance.tif"))
+
+#distance to streams
+
+streams_dist <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_stream/model_ready/stream17_ca_distance.tif"))
+
+#distance to urban areas
+
+
+urban_dist <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_urban/model_ready/ua19_ca_distance.tif"))
+
+#distance to recreational areas
+
+rec_dist <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_rec/model_ready/rec_ca_distance.tif"))
+
+#distance to forest cover
+
+forest_dist <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_forest/model_ready/fc19_ca_distance.tif"))
+
+#forest density
+
+forest_dens <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/forest_density/forest_dens_2016_mask.tif"))
+
+
+#fire layers
+
+dist_fire_1yr <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/dist_fire/fire20_ca_distance.tif"))
+
+dist_fire_23yrs <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/dist_fire/fire18_19_ca_distance.tif"))
+
+dist_fire_45yrs <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/dist_fire/fire16_17_ca_distance.tif"))
+
+#drought current - historical
+
+drought <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2021/d2021_masked.tif"))
+
+
+stackca_clim_rast <- c(dem, aspect, TRI, popdens, lc, road_dens, road_dist, streams_dist, urban_dist, rec_dist, forest_dist, forest_dens, dist_fire_1yr, dist_fire_23yrs, dist_fire_45yrs, drought)
+
+climate_model_data <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/11_10_2022/climate_model_data_allyears.csv"))
+
+```
+
+```{r}
+
+#changing names of the raster stack to match our model exactly
+
+#names(stackca_clim_rast) <- c("dem", "aspect", "TRI", "popdens", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens", "dist_fire_1yr", "dist_fire_23yrs", "dist_fire_45yrs", "drought")
+
+#any categorical variables used need to be identified first
+
+#making land cover categories factors
+lc_factors <- as.factor(climate_model_data$lc)
+
+#turning that into a list
+f <- as.list(levels(lc_factors))
+
+f <- as.list(levels(lc))
+
+#naming the list "lc" so it matches the model dataframe
+names(f) <- "lc"
+
+#read in ca raster for extent
+
+caraster <- raster(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
+
+map <- predict(stackca_clim_rast, model = climate_model_allyears, fun = predict, factors = f)
+
+#new error:
+# Error in (function (classes, fdef, mtable)  : 
+#   unable to find an inherited method for function ‘trim’ for signature ‘"NULL"’
+
+plot(map, main="Model Predictions")
+
+```
