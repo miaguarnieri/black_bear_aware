@@ -1002,7 +1002,7 @@ basemodel_allyears <- rspf(ID ~ dem + aspect + TRI + popdens + lc + road_dens + 
 ```{r}
 #save the model
 
-save(basemodel_allyears, file = here(gdrive_data, "/AnalysisData/models/11_12_2022/model_allyears_noclimate/basemodel_allyears.rda"))
+save(basemodel_allyears, file = here(gdrive_data, "/AnalysisData/models/11_12_2022/model_allyears_noclimate/basemodel_allyears.rds"))
 
 #save the model
 
@@ -1034,6 +1034,8 @@ mod4 <- rspf(ID ~ dem + forest_dens + lc + forest_dist + popdens + rec_dist + st
 #Model 5: elevation + land cover + distance to forests + population density + distance to streams + terrain ruggedness + distance to urban areas
 
 mod5 <- rspf(ID ~ dem + lc + forest_dist + popdens + streams_dist + TRI + urban_dist, family = "binomial", m = 0, B = 1000, data = model_data)
+
+
 
 ```
 #save the 5 models 
@@ -1092,5 +1094,6 @@ AIC(mod5)
 AIC(climate_model_allyears)
 
 AIC(basemodel_allyears)
+
 ```
 
