@@ -9,6 +9,19 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(usdm)
 library(corrplot)
+library(tidyverse)
+library(raster)
+library(tmap)
+library(here)
+library(sf)
+library(ResourceSelection)
+
+#mia, chase, and claire's file path
+#gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+
+#sam's file path
+gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
+
 
 ```
 
@@ -25,6 +38,67 @@ library(corrplot)
 #vif(model)
 
 ```{r}
+model<- load(here("models", "climate_model_allyears.rds")) #you have to name the object "model or it will not read in right
+
+# dem + aspect + TRI + popdens + lc + road_dens + road_dist + 
+   # streams_dist + urban_dist + rec_dist + forest_dist + forest_dens + 
+   # dist_fire_1yr + dist_fire_23yrs + dist_fire_45yrs
+
+```
+
+
+```{r}
+#read in the data
+climate_model_data <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/11_10_2022/climate_model_data_allyears.csv"))
+
+```
+```{r}
+data_model_matrix <- model.matrix(~0+., data=climate_model_data) 
+cor_matrix <- cor(data_model_matrix)
+corrplot(cor_matrix)
+
+cor_matrix_2 <- cor(cor_matrix, method = c("pearson"))
+
+corrplot(cor_matrix_2)
+cor_matrix
+
+vif(climate_model_allyears)
+
+```
+
+```{r}
+#from Jason's code: 
+##Correlation/collinearity#
+#Quick way to test for collinearity between covariates#
+cor.matrix <- cor(climate_model_data)
+#cor.matrix
+#corrplot(cor.matrix)
+#cor.matrix <- cor(data, method = c("pearson"))
+#cor.matrix
+#corrplot(cor.matrix)
+#if you want to examine VIFs, you need to build a model first (with all covariates)
+#vif(model)
+```
+
+
+```{r}
+climate_model_data_numeric <- climate_model_data$lc[, c('shrub_scrub', 'grassland_herbaceous','barren_land', 'forest', 'dev_open_space', 'planted_cultivated', 'open_water', 'dev_low_int', 'dev_med_int', 'dev_high_int', 'wetlands', 'undefined', 'perrenial_ice_snow', 'NA' )] <- sapply(climate_model_data$lc[, c('shrub_scrub', 'grassland_herbaceous','barren_land', 'forest', 'dev_open_space', 'planted_cultivated', 'open_water', 'dev_low_int', 'dev_med_int', 'dev_high_int', 'wetlands', 'undefined', 'perrenial_ice_snow', 'NA' )], unclass)
+```
+
+```{r}
+unclass(climate_model_data$lc[, c('shrub_scrub', 'grassland_herbaceous','barren_land', 'forest', 'dev_open_space', 'planted_cultivated', 'open_water', 'dev_low_int', 'dev_med_int', 'dev_high_int', 'wetlands', 'undefined', 'perrenial_ice_snow', 'NA' )]
+```
+
+
+```{r}
+#Quick way to test for collinearity between covariates#
+#cor.matrix <- cor(climate_model_data)
+#cor.matrix
+#corrplot(cor.matrix)
+
+cor.matrix <- cor(climate_model_data, method = c("pearson"))
+#cor.matrix
+#corrplot(cor.matrix)
 
 ```
 
