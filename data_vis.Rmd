@@ -17,6 +17,7 @@ library(ResourceSelection)
 
 
 
+
 #mia, chase, and claire's file path
 gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
@@ -334,7 +335,7 @@ f <- as.list(levels(lc_factors))
 f <- as.list(levels(lc))
 
 #naming the list "lc" so it matches the model dataframe
-names(f) <- "lc"
+names(f)[1:13] <- "lc"
 
 #read in ca raster for extent
 
