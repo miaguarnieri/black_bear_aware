@@ -882,6 +882,10 @@ climate_model_allyears <- rspf(conflict ~ dem + aspect + TRI + popdens + lc + ro
 
 mod3climate <- rspf(conflict ~ dem + lc + forest_dist + popdens + rec_dist + streams_dist + TRI + urban_dist + dist_fire_1yr + dist_fire_23yrs + dist_fire_45yrs + drought, family = "binomial", m = 0, B = 1000, data = climate_model_data)
 
+#update 11/22/22: running without land cover to see if that will run with predict functions
+
+clim_mod_no_lc <- rspf(conflict ~ dem + aspect + TRI + popdens + road_dens + road_dist + streams_dist + urban_dist + rec_dist + forest_dist + forest_dens + dist_fire_1yr + dist_fire_23yrs + dist_fire_45yrs + drought, family = "binomial", m = 0, B = 1000, data = climate_model_data)
+
 ```
 
 
@@ -890,6 +894,9 @@ mod3climate <- rspf(conflict ~ dem + lc + forest_dist + popdens + rec_dist + str
 
 save(climate_model_allyears, file = here("models", "climate_model_allyears.rds"))
 
+#save model with no lc
+
+save(clim_mod_no_lc, file = here("models", "clim_mod_no_lc.rds"))
 
 #test load it in
 
