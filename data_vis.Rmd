@@ -9,7 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 
 library(tidyverse)
-library(raster)
+#library(raster)
 library(tmap)
 library(here)
 library(sf)
@@ -118,7 +118,7 @@ plot(map, main="Base Model Predictions")
 
 #Climate model 
 
-#read in model, then layers and stack them 
+##read in model, then layers and stack them 
 ```{r}
 #read in the model
 
@@ -236,6 +236,35 @@ map <- raster::predict(stackca_clim_rast, model = climate_model_allyears, ext = 
 
 ```
 
+##Attempting to run the predict without land cover
+
+```{r}
+#read in the model
+
+model<- load(here("models", "clim_mod_no_lc.rds")) #you have to name the object "model or it will not read in right
+
+#use the raster predict function
+
+#stack the rasters
+
+climstack_nolc <- raster::stack(dem, aspect, TRI, popdens, road_dens, road_dist, streams_dist, urban_dist, rec_dist, forest_dist, forest_dens, dist_fire_1yr, dist_fire_23yrs, dist_fire_45yrs, drought)
+
+#changing names of the raster stack to match our model exactly
+
+names(climstack_nolc) <- c("dem", "aspect", "TRI", "popdens", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens", "dist_fire_1yr", "dist_fire_23yrs", "dist_fire_45yrs", "drought")
+
+#read in ca raster for extent
+
+caraster <- raster(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
+
+map <- raster::predict(climstack_nolc, model = clim_mod_no_lc, ext = extent(caraster), fun = predict)
+
+#new error:
+# Warning: NAs introduced by coercionError in .local(object, ...) : cannot process these factors
+
+plot(map, main="Model Predictions")
+```
+
 
 #messing around with terra
 
@@ -321,7 +350,7 @@ climate_model_data <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate
 
 #changing names of the raster stack to match our model exactly
 
-#names(stackca_clim_rast) <- c("dem", "aspect", "TRI", "popdens", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens", "dist_fire_1yr", "dist_fire_23yrs", "dist_fire_45yrs", "drought")
+names(stackca_clim_rast) <- c("dem", "aspect", "TRI", "popdens", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens", "dist_fire_1yr", "dist_fire_23yrs", "dist_fire_45yrs", "drought")
 
 #any categorical variables used need to be identified first
 
@@ -329,24 +358,29 @@ climate_model_data <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate
 lc_factors <- as.factor(climate_model_data$lc)
 
 #turning that into a list
-f <- as.list(levels(lc_factors))
+f <- list(levels(lc_factors))
 
 
-f <- as.list(levels(lc))
+f_lc <- list(levels(lc))
+
 
 #naming the list "lc" so it matches the model dataframe
 names(f)[1:13] <- "lc"
+
+names(f_lc) <- "lc"
+
+#levels(lc) = levels(lc_factors)
 
 #read in ca raster for extent
 
 caraster <- raster(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
 
-map <- predict(stackca_clim_rast, model = climate_model_allyears, fun = predict, factors = f)
+map <- predict(stackca_clim_rast, model = climate_model_allyears, fun = predict, factors = f_lc)
 
 #new error:
 # Error in (function (classes, fdef, mtable)  : 
 #   unable to find an inherited method for function ‘trim’ for signature ‘"NULL"’
 
-plot(map, main="Model Predictions")
+#plot(map, main="Model Predictions")
 
 ```
