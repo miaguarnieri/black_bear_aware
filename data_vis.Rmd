@@ -9,7 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 
 library(tidyverse)
-#library(raster)
+library(terra)
 library(tmap)
 library(here)
 library(sf)
@@ -268,7 +268,6 @@ plot(map, main="Model Predictions")
 #messing around with terra
 
 ```{r}
-library (terra)
 
 #read in the model
 
@@ -296,6 +295,27 @@ popdens <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/mode
 
 lc <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/land_cover/lc19_reclassed.tif"))
 
+# #index vector
+# index <- c(11, 12, 21, 22, 23, 24, 31, 40, 52, 71, 80, 90)
+# 
+# #categories vector
+# cats <- c("open_water", "perrenial_ice_snow", "dev_open_space","dev_low_int", "dev_med_int", "dev_high_int", "barren_land", "forest", "shrub_scrub", "grassland_herbaceous", "planted_cultivated", "wetlands")
+# 
+# #combine those into a dataframe
+# catdat <- data.frame(id = index, category = cats)
+# 
+# levels(lc) <- catdat #then reassign levels (labels) using the dataframe above
+
+#cats(lc)
+
+#lc2 <- lc
+
+# #df <- as.data.frame(cats(lc)) %>% 
+#    mutate(category = case_when(category == "undefined" ~ NA_character_,
+#                                T ~ category))
+# levels(lc2) <- df
+# 
+
 #road density
 
 road_dens <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/road_density/road_density_ca.tif"))
@@ -309,7 +329,6 @@ road_dist <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/di
 streams_dist <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_stream/model_ready/stream17_ca_distance.tif"))
 
 #distance to urban areas
-
 
 urban_dist <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_urban/model_ready/ua19_ca_distance.tif"))
 
@@ -359,25 +378,70 @@ lc_factors <- as.factor(climate_model_data$lc)
 #turning that into a list
 f <- list(levels(lc_factors))
 
-f_lc <- list(levels(lc))
+f_lc <- levels(lc)
+# 
+# f_lc2 <- levels(lc2) 
+# 
+# #f_lc2 <- factor(f_lc2, levels = f_lc2)
+# 
+# f_lc2[!is.na(f_lc2)]
 
 #naming the list "lc" so it matches the model dataframe
 names(f) <- "lc"
 
 names(f_lc) <- "lc"
 
+#names(f_lc2) <- "lc"
+
 #levels(lc) = levels(lc_factors)
 
 #read in ca raster for extent
 
-caraster <- raster(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
+caraster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
 
-map <- predict(stackca_clim_rast, model = climate_model_allyears, fun = predict, factors = f_lc)
+map <- predict(object = stackca_clim_rast, model = climate_model_allyears, fun = predict, factors = f_lc)
 
-#new error:
-# Error in (function (classes, fdef, mtable)  : 
-#   unable to find an inherited method for function ‘trim’ for signature ‘"NULL"’
+#save the map
 
-#plot(map, main="Model Predictions")
+#writeRaster(map, filename = here(gdrive_data, "/AnalysisData/model_outputs/allyear_clim_map21_v2.tif"), filetype = "GTiff", overwrite= TRUE)
 
 ```
+
+```{r}
+current_map <- rast((here(gdrive_data, "/AnalysisData/model_outputs/allyear_clim_map21_v2.tif")))
+
+terra::plot(current_map)
+
+```
+
+
+
+```{r no lc test}
+library(terra)
+
+#read in the model
+
+model<- load(here("models", "clim_mod_no_lc.rds")) #you have to name the object "model or it will not read in right
+
+#use the raster predict function
+
+#stack the rasters
+
+climstack_nolc <- c(dem, aspect, TRI, popdens, road_dens, road_dist, streams_dist, urban_dist, rec_dist, forest_dist, forest_dens, dist_fire_1yr, dist_fire_23yrs, dist_fire_45yrs, drought)
+
+#changing names of the raster stack to match our model exactly
+
+names(climstack_nolc) <- c("dem", "aspect", "TRI", "popdens", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens", "dist_fire_1yr", "dist_fire_23yrs", "dist_fire_45yrs", "drought")
+
+#read in ca raster for extent
+
+caraster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
+
+map <- terra::predict(climstack_nolc, model = clim_mod_no_lc, fun = predict)
+
+#new error:
+# Warning: NAs introduced by coercionError in .local(object, ...) : cannot process these factors
+
+plot(map, main="Model Predictions")
+```
+
