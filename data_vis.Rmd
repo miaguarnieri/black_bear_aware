@@ -361,11 +361,11 @@ lc_factors <- as.factor(climate_model_data$lc)
 f <- list(levels(lc_factors))
 
 
-f_lc <- list(levels(lc))
+#f_lc <- list(levels(lc))
 
 
 #naming the list "lc" so it matches the model dataframe
-names(f)[1:13] <- "lc"
+#names(f)[1:13] <- "lc"
 
 names(f_lc) <- "lc"
 
