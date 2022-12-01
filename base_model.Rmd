@@ -1006,6 +1006,7 @@ save(basemodel_allyears, file = here(gdrive_data, "/AnalysisData/models/11_29_20
 
 #save the model
 
+save(basemodel_allyears, file = here("models", "basemodel_allyears.rds"))
 
 
 
