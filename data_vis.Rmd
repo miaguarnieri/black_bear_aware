@@ -17,6 +17,7 @@ library(ResourceSelection)
 
 
 
+
 #mia, chase, and claire's file path
 gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
@@ -351,6 +352,11 @@ lc_factors <- as.factor(climate_model_data$lc)
 #turning that into a list
 f <- list(levels(lc_factors))
 
+
+
+#f_lc <- list(levels(lc))
+
+
 f_lc <- levels(lc)
 # 
 # f_lc2 <- levels(lc2) 
@@ -359,8 +365,9 @@ f_lc <- levels(lc)
 # 
 # f_lc2[!is.na(f_lc2)]
 
+
 #naming the list "lc" so it matches the model dataframe
-names(f) <- "lc"
+#names(f)[1:13] <- "lc"
 
 names(f_lc) <- "lc"
 

@@ -251,7 +251,7 @@ modeldf_16_year <- model_df_16 %>%
 ```{r}
 #saving the files
 
-write.csv(modeldf_16_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/11_12_2022/modeldf_16.csv"), row.names = FALSE)
+write.csv(modeldf_16_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/11_29_2022/modeldf_16.csv"), row.names = FALSE)
 
 #save the 2016 model output
 #save(model16, file = here(gdrive_data, "/AnalysisData/models/10_31_2022/model_2016_noclimate/model_2016_noclimate.RData"))
@@ -386,7 +386,7 @@ modeldf_17_year <- model_df_17 %>%
 ```{r}
 #save the file
 
-write.csv(modeldf_17_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/11_12_2022/modeldf_17.csv"), row.names = FALSE)
+write.csv(modeldf_17_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/11_29_2022/modeldf_17.csv"), row.names = FALSE)
 
 ```
 
@@ -532,7 +532,7 @@ modeldf_18_year <- model_df_18 %>%
 
 #EDIT: that save didn't work, trying this workaround
 
-write.csv(modeldf_18_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/11_12_2022/modeldf_18.csv"), row.names = FALSE)
+write.csv(modeldf_18_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/11_29_2022/modeldf_18.csv"), row.names = FALSE)
 ```
 
 ##2019
@@ -668,7 +668,7 @@ modeldf_19_year <- model_df_19 %>%
 ```{r}
 #save the file
 
-write.csv(modeldf_19_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/11_12_2022/modeldf_19.csv"), row.names = FALSE)
+write.csv(modeldf_19_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/11_29_2022/modeldf_19.csv"), row.names = FALSE)
 
 ```
 
@@ -811,7 +811,7 @@ modeldf_20_year <- model_df_20 %>%
 ```{r}
 #save the file
 
-write.csv(modeldf_20_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/11_12_2022/modeldf_20.csv"), row.names = FALSE)
+write.csv(modeldf_20_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/11_29_2022/modeldf_20.csv"), row.names = FALSE)
 ```
 
 ##2021
@@ -949,7 +949,7 @@ modeldf_21_year <- model_df_21 %>%
 #saving the file
 
 
-write.csv(modeldf_21_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/11_12_2022/modeldf_21.csv"), row.names = FALSE)
+write.csv(modeldf_21_year, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/11_29_2022/modeldf_21.csv"), row.names = FALSE)
 ```
 
 
@@ -958,17 +958,17 @@ write.csv(modeldf_21_year, file = here(gdrive_data, "/AnalysisData/model_df_nocl
 ```{r}
 #read them in
 
-df16 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_noclimate/11_12_2022/modeldf_16.csv"))
+df16 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_noclimate/11_29_2022/modeldf_16.csv"))
 
-df17 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_noclimate/11_12_2022/modeldf_17.csv"))
+df17 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_noclimate/11_29_2022/modeldf_17.csv"))
 
-df18 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_noclimate/11_12_2022/modeldf_18.csv"))
+df18 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_noclimate/11_29_2022/modeldf_18.csv"))
 
-df19 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_noclimate/11_12_2022/modeldf_19.csv"))
+df19 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_noclimate/11_29_2022/modeldf_19.csv"))
 
-df20 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_noclimate/11_12_2022/modeldf_20.csv"))
+df20 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_noclimate/11_29_2022/modeldf_20.csv"))
 
-df21 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_noclimate/11_12_2022/modeldf_21.csv"))
+df21 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_noclimate/11_29_2022/modeldf_21.csv"))
 
 
 
@@ -979,7 +979,7 @@ model_data_allyears <- rbind(df16, df17, df18, df19, df20, df21)
 ```{r}
 #save the all year data frame
 
-write.csv(model_data_allyears, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/11_12_2022/model_data_allyears.csv"), row.names = FALSE)
+write.csv(model_data_allyears, file = here(gdrive_data, "/AnalysisData/model_df_noclimate/11_29_2022/model_data_allyears.csv"), row.names = FALSE)
 ```
 
 
@@ -987,7 +987,7 @@ write.csv(model_data_allyears, file = here(gdrive_data, "/AnalysisData/model_df_
 
 ```{r}
 #read in the data
-model_data <- read_csv(here(gdrive_data, "/AnalysisData/model_df_noclimate/11_12_2022/model_data_allyears.csv"))
+model_data <- read_csv(here(gdrive_data, "/AnalysisData/model_df_noclimate/11_29_2022/model_data_allyears.csv"))
 ```
 
 
@@ -1002,11 +1002,11 @@ basemodel_allyears <- rspf(ID ~ dem + aspect + TRI + popdens + lc + road_dens + 
 ```{r}
 #save the model
 
-save(basemodel_allyears, file = here(gdrive_data, "/AnalysisData/models/11_12_2022/model_allyears_noclimate/basemodel_allyears.rds"))
+save(basemodel_allyears, file = here(gdrive_data, "/AnalysisData/models/11_29_2022/model_allyears_noclimate/basemodel_allyears.rds"))
 
 #save the model
 
-save(climate_model_allyears, file = here("models", "basemodel_allyears.rds"))
+
 
 
 ```
@@ -1041,40 +1041,40 @@ mod5 <- rspf(ID ~ dem + lc + forest_dist + popdens + streams_dist + TRI + urban_
 #save the 5 models 
 ```{r}
 #mod1
-save(mod1, file = here(gdrive_data, "/AnalysisData/models/11_12_2022/model_allyears_noclimate/mod1.rda"))
+save(mod1, file = here(gdrive_data, "/AnalysisData/models/11_29_2022/model_allyears_noclimate/mod1.rds"))
 
 #save the model
 
-save(mod1, file = here("models", "mod1.rda"))
+save(mod1, file = here("models", "mod1.rds"))
 
 #mod2
-save(mod2, file = here(gdrive_data, "/AnalysisData/models/11_12_2022/model_allyears_noclimate/mod2.rda"))
+save(mod2, file = here(gdrive_data, "/AnalysisData/models/11_29_2022/model_allyears_noclimate/mod2.rds"))
 
 #save the model
 
-save(mod2, file = here("models", "mod2.rda"))
+save(mod2, file = here("models", "mod2.rds"))
 
 #mod3
-save(mod3, file = here(gdrive_data, "/AnalysisData/models/11_12_2022/model_allyears_noclimate/mod3.rda"))
+save(mod3, file = here(gdrive_data, "/AnalysisData/models/11_29_2022/model_allyears_noclimate/mod3.rds"))
 
 #save the model
 
-save(mod3, file = here("models", "mod3.rda"))
+save(mod3, file = here("models", "mod3.rds"))
 
 #mod4
 
-save(mod4, file = here(gdrive_data, "/AnalysisData/models/11_12_2022/model_allyears_noclimate/mod4.rda"))
+save(mod4, file = here(gdrive_data, "/AnalysisData/models/11_29_2022/model_allyears_noclimate/mod4.rds"))
 
 #save the model
 
-save(mod4, file = here("models", "mod4.rda"))
+save(mod4, file = here("models", "mod4.rds"))
 
 #mod5
-save(mod5, file = here(gdrive_data, "/AnalysisData/models/11_12_2022/model_allyears_noclimate/mod5.rda"))
+save(mod5, file = here(gdrive_data, "/AnalysisData/models/11_29_2022/model_allyears_noclimate/mod5.rds"))
 
 #save the model
 
-save(mod5, file = here("models", "mod5.rda"))
+save(mod5, file = here("models", "mod5.rds"))
 
 ```
 
@@ -1091,7 +1091,6 @@ AIC(mod4)
 
 AIC(mod5)
 
-AIC(climate_model_allyears)
 
 AIC(basemodel_allyears)
 
