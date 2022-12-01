@@ -28,178 +28,72 @@ gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #Base Model
 
-
 ```{r}
 #read in the model
 
-model <- load(here("models", "basemodel_allyears.rds")) #you have to name the object "model or it will not read in right
+model <- load(here(gdrive_data, "/AnalysisData/models/11_29_2022/model_allyears_noclimate/basemodel_allyears.rds")) #you have to name the object "model or it will not read in right
 
 #read in the CA raster
 
-ca_raster <- raster(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
+ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
 
 #read in the environmental variables (as close to 2022 as possible)
 
 #elevation
-dem <- raster(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/elevation/dem_formatted.tif"))
+dem <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/elevation/dem_formatted.tif"))
 
 #aspect
-aspect <- raster(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/aspect/aspect.tif"))
+aspect <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/aspect/aspect.tif"))
 
 #terrain ruggedness
-TRI <- raster(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/terrain_ruggedness/terrain_ruggedness.tif"))
+TRI <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/terrain_ruggedness/terrain_ruggedness.tif"))
 
 #human pop density
 
-popdens <- raster(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/population_density/pop_den_2021_mask.tif"))
+popdens <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/population_density/pop_den_2021_mask.tif"))
 
 #land cover
 
-lc <- raster(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/land_cover/lc19_reclassed.tif"))
+lc <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/land_cover/lc19_reclassed.tif"))
 
 #road density
 
-road_dens <- raster(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/road_density/road_density_ca.tif"))
+road_dens <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/road_density/road_density_ca.tif"))
 
 #distance to roads
 
-road_dist <- raster(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_road/model_ready/roads15_ca_distance.tif"))
+road_dist <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_road/model_ready/roads15_ca_distance.tif"))
 
 #distance to streams
 
-streams_dist <- raster(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_stream/model_ready/stream17_ca_distance.tif"))
+streams_dist <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_stream/model_ready/stream17_ca_distance.tif"))
 
 #distance to urban areas
 
-urban_dist <- raster(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_urban/model_ready/ua19_ca_distance.tif"))
+urban_dist <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_urban/model_ready/ua19_ca_distance.tif"))
 
 #distance to recreational areas
 
-rec_dist <- raster(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_rec/model_ready/rec_ca_distance.tif"))
+rec_dist <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_rec/model_ready/rec_ca_distance.tif"))
 
 #distance to forest cover
 
-forest_dist <- raster(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_forest/model_ready/fc19_ca_distance.tif"))
+forest_dist <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_forest/model_ready/fc19_ca_distance.tif"))
 
 #forest density
 
-forest_dens <- raster(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/forest_density/forest_dens_2016_mask.tif"))
+forest_dens <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/forest_density/forest_dens_2016_mask.tif"))
 
-#stack the rasters
+stackca_base_rast <- c(dem, aspect, TRI, popdens, lc, road_dens, road_dist, streams_dist, urban_dist, rec_dist, forest_dist, forest_dens)
 
-stackca_rast <- raster::stack(dem, aspect, TRI, popdens, lc, road_dens, road_dist, streams_dist, urban_dist, rec_dist, forest_dist, forest_dens)
-
-
-#extract the data for CA raster
-
-#vars_ca <- extract(stackca, ca_vect, method = "simple", bind = TRUE, ID = TRUE) %>% 
-  #rast()
-
-#use the terra predict function
-
-#terra::predict(stackca, model = basemodel_allyears, fun = predict)
+base_model_data <- read_csv(here(gdrive_data, "/AnalysisData/model_df_noclimate/11_29_2022/model_data_allyears.csv"))
 
 ```
 
 ```{r}
-
-#use the raster predict function
-library(raster)
-#any categorical variables used need to be identified first
-f <- list(raster::levels(stackca$category))
-names(f) <- "category"
-
-map <- raster::predict(stackca_rast, model = basemodel_allyears, fun = predict, factors = f)
-
-plot(map, main="Base Model Predictions")
-
-```
-
-
-#Climate model 
-
-##read in model, then layers and stack them 
-```{r}
-library(raster)
-
-#read in the model
-model<- load(here("models", "climate_model_allyears.rds")) #you have to name the object "model or it will not read in right
-
-# dem + aspect + TRI + popdens + lc + road_dens + road_dist + 
-   # streams_dist + urban_dist + rec_dist + forest_dist + forest_dens + 
-   # dist_fire_1yr + dist_fire_23yrs + dist_fire_45yrs
-
-
-#elevation
-dem <- raster(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/elevation/dem_formatted.tif"))
-
-#aspect
-aspect <- raster(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/aspect/aspect.tif"))
-
-#terrain ruggedness
-TRI <- raster(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/terrain_ruggedness/terrain_ruggedness.tif"))
-
-#human pop density
-popdens <- raster(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/population_density/pop_den_2021_mask.tif"))
-
-#land cover
-
-lc <- raster(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/land_cover/lc19_reclassed.tif"))
-
-#road density
-
-road_dens <- raster(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/road_density/road_density_ca.tif"))
-
-#distance to roads
-
-road_dist <- raster(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_road/model_ready/roads15_ca_distance.tif"))
-
-#distance to streams
-
-streams_dist <- raster(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_stream/model_ready/stream17_ca_distance.tif"))
-
-#distance to urban areas
-
-urban_dist <- raster(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_urban/model_ready/ua19_ca_distance.tif"))
-
-#distance to recreational areas
-
-rec_dist <- raster(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_rec/model_ready/rec_ca_distance.tif"))
-
-#distance to forest cover
-
-forest_dist <- raster(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_forest/model_ready/fc19_ca_distance.tif"))
-
-#forest density
-
-forest_dens <- raster(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/forest_density/forest_dens_2016_mask.tif"))
-
-
-#fire layers
-
-dist_fire_1yr <- raster(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/dist_fire/fire20_ca_distance.tif"))
-
-dist_fire_23yrs <- raster(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/dist_fire/fire18_19_ca_distance.tif"))
-
-dist_fire_45yrs <- raster(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/dist_fire/fire16_17_ca_distance.tif"))
-
-#drought current - historical
-
-drought <- raster(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2021/d2021_masked.tif"))
-
-
-stackca_clim_rast <- raster::stack(dem, aspect, TRI, popdens, lc, road_dens, road_dist, streams_dist, urban_dist, rec_dist, forest_dist, forest_dens, dist_fire_1yr, dist_fire_23yrs, dist_fire_45yrs, drought)
-
-climate_model_data <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/11_10_2022/climate_model_data_allyears.csv"))
-
-```
-
-```{r}
-#use the raster predict function
-
 #changing names of the raster stack to match our model exactly
 
-names(stackca_clim_rast) <- c("dem", "aspect", "TRI", "popdens", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens", "dist_fire_1yr", "dist_fire_23yrs", "dist_fire_45yrs", "drought")
+names(stackca_base_rast) <- c("dem", "aspect", "TRI", "popdens", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens")
 
 #any categorical variables used need to be identified first
 
@@ -207,61 +101,44 @@ names(stackca_clim_rast) <- c("dem", "aspect", "TRI", "popdens", "lc", "road_den
 lc_factors <- as.factor(climate_model_data$lc)
 
 #turning that into a list
-f <- list(levels(lc_factors))
+
+f_lc <- levels(lc)
 
 #naming the list "lc" so it matches the model dataframe
-names(f) <- "lc"
 
-#read in ca raster for extent
+names(f_lc) <- "lc"
 
-caraster <- raster(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
+map <- predict(object = stackca_base_rast, model = basemodel_allyears, fun = predict, factors = f_lc, na.rm = TRUE, type = "response")
 
-map <- raster::predict(stackca_clim_rast, model = climate_model_allyears, ext = extent(caraster), fun = predict, factors = f)
+plot(map)
 
-#new error:
-# Warning: NAs introduced by coercionError in .local(object, ...) : cannot process these factors
+#save the map
 
-#plot(map, main="Model Predictions")
+#writeRaster(map, filename = here(gdrive_data, "/AnalysisData/model_outputs/allyear_base_map.tif"), filetype = "GTiff", overwrite= TRUE)
 
 ```
-
-##Attempting to run the predict without land cover
 
 ```{r}
-#read in the model
+#high probability only
 
-model<- load(here("models", "clim_mod_no_lc.rds")) #you have to name the object "model or it will not read in right
+top_con <- map
 
-#use the raster predict function
+top_con[top_con < 0.7] <- 0
 
-#stack the rasters
+top_con[top_con >= 0.7] <- top_con
 
-climstack_nolc <- raster::stack(dem, aspect, TRI, popdens, road_dens, road_dist, streams_dist, urban_dist, rec_dist, forest_dist, forest_dens, dist_fire_1yr, dist_fire_23yrs, dist_fire_45yrs, drought)
+plot(top_con)
 
-#changing names of the raster stack to match our model exactly
-
-names(climstack_nolc) <- c("dem", "aspect", "TRI", "popdens", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens", "dist_fire_1yr", "dist_fire_23yrs", "dist_fire_45yrs", "drought")
-
-#read in ca raster for extent
-
-caraster <- raster(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
-
-map <- raster::predict(climstack_nolc, model = clim_mod_no_lc, ext = extent(caraster), fun = predict)
-
-#new error:
-# Warning: NAs introduced by coercionError in .local(object, ...) : cannot process these factors
-
-plot(map, main="Model Predictions")
 ```
 
 
-#messing around with terra
+#Climate model 
 
 ```{r}
 
 #read in the model
 
-model<- load(here("models", "basemodel_allyears.rds")) #you have to name the object "model or it will not read in right
+model<- load(here("models", "climate_model_allyears.rds")) #you have to name the object "model or it will not read in right
 
 # dem + aspect + TRI + popdens + lc + road_dens + road_dist + 
    # streams_dist + urban_dist + rec_dist + forest_dist + forest_dens + 
@@ -329,9 +206,6 @@ drought <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drou
 
 stackca_clim_rast <- c(dem, aspect, TRI, popdens, lc, road_dens, road_dist, streams_dist, urban_dist, rec_dist, forest_dist, forest_dens, dist_fire_1yr, dist_fire_23yrs, dist_fire_45yrs, drought)
 
-stackca_base_rast <- c(dem, aspect, TRI, popdens, lc, road_dens, road_dist, streams_dist, urban_dist, rec_dist, forest_dist, forest_dens)
-
-
 climate_model_data <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/11_10_2022/climate_model_data_allyears.csv"))
 
 ```
@@ -341,8 +215,6 @@ climate_model_data <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate
 #changing names of the raster stack to match our model exactly
 
 names(stackca_clim_rast) <- c("dem", "aspect", "TRI", "popdens", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens", "dist_fire_1yr", "dist_fire_23yrs", "dist_fire_45yrs", "drought")
-
-names(stackca_base_rast) <- c("dem", "aspect", "TRI", "popdens", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens")
 
 #any categorical variables used need to be identified first
 
@@ -387,12 +259,6 @@ map <- predict(object = stackca_base_rast, model = basemodel_allyears, fun = pre
 
 ```
 
-```{r}
-tm_shape(map) +
-  tm_raster() +
-  tmap_mode("view")
-```
-
 
 ```{r}
 current_map <- rast((here(gdrive_data, "/AnalysisData/model_outputs/allyear_clim_map21_v2.tif")))
@@ -400,14 +266,74 @@ current_map <- rast((here(gdrive_data, "/AnalysisData/model_outputs/allyear_clim
 terra::plot(current_map)
 ```
 
-```{r no binom test}
+#fire model high probability (remember to change this later to incorporate drought)
 
-map_nobinom <- predict(object = stackca_clim_rast, model = climate_model_allyears_nobinom, fun = predict, factors = f)
+```{r}
+#high probability only
 
-plot(map_nobinom)
+clim_con <- rast(here(gdrive_data, "/AnalysisData/model_outputs/firemod_map.tif"))
 
+top_con_clim <- clim_con
+
+top_con_clim[top_con_clim < 0.7] <- NA
+
+top_con_clim[top_con_clim >= 0.7] <- top_con_clim
+
+plot(top_con_clim)
+
+
+tm_shape(top_con_clim) +
+  tm_raster() +
+  tmap_mode("view")
+
+
+writeRaster(top_con_clim, filename = here(gdrive_data, "/AnalysisData/model_outputs/fire_map_top70.tif"), filetype = "GTiff", overwrite= TRUE)
 ```
 
+
+```{r}
+#zonal statistics
+conflict_points <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_points/conflict_points.shp"))
+
+
+fire_map <- rast(here(gdrive_data, "/AnalysisData/model_outputs/firemod_map.tif"))
+
+tm_shape(fire_map) +
+  tm_raster() +
+tm_shape(conflict_points) +
+  tm_dots() +
+  tmap_mode("view")
+```
+
+
+##Attempting to run the predict without land cover
+
+```{r}
+#read in the model
+
+model<- load(here("models", "clim_mod_no_lc.rds")) #you have to name the object "model or it will not read in right
+
+#use the raster predict function
+
+#stack the rasters
+
+climstack_nolc <- raster::stack(dem, aspect, TRI, popdens, road_dens, road_dist, streams_dist, urban_dist, rec_dist, forest_dist, forest_dens, dist_fire_1yr, dist_fire_23yrs, dist_fire_45yrs, drought)
+
+#changing names of the raster stack to match our model exactly
+
+names(climstack_nolc) <- c("dem", "aspect", "TRI", "popdens", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens", "dist_fire_1yr", "dist_fire_23yrs", "dist_fire_45yrs", "drought")
+
+#read in ca raster for extent
+
+caraster <- raster(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
+
+map <- raster::predict(climstack_nolc, model = clim_mod_no_lc, ext = extent(caraster), fun = predict)
+
+#new error:
+# Warning: NAs introduced by coercionError in .local(object, ...) : cannot process these factors
+
+plot(map, main="Model Predictions")
+```
 
 ```{r no lc test}
 library(terra)
@@ -437,4 +363,3 @@ map <- terra::predict(climstack_nolc, model = clim_mod_no_lc, fun = predict)
 
 plot(map, main="Model Predictions")
 ```
-
