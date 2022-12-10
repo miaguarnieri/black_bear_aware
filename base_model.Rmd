@@ -1006,6 +1006,13 @@ save(basemodel_allyears, file = here(gdrive_data, "/AnalysisData/models/11_29_20
 
 #save the model
 
+<<<<<<< HEAD
+save(basemodel_allyears, file = here("models", "basemodel_allyears.rds"))
+
+
+
+=======
+>>>>>>> eb41fcc6c9649f6cb4898eb7bccbc48dcb9befea
 ```
 
 #Set up 5 alternative models, with the same covariates as the Hagani et al models
