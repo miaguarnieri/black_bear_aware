@@ -206,7 +206,7 @@ drought <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drou
 
 stackca_clim_rast <- c(dem, aspect, TRI, popdens, lc, road_dens, road_dist, streams_dist, urban_dist, rec_dist, forest_dist, forest_dens, dist_fire_1yr, dist_fire_23yrs, dist_fire_45yrs, drought)
 
-climate_model_data <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/11_10_2022/climate_model_data_allyears.csv"))
+climate_model_data <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/12_9_2022/climate_model_data_allyears.csv"))
 
 ```
 
@@ -222,7 +222,7 @@ names(stackca_clim_rast) <- c("dem", "aspect", "TRI", "popdens", "lc", "road_den
 lc_factors <- as.factor(climate_model_data$lc)
 
 #turning that into a list
-f <- list(levels(lc_factors))
+f <- as.list(levels(lc_factors))
 
 
 
@@ -240,6 +240,8 @@ f_lc <- levels(lc)
 
 #naming the list "lc" so it matches the model dataframe
 #names(f)[1:13] <- "lc"
+#naming the list "lc" so it matches the model dataframe
+names(f) <- "lc"
 
 names(f_lc) <- "lc"
 
@@ -251,12 +253,12 @@ names(f_lc) <- "lc"
 
 caraster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
 
-map <- predict(object = stackca_base_rast, model = basemodel_allyears, fun = predict, factors = f_lc, na.rm = TRUE, type = "response")
+map <- terra::predict(object = stackca_clim_rast, model = climate_model_allyears, fun = predict, factors = f_lc, na.rm = TRUE, type = "response")
 
 #save the map
 
 #writeRaster(map, filename = here(gdrive_data, "/AnalysisData/model_outputs/allyear_clim_map.tif"), filetype = "GTiff", overwrite= TRUE)
-
+plot(map, main="Model Predictions")
 ```
 
 
@@ -306,60 +308,3 @@ tm_shape(conflict_points) +
 ```
 
 
-##Attempting to run the predict without land cover
-
-```{r}
-#read in the model
-
-model<- load(here("models", "clim_mod_no_lc.rds")) #you have to name the object "model or it will not read in right
-
-#use the raster predict function
-
-#stack the rasters
-
-climstack_nolc <- raster::stack(dem, aspect, TRI, popdens, road_dens, road_dist, streams_dist, urban_dist, rec_dist, forest_dist, forest_dens, dist_fire_1yr, dist_fire_23yrs, dist_fire_45yrs, drought)
-
-#changing names of the raster stack to match our model exactly
-
-names(climstack_nolc) <- c("dem", "aspect", "TRI", "popdens", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens", "dist_fire_1yr", "dist_fire_23yrs", "dist_fire_45yrs", "drought")
-
-#read in ca raster for extent
-
-caraster <- raster(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
-
-map <- raster::predict(climstack_nolc, model = clim_mod_no_lc, ext = extent(caraster), fun = predict)
-
-#new error:
-# Warning: NAs introduced by coercionError in .local(object, ...) : cannot process these factors
-
-plot(map, main="Model Predictions")
-```
-
-```{r no lc test}
-library(terra)
-
-#read in the model
-
-model<- load(here("models", "clim_mod_no_lc.rds")) #you have to name the object "model or it will not read in right
-
-#use the raster predict function
-
-#stack the rasters
-
-climstack_nolc <- c(dem, aspect, TRI, popdens, road_dens, road_dist, streams_dist, urban_dist, rec_dist, forest_dist, forest_dens, dist_fire_1yr, dist_fire_23yrs, dist_fire_45yrs, drought)
-
-#changing names of the raster stack to match our model exactly
-
-names(climstack_nolc) <- c("dem", "aspect", "TRI", "popdens", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens", "dist_fire_1yr", "dist_fire_23yrs", "dist_fire_45yrs", "drought")
-
-#read in ca raster for extent
-
-caraster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
-
-map <- terra::predict(climstack_nolc, model = clim_mod_no_lc, fun = predict)
-
-#new error:
-# Warning: NAs introduced by coercionError in .local(object, ...) : cannot process these factors
-
-plot(map, main="Model Predictions")
-```
