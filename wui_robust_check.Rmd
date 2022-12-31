@@ -32,8 +32,45 @@ gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 #WUI wrangling 
 
 ```{r}
+#load in CA raster
+
+ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
+
+#check the coordinate reference system 
+crs(ca_raster)
+
+#plot CA raster to confirm
+tm_shape(ca_raster) +
+  tm_raster() +
+  tmap_mode("view")
+
+res(ca_raster)
 
 ```
+
+```{r}
+#load in and wrangle WUI data 
+wui_2022 <- vect(here(gdrive_data, "/InputData/InputData_Files/Forest_Service_WUI_2022/CONUS_WUI_block_1990_2020_change.shp"))
+
+wui_2022_calbers <- project(wui_2022, ca_raster)
+
+ca_vector <- as.polygons(ca_raster)
+
+wui_2022_mask <- crop(wui_2022_calbers, ca_vector)
+
+wui_2022_raster <- rasterize(wui_2022_mask, ca_raster)
+
+```
+
+```{r}
+tm_shape(wui_2022_raster) +
+  tm_raster() +
+  tmap_mode("view")
+
+plot(wui_2022_mask)
+```
+
+
 
 #Load in data layers
 
