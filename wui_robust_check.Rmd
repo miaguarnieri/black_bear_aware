@@ -60,8 +60,16 @@ wui_2022_mask <- crop(wui_2022_calbers, ca_vector)
 
 wui_2022_raster <- rasterize(wui_2022_mask, ca_raster)
 
-
 ```
+
+```{r}
+tm_shape(wui_2022_raster) +
+  tm_raster() +
+  tmap_mode("view")
+
+plot(wui_2022_mask)
+```
+
 
 
 #Load in data layers
