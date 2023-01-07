@@ -54,20 +54,46 @@ wui_2022 <- vect(here(gdrive_data, "/InputData/InputData_Files/Forest_Service_WU
 
 wui_2022_calbers <- project(wui_2022, ca_raster)
 
-ca_vector <- as.polygons(ca_raster)
+#ca_vector <- as.polygons(ca_raster)
 
-wui_2022_mask <- crop(wui_2022_calbers, ca_vector)
+#wui_2022_mask <- crop(wui_2022_calbers, ca_vector)
 
-wui_2022_raster <- rasterize(wui_2022_mask, ca_raster)
+wui_2022_raster <- rasterize(wui_2022_calbers, ca_raster)
+
+wui_2022_ca <- mask(wui_2022_raster, ca_raster)
 
 ```
+
+```{r}
+tm_shape(wui_2022_ca) +
+  tm_raster() +
+  tmap_mode("view")
+
+plot(wui_2022_ca)
+```
+
+
+```{r}
+savevect <- function(x){
+  
+  name <- paste0(deparse(substitute(x)), ".shp") #the name of the file will be the same as the input object, plus '.hp' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a shapefile
+  
+  writeVector(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/ca_wui_shp", name), filetype = "ESRI Shapefile", overwrite=TRUE)
+}
+
+#save the file
+savevect(wui_2022_mask)
+```
+
 
 ```{r}
 tm_shape(wui_2022_raster) +
   tm_raster() +
   tmap_mode("view")
 
-plot(wui_2022_mask)
+plot(wui_2022_raster)
 ```
 
 
