@@ -335,7 +335,7 @@ clim_modeldf_16_year <- clim_model_df_16 %>%
 ```{r}
 #saving the files
 
-write.csv(clim_modeldf_16_year, file = here(gdrive_data, "/AnalysisData/model_df_climate/12_9_2022/climate_modeldf_16.csv"), row.names = FALSE)
+write.csv(clim_modeldf_16_year, file = here(gdrive_data, "/AnalysisData/model_wui_df_robustness/1_9_2023/climate_model_wui_16.csv"), row.names = FALSE)
 
 ```
 
@@ -442,7 +442,7 @@ clim_modeldf_17_year <- clim_model_df_17 %>%
 ```{r}
 #saving the files
 
-write.csv(clim_modeldf_17_year, file = here(gdrive_data, "/AnalysisData/model_df_climate/12_9_2022/climate_modeldf_17.csv"), row.names = FALSE)
+write.csv(clim_modeldf_17_year, file = here(gdrive_data, "/AnalysisData/model_wui_df_robustness/1_9_2023/climate_model_wui_17.csv"), row.names = FALSE)
 
 ```
 
@@ -557,7 +557,7 @@ clim_modeldf_18_year <- clim_model_df_18 %>%
 ```{r}
 #save the file
 
-write.csv(clim_modeldf_18_year, file = here(gdrive_data, "/AnalysisData/model_df_climate/12_9_2022/climate_modeldf_18.csv"), row.names = FALSE)
+write.csv(clim_modeldf_18_year, file = here(gdrive_data, "/AnalysisData/model_wui_df_robustness/1_9_2023/climate_model_wui_18.csv"), row.names = FALSE)
 ```
 
 ##2019
@@ -668,7 +668,7 @@ clim_modeldf_19_year <- clim_model_df_19 %>%
 ```{r}
 #save the file
 
-write.csv(clim_modeldf_19_year, file = here(gdrive_data, "/AnalysisData/model_df_climate/12_9_2022/climate_modeldf_19.csv"), row.names = FALSE)
+write.csv(clim_modeldf_19_year, file = here(gdrive_data, "/AnalysisData/model_wui_df_robustness/1_9_2023/climate_model_wui_19.csv"), row.names = FALSE)
 
 ```
 
@@ -784,7 +784,7 @@ clim_modeldf_20_year <- clim_model_df_20 %>%
 ```{r}
 #save the file
 
-write.csv(clim_modeldf_20_year, file = here(gdrive_data, "/AnalysisData/model_df_climate/12_9_2022/climate_modeldf_20.csv"), row.names = FALSE)
+write.csv(clim_modeldf_20_year, file = here(gdrive_data, "/AnalysisData/model_wui_df_robustness/1_9_2023/climate_model_wui_20.csv"), row.names = FALSE)
 
 ```
 
@@ -897,7 +897,7 @@ clim_modeldf_21_year <- clim_model_df_21 %>%
 ```{r}
 #save the file
 
-write.csv(clim_modeldf_21_year, file = here(gdrive_data, "/AnalysisData/model_df_climate/12_9_2022/climate_modeldf_21.csv"), row.names = FALSE)
+write.csv(clim_modeldf_21_year, file = here(gdrive_data, "/AnalysisData/model_wui_df_robustness/1_9_2023/climate_model_wui_21.csv"), row.names = FALSE)
 
 ```
 
@@ -908,34 +908,35 @@ write.csv(clim_modeldf_21_year, file = here(gdrive_data, "/AnalysisData/model_df
 ```{r}
 #read them in
 
-climdf16 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/12_9_2022/climate_modeldf_16.csv"))
+climdf16_wui <- read_csv(here(gdrive_data, "/AnalysisData/model_wui_df_robustness/1_9_2023/climate_model_wui_16.csv"))
 
-climdf17 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/12_9_2022/climate_modeldf_17.csv"))
+climdf17_wui <- read_csv(here(gdrive_data, "/AnalysisData/model_wui_df_robustness/1_9_2023/climate_model_wui_17.csv"))
 
-climdf18 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/12_9_2022/climate_modeldf_18.csv"))
+climdf18_wui <- read_csv(here(gdrive_data, "/AnalysisData/model_wui_df_robustness/1_9_2023/climate_model_wui_18.csv"))
 
-climdf19 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/12_9_2022/climate_modeldf_19.csv"))
+climdf19_wui <- read_csv(here(gdrive_data, "/AnalysisData/model_wui_df_robustness/1_9_2023/climate_model_wui_19.csv"))
 
-climdf20 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/12_9_2022/climate_modeldf_20.csv"))
+climdf20_wui <- read_csv(here(gdrive_data, "/AnalysisData/model_wui_df_robustness/1_9_2023/climate_model_wui_20.csv"))
 
-climdf21 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/12_9_2022/climate_modeldf_21.csv"))
+climdf21_wui <- read_csv(here(gdrive_data, "/AnalysisData/model_wui_df_robustness/1_9_2023/climate_model_wui_21.csv"))
 
-climate_model_data_allyears <- rbind(climdf16, climdf17, climdf18, climdf19, climdf20, climdf21)
+climate_model_data_allyears_wui <- rbind(climdf16_wui, climdf17_wui, climdf1_wui, climdf19_wui, climdf20_wui, climdf21_wui)
 
 #test that all your years are present
 
-unique(climate_model_data_allyears$year)
+unique(climate_model_data_allyears_wui$year)
 
 #relevel the factors
 
-relevel(as.factor(climate_model_data_allyears$lc), ref = "barren_land")
+relevel(as.factor(climate_model_data_allyears_wui$lc), ref = "barren_land")
 
 ```
 
 ```{r}
 #save the all year data frame
 
-write.csv(climate_model_data_allyears, file = here(gdrive_data, "/AnalysisData/model_df_climate/12_9_2022/climate_model_data_allyears.csv"), row.names = FALSE)
+write.csv(climate_model_data_allyears_wui, file = here(gdrive_data, "/AnalysisData/model_wui_df_robustness/1_9_2023/climate_model_data_allyears_wui.csv"), row.names = FALSE)
+
 ```
 
 
@@ -943,30 +944,20 @@ write.csv(climate_model_data_allyears, file = here(gdrive_data, "/AnalysisData/m
 
 ```{r}
 #read in the data
-climate_model_data <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/12_9_2022/climate_model_data_allyears.csv"))
+climate_model_data_wui <- read_csv(here(gdrive_data, "/AnalysisData/model_wui_df_robustness/1_9_2023/climate_model_data_allyears_wui.csv"))
 ```
 
 ```{r}
 #run the rspf
 
-climate_model_allyears <- rspf(conflict ~ dem + aspect + TRI + popdens + lc + road_dens + road_dist + streams_dist + urban_dist + rec_dist + forest_dist + forest_dens + dist_fire_1yr + dist_fire_23yrs + dist_fire_45yrs + drought, family = "binomial", m = 0, B = 1000, data = climate_model_data)
+climate_model_allyears_wui <- rspf(conflict ~ dem + aspect + TRI + popdens + lc + road_dens + road_dist + streams_dist + urban_dist + rec_dist + forest_dist + forest_dens + dist_fire_1yr + dist_fire_23yrs + dist_fire_45yrs + drought, family = "binomial", m = 0, B = 1000, data = climate_model_data_wui)
 
 #save the model 
-save(climate_model_allyears, file = here("models", "climate_model_allyears.rds"))
+save(climate_model_allyears_wui, file = here("models", "climate_model_data_allyears_wui.rds"))
 
-save(climate_model_allyears, file = here(gdrive_data, "/AnalysisData/models/12_9_2022/model_allyears_climate/climate_model_allyears.rds"))
 
-#update 11/28/22: this model needs to be rerun and saved with new lc raster
-#update 11/17/22: mod #3 is best option so rerunning with climate variables 
-#update 12/9/22: rerunning model with new lc raster 
+save(climate_model_allyears_wui, file = here(gdrive_data, "/AnalysisData/model_wui_robustness/1_9_2023/climate_model_allyears_wui.rds"))
 
-#also rerunning model 3 again because it is still the best alt base model 
-mod3climate <- rspf(conflict ~ dem + lc + forest_dist + popdens + rec_dist + streams_dist + TRI + urban_dist + dist_fire_1yr + dist_fire_23yrs + dist_fire_45yrs + drought, family = "binomial", m = 0, B = 1000, data = climate_model_data)
-
-#saving mod 3 with climate 
-save(mod3climate, file = here("models", "mod3climate.rds"))
-
-save(climate_model_allyears, file = here(gdrive_data, "/AnalysisData/models/12_9_2022/mod3_allyears_climate/mod3climate.rds"))
 
 
 ```
