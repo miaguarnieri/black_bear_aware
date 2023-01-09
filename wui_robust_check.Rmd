@@ -264,7 +264,7 @@ conbuff16_sf <- st_as_sf(conbuff16_reproj)
 
 #create an inverse mask- Anything withing the conflict buffer shapefiles will be a 0 value. So we get a California raster with all the conflict buffer locations zeroed out
 
-conbuff16_inverse <- mask(ca_raster, conbuff16_reproj, inverse = TRUE)
+conbuff16_inverse <- mask(wui_2022_ca, conbuff16_reproj, inverse = TRUE)
 
 tm_shape(conbuff16_inverse) +
   tm_raster() +
@@ -376,8 +376,8 @@ conpoints17_sf <- st_as_sf(conpoints17_reproj)
 conbuff17_sf <- st_as_sf(conbuff17_reproj)
 
 #create an inverse mask- Anything withing the conflict buffer shapefiles will be a 0 value. So we get a California raster with all the conflict buffer locations zeroed out
-conbuff17_inverse <- mask(ca_raster, conbuff17_reproj, inverse = TRUE)
-tm_shape(conbuff17_inverse) +
+conbuff17_inverse <- mask(wui_2022_ca, conbuff17_reproj, inverse = TRUE)
+tm_shape(conbuff17_inverse_wui) +
   tm_raster() +
   tmap_mode("view")
 
@@ -486,7 +486,7 @@ conbuff18_sf <- st_as_sf(conbuff18_reproj)
 
 #create an inverse mask- Anything withing the conflict buffer shapefiles will be a 0 value. So we get a California raster with all the conflict buffer locations zeroed out
 
-conbuff18_inverse <- mask(ca_raster, conbuff18_reproj, inverse = TRUE)
+conbuff18_inverse <- mask(wui_2022_ca, conbuff18_reproj, inverse = TRUE)
 
 tm_shape(conbuff18_inverse) +
   tm_raster() +
@@ -599,7 +599,7 @@ conbuff19_sf <- st_as_sf(conbuff19_reproj)
 
 #create an inverse mask- Anything withing the conflict buffer shapefiles will be a 0 value. So we get a California raster with all the conflict buffer locations zeroed out
 
-conbuff19_inverse <- mask(ca_raster, conbuff19_reproj, inverse = TRUE)
+conbuff19_inverse <- mask(wui_2022_ca, conbuff19_reproj, inverse = TRUE)
 
 tm_shape(conbuff19_inverse) +
   tm_raster() +
@@ -712,7 +712,7 @@ conbuff20_sf <- st_as_sf(conbuff20_reproj)
 
 #create an inverse mask- Anything withing the conflict buffer shapefiles will be a 0 value. So we get a California raster with all the conflict buffer locations zeroed out
 
-conbuff20_inverse <- mask(ca_raster, conbuff20_reproj, inverse = TRUE)
+conbuff20_inverse <- mask(wui_2022_ca, conbuff20_reproj, inverse = TRUE)
 
 tm_shape(conbuff20_inverse) +
   tm_raster() +
@@ -828,7 +828,7 @@ conbuff21_sf <- st_as_sf(conbuff21_reproj)
 
 #create an inverse mask- Anything withing the conflict buffer shapefiles will be a 0 value. So we get a California raster with all the conflict buffer locations zeroed out
 
-conbuff21_inverse <- mask(ca_raster, conbuff21_reproj, inverse = TRUE)
+conbuff21_inverse <- mask(wui_2022_ca, conbuff21_reproj, inverse = TRUE)
 
 tm_shape(conbuff21_inverse) +
   tm_raster() +
