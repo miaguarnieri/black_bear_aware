@@ -916,6 +916,7 @@ save(mod1_no_rec, file = here("models", "robustness_checks", "mod1_no_rec.rds"))
 
 mod2_no_rec <- rspf(ID ~ dem + forest_dens + lc + forest_dist + popdens  + road_dens + urban_dist, family = "binomial", m = 0, B = 1000, data = rec_model_data_nc)
 
+
 #save model 
 save(mod2_no_rec, file = here("models", "robustness_checks", "mod2_no_rec.rds"))
 
