@@ -20,6 +20,7 @@ library(lubridate)
 library(ResourceSelection)
 library(rmapshaper)
 
+
 #mia, chase, and claire's file path
 
 #gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
@@ -65,11 +66,20 @@ wui_2022_ca <- mask(wui_2022_raster, ca_raster)
 ```
 
 ```{r}
-tm_shape(wui_2022_ca) +
+wui_2022_claire <- vect(here(gdrive_data, "/IntermediateData/IntermediateData_Files/wui_claire/wui_claire.shp"))
+wui_2022_calbers <- project(wui_2022_claire, ca_raster)
+wui_2022_raster <- rasterize(wui_2022_calbers, ca_raster)
+wui_2022_ca <- mask(wui_2022_raster, ca_raster)
+
+```
+
+
+```{r}
+tm_shape(wui_2022_raster) +
   tm_raster() +
   tmap_mode("view")
 
-plot(wui_2022_ca)
+plot(wui_2022_calbers)
 ```
 
 
