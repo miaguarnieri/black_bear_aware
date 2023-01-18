@@ -1,0 +1,172 @@
+---
+title: "Log Transformation"
+author: "Mia Guarnieri"
+date: "2022-12-19"
+output: html_document
+---
+##Setup and packages
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+#attach packages
+library(tidyverse)
+library(here)
+library(terra)
+library(sf)
+library(tmap)
+library(lubridate)
+library(ResourceSelection)
+library(rmapshaper)
+
+#mia, chase, and claire's file path
+#gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+
+#mia's new file path
+
+gdrive_data <- "/Users/mia/Library/CloudStorage/GoogleDrive-mguarnieri@ucsb.edu/Shared drives/Black_Bear_Aware/gdrive_data"
+
+#sam's file path
+#gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
+
+```
+
+# Load in the data
+
+```{r}
+#read in the data
+model_data <- read_csv(here(gdrive_data, "/AnalysisData/model_df_noclimate/12_13_2022/model_data_allyears.csv"))
+```
+
+
+# Run the base model
+
+```{r}
+basemodel_allyears <- rspf(ID ~ dem + aspect + TRI + log((popdens + 1)) + lc + road_dens + road_dist + streams_dist + urban_dist + rec_dist + log((forest_dist + 1)) + forest_dens, family = "binomial", m = 0, B = 1000, data = model_data)
+```
+
+
+```{r}
+#save the model - this one isn't working for some reason (says it cannot open the connection?)
+
+save(basemodel_allyears, file = here(gdrive_data, "/AnalysisData/model_log_transform/noclimate/basemodel_allyears_log.rds"))
+
+#save the model
+
+save(basemodel_allyears, file = here("models", "robustness_checks", "log_transform", "basemodel_allyears_log.rds"))
+
+```
+
+#Set up 5 alternative models, with the same covariates as the Hagani et al models
+
+```{r}
+
+#Model 1: elevation + land cover + distance to forests + population density + distance to recreational areas+ road density + distance to urban areas
+mod1 <- rspf(ID ~ dem + lc + log((forest_dist + 1)) + log((popdens + 1)) + rec_dist + road_dens + urban_dist, family = "binomial", m = 0, B = 1000, data = model_data)
+
+#Model 2: elevation + forest density + land cover + distance to forests + population density + distance to recreational areas + road density + distance to urban areas
+
+mod2 <- rspf(ID ~ dem + forest_dens + lc + log((forest_dist + 1)) + log((popdens + 1)) + rec_dist + road_dens + urban_dist, family = "binomial", m = 0, B = 1000, data = model_data)
+
+#Model 3: elevation + land cover + distance to forests + population density + distance to recreational areas + distance to streams + terrain ruggedness + distance to urban areas
+
+mod3 <- rspf(ID ~ dem + lc + log((forest_dist + 1)) + log((popdens + 1)) + rec_dist + streams_dist + TRI + urban_dist, family = "binomial", m = 0, B = 1000, data = model_data)
+
+#Model 4: elevation + forest density + land cover + distance to forests + population density + distance to recreational areas + distance to streams + distance to urban areas
+
+mod4 <- rspf(ID ~ dem + forest_dens + lc + log((forest_dist + 1)) + log((popdens + 1)) + rec_dist + streams_dist + urban_dist, family = "binomial", m = 0, B = 1000, data = model_data)
+
+#Model 5: elevation + land cover + distance to forests + population density + distance to streams + terrain ruggedness + distance to urban areas
+
+mod5 <- rspf(ID ~ dem + lc + log((forest_dist + 1)) + log((popdens + 1)) + streams_dist + TRI + urban_dist, family = "binomial", m = 0, B = 1000, data = model_data)
+
+
+
+```
+
+#save the 5 models 
+
+```{r}
+#mod1
+save(mod1, file = here(gdrive_data, "/AnalysisData/model_log_transform/noclimate/mod1_log.rds"))
+
+#save the model
+
+save(mod1, file = here("models", "robustness_checks", "log_transform", "mod1_log.rds"))
+
+#mod2
+save(mod2, file = here(gdrive_data, "/AnalysisData/model_log_transform/noclimate/mod2_log.rds"))
+
+#save the model
+
+save(mod2, file = here("models", "robustness_checks", "log_transform", "mod2_log.rds"))
+
+#mod3
+save(mod3, file = here(gdrive_data, "/AnalysisData/model_log_transform/noclimate/mod3_log.rds"))
+
+#save the model
+
+save(mod3, file = here("models", "robustness_checks", "log_transform", "mod3_log.rds"))
+
+#mod4
+
+save(mod4, file = here(gdrive_data, "/AnalysisData/model_log_transform/noclimate/mod4_log.rds"))
+
+#save the model
+
+save(mod4, file = here("models", "robustness_checks", "log_transform", "mod4_log.rds"))
+
+#mod5
+save(mod5, file = here(gdrive_data, "/AnalysisData/model_log_transform/noclimate/mod5_log.rds"))
+
+#save the model
+
+save(mod5, file = here("models", "robustness_checks", "log_transform", "mod5_log.rds"))
+
+```
+
+```{r}
+#comparing AIC scores
+AIC(mod1)
+
+AIC(mod2)
+
+AIC(mod3)
+
+AIC(mod4)
+
+AIC(mod5)
+
+AIC(basemodel_allyears)
+
+```
+#Load in climate data
+
+```{r}
+climate_model_data <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/12_9_2022/climate_model_data_allyears.csv"))
+```
+
+
+#Run the climate model
+
+```{r}
+#all variables
+
+climate_model_allyears <- rspf(conflict ~ dem + aspect + TRI + log((popdens + 1)) + lc + road_dens + road_dist + streams_dist + urban_dist + rec_dist + log((forest_dist + 1)) + forest_dens + dist_fire_1yr + dist_fire_23yrs + dist_fire_45yrs + drought, family = "binomial", m = 0, B = 1000, data = climate_model_data)
+
+#save the model 
+save(climate_model_allyears, file = here("models", "robustness_checks", "log_transform", "climatemodel_allyears_log.rds"))
+
+save(climate_model_allyears, file = here(gdrive_data, "/AnalysisData/models/1_17_2023/climatemodel_allyears_log.rds"))
+
+#model 3
+
+mod3climate <- rspf(conflict ~ dem + lc + log((forest_dist + 1)) + log((popdens + 1)) + rec_dist + streams_dist + TRI + urban_dist + dist_fire_1yr + dist_fire_23yrs + dist_fire_45yrs + drought, family = "binomial", m = 0, B = 1000, data = climate_model_data)
+
+#saving mod 3 with climate 
+save(mod3climate, file = here("models", "mod3climate.rds"))
+
+save(climate_model_allyears, file = here(gdrive_data, "/AnalysisData/models/12_9_2022/mod3_allyears_climate/mod3climate.rds"))
+
+```
+
