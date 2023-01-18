@@ -20,7 +20,11 @@ library(ResourceSelection)
 library(rmapshaper)
 
 #mia, chase, and claire's file path
-gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+#gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+
+#mia's new file path
+
+gdrive_data <- "/Users/mia/Library/CloudStorage/GoogleDrive-mguarnieri@ucsb.edu/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #sam's file path
 #gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
@@ -136,3 +140,33 @@ AIC(mod5)
 AIC(basemodel_allyears)
 
 ```
+#Load in climate data
+
+```{r}
+climate_model_data <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/12_9_2022/climate_model_data_allyears.csv"))
+```
+
+
+#Run the climate model
+
+```{r}
+#all variables
+
+climate_model_allyears <- rspf(conflict ~ dem + aspect + TRI + log((popdens + 1)) + lc + road_dens + road_dist + streams_dist + urban_dist + rec_dist + log((forest_dist + 1)) + forest_dens + dist_fire_1yr + dist_fire_23yrs + dist_fire_45yrs + drought, family = "binomial", m = 0, B = 1000, data = climate_model_data)
+
+#save the model 
+save(climate_model_allyears, file = here("models", "robustness_checks", "log_transform", "climatemodel_allyears_log.rds"))
+
+save(climate_model_allyears, file = here(gdrive_data, "/AnalysisData/models/1_17_2023/climatemodel_allyears_log.rds"))
+
+#model 3
+
+mod3climate <- rspf(conflict ~ dem + lc + log((forest_dist + 1)) + log((popdens + 1)) + rec_dist + streams_dist + TRI + urban_dist + dist_fire_1yr + dist_fire_23yrs + dist_fire_45yrs + drought, family = "binomial", m = 0, B = 1000, data = climate_model_data)
+
+#saving mod 3 with climate 
+save(mod3climate, file = here("models", "mod3climate.rds"))
+
+save(climate_model_allyears, file = here(gdrive_data, "/AnalysisData/models/12_9_2022/mod3_allyears_climate/mod3climate.rds"))
+
+```
+
