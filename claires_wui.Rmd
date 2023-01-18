@@ -1,0 +1,62 @@
+---
+title: "claires_wui"
+author: "Claire Meuter"
+date: "2023-01-18"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(here)
+library(terra)
+library(sf)
+library(tmap)
+library(beepr)
+library(rgeos)
+library(rmapshaper)
+library(rgdal)
+```
+
+#trying to read in 
+```{r}
+sf_use_s2(FALSE)
+
+wui <- read_sf(here("/Users/clairemeuter/Library/CloudStorage/GoogleDrive-clairemeuter@ucsb.edu/Shared drives/Black_Bear_Aware/gdrive_data/InputData/InputData_Files/ca_wui_block_1990_2020_change_shp/CA_wui_block_1990_2020_change/CA_wui_block_1990_2020_change.shp")) %>% 
+  select(WUIFLAG202) %>% 
+  filter(WUIFLAG202 > 0)
+
+#unioning all the polygons into one 
+wui_union <- st_union(wui)
+
+#reading in Ca raster so i can rasterize later 
+ca_raster <- rast(here("/Users/clairemeuter/Library/CloudStorage/GoogleDrive-clairemeuter@ucsb.edu/Shared drives/Black_Bear_Aware/gdrive_data/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
+```
+
+```{r}
+tm_shape(wui_union) +
+  tm_polygons() +
+  tmap_mode("view") 
+```
+
+
+```{r}
+#saving the orginal wui
+st_write(wui, dsn = here("/Users/clairemeuter/Library/CloudStorage/GoogleDrive-clairemeuter@ucsb.edu/Shared drives/Black_Bear_Aware/gdrive_data/IntermediateData/IntermediateData_Files/wui_claire", "wui_claire.shp"))
+#saving the unioned wui 
+st_write(wui_union, dsn = here("/Users/clairemeuter/Library/CloudStorage/GoogleDrive-clairemeuter@ucsb.edu/Shared drives/Black_Bear_Aware/gdrive_data/IntermediateData/IntermediateData_Files/wui_claire", "wui_union.shp"))
+```
+```{r}
+#changing to spat vector so terra can use 
+wui_union_sv <- vect(wui_union)
+
+#saving this layer to drive 
+writeVector(wui_union_sv, dsn = here("/Users/clairemeuter/Library/CloudStorage/GoogleDrive-clairemeuter@ucsb.edu/Shared drives/Black_Bear_Aware/gdrive_data/IntermediateData/IntermediateData_Files/wui_claire", "wui_union_sv.shp"))
+#rasterizing the spat vector 
+rasterize(wui_union_sv, ca_raster)
+```
+
+```{r}
+
+```
+
