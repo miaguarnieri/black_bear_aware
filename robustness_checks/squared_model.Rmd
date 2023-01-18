@@ -1,0 +1,112 @@
+---
+title: "squared_model"
+author: "Claire Meuter, Chase Tarr"
+date: "10/31/2022"
+output: html_document
+---
+
+##Setup and packages
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+#attach packages
+library(tidyverse)
+library(here)
+library(terra)
+library(sf)
+library(tmap)
+library(lubridate)
+library(ResourceSelection)
+library(rmapshaper)
+
+#mia, chase, and claire's file path
+
+gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+
+#sam's file path
+#gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
+
+```
+##base model code
+#read in the required data
+```{r}
+#read in the data
+model_data_sq <- read_csv(here(gdrive_data, "/AnalysisData/model_df_noclimate/12_13_2022/model_data_allyears.csv"))
+```
+
+```{r}
+#base model run
+basemodel_allyears_sq <- rspf(ID ~ dem + aspect + TRI + I(popdens^2) + lc + I(road_dens^2) + road_dist + streams_dist + urban_dist + rec_dist + forest_dist + forest_dens, family = "binomial", m = 0, B = 1000, data = model_data_sq)
+```
+```{r}
+AIC(basemodel_allyears_sq)
+```
+
+
+#run and save 5 alt models sqaured
+```{r}
+#Model 1: elevation + land cover + distance to forests + population density^2 + distance to recreational areas+ road density^2 + distance to urban areas
+mod1_sq <- rspf(ID ~ dem + lc + forest_dist + I(popdens^2) + rec_dist + I(road_dens^2) + urban_dist, family = "binomial", m = 0, B = 1000, data = model_data_sq)
+
+#save model 
+save(mod1_sq, file = here("models", "robustness_checks", "mod1_sq.rds"))
+
+#Model 2: elevation + forest density + land cover + distance to forests + population density^2 + distance to recreational areas + road density^2 + distance to urban areas
+
+mod2_sq <- rspf(ID ~ dem + forest_dens + lc + forest_dist + I(popdens^2) + rec_dist + I(road_dens^2) + urban_dist, family = "binomial", m = 0, B = 1000, data = model_data_sq)
+
+#save model 
+save(mod2_sq, file = here("models", "robustness_checks", "mod2_sq.rds"))
+
+#Model 3: elevation + land cover + distance to forests + population density^2 + distance to recreational areas + distance to streams + terrain ruggedness + distance to urban areas
+
+mod3_sq <- rspf(ID ~ dem + lc + forest_dist + I(popdens^2) + rec_dist + streams_dist + TRI + urban_dist, family = "binomial", m = 0, B = 1000, data = model_data_sq)
+
+#save model 
+save(mod3_sq, file = here("models", "robustness_checks", "mod3_sq.rds"))
+
+#Model 4: elevation + forest density + land cover + distance to forests + population density^2 + distance to recreational areas + distance to streams + distance to urban areas
+
+mod4_sq <- rspf(ID ~ dem + forest_dens + lc + forest_dist + I(popdens^2) + rec_dist + streams_dist + urban_dist, family = "binomial", m = 0, B = 1000, data = model_data_sq)
+
+#save model 
+save(mod4_sq, file = here("models", "robustness_checks", "mod4_sq.rds"))
+
+
+#Model 5: elevation + land cover + distance to forests + population density^2 + distance to streams + terrain ruggedness + distance to urban areas
+
+mod5_sq <- rspf(ID ~ dem + lc + forest_dist + I(popdens^2) + streams_dist + TRI + urban_dist, family = "binomial", m = 0, B = 1000, data = model_data_sq)
+
+#save model 
+save(mod5_sq, file = here("models", "robustness_checks", "mod5_sq.rds"))
+
+
+```
+#check AICS
+```{r}
+AIC(mod1_sq)
+AIC(mod2_sq)
+AIC(mod3_sq)
+AIC(mod4_sq)
+AIC(mod5_sq)
+```
+
+#climate model code
+
+#read in the data 
+```{r}
+#read in the data
+sq_model_data <- read_csv(here("/Users/clairemeuter/Library/CloudStorage/GoogleDrive-clairemeuter@ucsb.edu/Shared drives/Black_Bear_Aware/gdrive_data/AnalysisData/model_df_climate/12_9_2022/climate_model_data_allyears.csv"))
+```
+#run the rspf 
+```{r}
+#climate model with all variables 
+sq_model_climate_all <- rspf(conflict ~ dem + aspect + TRI + I(popdens^2)+ lc +  I(road_dens^2) + road_dist + streams_dist + urban_dist + rec_dist + forest_dist + forest_dens + dist_fire_1yr + dist_fire_23yrs + dist_fire_45yrs + drought, family = "binomial", m = 0, B = 1000, data = sq_model_data)
+
+#save the model 
+save(sq_model_climate_all, file = here("models", "sq_model_climate_all.rds"))
+
+AIC(sq_model_climate_all)
+```
+
