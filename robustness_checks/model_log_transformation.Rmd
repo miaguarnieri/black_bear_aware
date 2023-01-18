@@ -140,6 +140,7 @@ AIC(mod5)
 AIC(basemodel_allyears)
 
 ```
+
 #Load in climate data
 
 ```{r}
@@ -164,9 +165,9 @@ save(climate_model_allyears, file = here(gdrive_data, "/AnalysisData/models/1_17
 mod3climate <- rspf(conflict ~ dem + lc + log((forest_dist + 1)) + log((popdens + 1)) + rec_dist + streams_dist + TRI + urban_dist + dist_fire_1yr + dist_fire_23yrs + dist_fire_45yrs + drought, family = "binomial", m = 0, B = 1000, data = climate_model_data)
 
 #saving mod 3 with climate 
-save(mod3climate, file = here("models", "mod3climate.rds"))
+save(mod3climate, file = here("models", "robustness_checks", "log_transform", "mod3climate_log.rds"))
 
-save(climate_model_allyears, file = here(gdrive_data, "/AnalysisData/models/12_9_2022/mod3_allyears_climate/mod3climate.rds"))
+save(mod3climate, file = here(gdrive_data, "/AnalysisData/models/1_17_2023/mod3climate_log.rds"))
 
 ```
 
