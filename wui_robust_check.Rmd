@@ -66,7 +66,7 @@ wui_2022_ca <- mask(wui_2022_raster, ca_raster)
 ```
 
 ```{r}
-wui_2022_claire <- vect(here(gdrive_data, "/IntermediateData/IntermediateData_Files/wui_claire/wui_claire.shp"))
+wui_2022_claire <- vect(here(gdrive_data, "/IntermediateData/IntermediateData_Files/wui_claire/wui_union.shp"))
 wui_2022_calbers <- project(wui_2022_claire, ca_raster)
 wui_2022_raster <- rasterize(wui_2022_calbers, ca_raster)
 wui_2022_ca <- mask(wui_2022_raster, ca_raster)
@@ -75,35 +75,11 @@ wui_2022_ca <- mask(wui_2022_raster, ca_raster)
 
 
 ```{r}
-tm_shape(wui_2022_raster) +
+tm_shape(wui_2022_ca) +
   tm_raster() +
   tmap_mode("view")
 
-plot(wui_2022_calbers)
-```
-
-
-```{r}
-savevect <- function(x){
-  
-  name <- paste0(deparse(substitute(x)), ".shp") #the name of the file will be the same as the input object, plus '.hp' at the end
-  
-#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a shapefile
-  
-  writeVector(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/ca_wui_shp", name), filetype = "ESRI Shapefile", overwrite=TRUE)
-}
-
-#save the file
-savevect(wui_2022_mask)
-```
-
-
-```{r}
-tm_shape(wui_2022_raster) +
-  tm_raster() +
-  tmap_mode("view")
-
-plot(wui_2022_raster)
+plot(wui_2022_ca)
 ```
 
 
@@ -345,7 +321,7 @@ clim_modeldf_16_year <- clim_model_df_16 %>%
 ```{r}
 #saving the files
 
-write.csv(clim_modeldf_16_year, file = here(gdrive_data, "/AnalysisData/model_wui_df_robustness/1_9_2023/climate_model_wui_16.csv"), row.names = FALSE)
+write.csv(clim_modeldf_16_year, file = here(gdrive_data, "/AnalysisData/robustness_check_data/model_wui_df_robustness/1_9_2023/climate_model_wui_16.csv"), row.names = FALSE)
 
 ```
 
@@ -387,7 +363,7 @@ conbuff17_sf <- st_as_sf(conbuff17_reproj)
 
 #create an inverse mask- Anything withing the conflict buffer shapefiles will be a 0 value. So we get a California raster with all the conflict buffer locations zeroed out
 conbuff17_inverse <- mask(wui_2022_ca, conbuff17_reproj, inverse = TRUE)
-tm_shape(conbuff17_inverse_wui) +
+tm_shape(conbuff17_inverse) +
   tm_raster() +
   tmap_mode("view")
 
@@ -452,7 +428,7 @@ clim_modeldf_17_year <- clim_model_df_17 %>%
 ```{r}
 #saving the files
 
-write.csv(clim_modeldf_17_year, file = here(gdrive_data, "/AnalysisData/model_wui_df_robustness/1_9_2023/climate_model_wui_17.csv"), row.names = FALSE)
+write.csv(clim_modeldf_17_year, file = here(gdrive_data, "/AnalysisData/robustness_check_data/model_wui_df_robustness/1_9_2023/climate_model_wui_17.csv"), row.names = FALSE)
 
 ```
 
@@ -567,7 +543,7 @@ clim_modeldf_18_year <- clim_model_df_18 %>%
 ```{r}
 #save the file
 
-write.csv(clim_modeldf_18_year, file = here(gdrive_data, "/AnalysisData/model_wui_df_robustness/1_9_2023/climate_model_wui_18.csv"), row.names = FALSE)
+write.csv(clim_modeldf_18_year, file = here(gdrive_data, "/AnalysisData/robustness_check_data/model_wui_df_robustness/1_9_2023/climate_model_wui_18.csv"), row.names = FALSE)
 ```
 
 ##2019
@@ -678,7 +654,7 @@ clim_modeldf_19_year <- clim_model_df_19 %>%
 ```{r}
 #save the file
 
-write.csv(clim_modeldf_19_year, file = here(gdrive_data, "/AnalysisData/model_wui_df_robustness/1_9_2023/climate_model_wui_19.csv"), row.names = FALSE)
+write.csv(clim_modeldf_19_year, file = here(gdrive_data, "/AnalysisData/robustness_check_data/model_wui_df_robustness/1_9_2023/climate_model_wui_19.csv"), row.names = FALSE)
 
 ```
 
@@ -794,7 +770,7 @@ clim_modeldf_20_year <- clim_model_df_20 %>%
 ```{r}
 #save the file
 
-write.csv(clim_modeldf_20_year, file = here(gdrive_data, "/AnalysisData/model_wui_df_robustness/1_9_2023/climate_model_wui_20.csv"), row.names = FALSE)
+write.csv(clim_modeldf_20_year, file = here(gdrive_data, "/AnalysisData/robustness_check_data/model_wui_df_robustness/1_9_2023/climate_model_wui_20.csv"), row.names = FALSE)
 
 ```
 
@@ -907,7 +883,7 @@ clim_modeldf_21_year <- clim_model_df_21 %>%
 ```{r}
 #save the file
 
-write.csv(clim_modeldf_21_year, file = here(gdrive_data, "/AnalysisData/model_wui_df_robustness/1_9_2023/climate_model_wui_21.csv"), row.names = FALSE)
+write.csv(clim_modeldf_21_year, file = here(gdrive_data, "/AnalysisData/robustness_check_data/model_wui_df_robustness/1_9_2023/climate_model_wui_21.csv"), row.names = FALSE)
 
 ```
 
@@ -918,19 +894,19 @@ write.csv(clim_modeldf_21_year, file = here(gdrive_data, "/AnalysisData/model_wu
 ```{r}
 #read them in
 
-climdf16_wui <- read_csv(here(gdrive_data, "/AnalysisData/model_wui_df_robustness/1_9_2023/climate_model_wui_16.csv"))
+climdf16_wui <- read_csv(here(gdrive_data, "/AnalysisData/robustness_check_data/model_wui_df_robustness/1_9_2023/climate_model_wui_16.csv"))
 
-climdf17_wui <- read_csv(here(gdrive_data, "/AnalysisData/model_wui_df_robustness/1_9_2023/climate_model_wui_17.csv"))
+climdf17_wui <- read_csv(here(gdrive_data, "/AnalysisData/robustness_check_data/model_wui_df_robustness/1_9_2023/climate_model_wui_17.csv"))
 
-climdf18_wui <- read_csv(here(gdrive_data, "/AnalysisData/model_wui_df_robustness/1_9_2023/climate_model_wui_18.csv"))
+climdf18_wui <- read_csv(here(gdrive_data, "/AnalysisData/robustness_check_data/model_wui_df_robustness/1_9_2023/climate_model_wui_18.csv"))
 
-climdf19_wui <- read_csv(here(gdrive_data, "/AnalysisData/model_wui_df_robustness/1_9_2023/climate_model_wui_19.csv"))
+climdf19_wui <- read_csv(here(gdrive_data, "/AnalysisData/robustness_check_data/model_wui_df_robustness/1_9_2023/climate_model_wui_19.csv"))
 
-climdf20_wui <- read_csv(here(gdrive_data, "/AnalysisData/model_wui_df_robustness/1_9_2023/climate_model_wui_20.csv"))
+climdf20_wui <- read_csv(here(gdrive_data, "/AnalysisData/robustness_check_data/model_wui_df_robustness/1_9_2023/climate_model_wui_20.csv"))
 
-climdf21_wui <- read_csv(here(gdrive_data, "/AnalysisData/model_wui_df_robustness/1_9_2023/climate_model_wui_21.csv"))
+climdf21_wui <- read_csv(here(gdrive_data, "/AnalysisData/robustness_check_data/model_wui_df_robustness/1_9_2023/climate_model_wui_21.csv"))
 
-climate_model_data_allyears_wui <- rbind(climdf16_wui, climdf17_wui, climdf1_wui, climdf19_wui, climdf20_wui, climdf21_wui)
+climate_model_data_allyears_wui <- rbind(climdf16_wui, climdf17_wui, climdf18_wui, climdf19_wui, climdf20_wui, climdf21_wui)
 
 #test that all your years are present
 
@@ -945,7 +921,7 @@ relevel(as.factor(climate_model_data_allyears_wui$lc), ref = "barren_land")
 ```{r}
 #save the all year data frame
 
-write.csv(climate_model_data_allyears_wui, file = here(gdrive_data, "/AnalysisData/model_wui_df_robustness/1_9_2023/climate_model_data_allyears_wui.csv"), row.names = FALSE)
+write.csv(climate_model_data_allyears_wui, file = here(gdrive_data, "/AnalysisData/robustness_check_data/model_wui_df_robustness/1_9_2023/climate_model_data_allyears_wui.csv"), row.names = FALSE)
 
 ```
 
