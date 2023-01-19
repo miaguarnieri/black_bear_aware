@@ -930,7 +930,7 @@ write.csv(climate_model_data_allyears_wui, file = here(gdrive_data, "/AnalysisDa
 
 ```{r}
 #read in the data
-climate_model_data_wui <- read_csv(here(gdrive_data, "/AnalysisData/model_wui_df_robustness/1_9_2023/climate_model_data_allyears_wui.csv"))
+climate_model_data_wui <- read_csv(here(gdrive_data, "/AnalysisData/robustness_check_data/model_wui_df_robustness/1_9_2023/climate_model_data_allyears_wui.csv"))
 ```
 
 ```{r}
@@ -942,8 +942,39 @@ climate_model_allyears_wui <- rspf(conflict ~ dem + aspect + TRI + popdens + lc 
 save(climate_model_allyears_wui, file = here("models", "climate_model_data_allyears_wui.rds"))
 
 
-save(climate_model_allyears_wui, file = here(gdrive_data, "/AnalysisData/model_wui_robustness/1_9_2023/climate_model_allyears_wui.rds"))
-
+save(climate_model_allyears_wui, file = here(gdrive_data, "/AnalysisData/robustness_check_data/model_wui_robustness/1_9_2023/climate_model_allyears_wui.rds"))
 
 
 ```
+
+```{r}
+#Model 1: elevation + land cover + distance to forests + population density + distance to recreational areas+ road density + distance to urban areas
+mod1_wui <- rspf(conflict ~ dem + lc + forest_dist + popdens + rec_dist + road_dens + urban_dist + dist_fire_1yr + dist_fire_23yrs + dist_fire_45yrs + drought, family = "binomial", m = 0, B = 1000, data = climate_model_data_wui)
+
+#Model 2: elevation + forest density + land cover + distance to forests + population density + distance to recreational areas + road density + distance to urban areas
+
+mod2_wui <- rspf(conflict ~ dem + forest_dens + lc + forest_dist + popdens + rec_dist + road_dens + urban_dist + dist_fire_1yr + dist_fire_23yrs + dist_fire_45yrs + drought, family = "binomial", m = 0, B = 1000, data = climate_model_data_wui)
+
+#Model 3: elevation + land cover + distance to forests + population density + distance to recreational areas + distance to streams + terrain ruggedness + distance to urban areas
+
+mod3_wui <- rspf(conflict ~ dem + lc + forest_dist + popdens + rec_dist + streams_dist + TRI + urban_dist + dist_fire_1yr + dist_fire_23yrs + dist_fire_45yrs + drought, family = "binomial", m = 0, B = 1000, data = climate_model_data_wui)
+
+#Model 4: elevation + forest density + land cover + distance to forests + population density + distance to recreational areas + distance to streams + distance to urban areas
+
+mod4_wui <- rspf(conflict ~ dem + forest_dens + lc + forest_dist + popdens + rec_dist + streams_dist + urban_dist + dist_fire_1yr + dist_fire_23yrs + dist_fire_45yrs + drought, family = "binomial", m = 0, B = 1000, data = climate_model_data_wui)
+
+#Model 5: elevation + land cover + distance to forests + population density + distance to streams + terrain ruggedness + distance to urban areas
+
+mod5_wui <- rspf(conflict ~ dem + lc + forest_dist + popdens + streams_dist + TRI + urban_dist + dist_fire_1yr + dist_fire_23yrs + dist_fire_45yrs + drought, family = "binomial", m = 0, B = 1000, data = climate_model_data_wui)
+
+```
+
+#Check AIC
+```{r}
+AIC(mod1_wui)
+AIC(mod2_wui)
+AIC(mod3_wui)
+AIC(mod4_wui)
+AIC(mod5_wui)
+```
+
