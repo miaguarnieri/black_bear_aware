@@ -319,7 +319,7 @@ clim_modeldf_16_year <- clim_model_df_16 %>%
 ```{r}
 #saving the files
 
-write.csv(clim_modeldf_16_year, file = here(gdrive_data, "/AnalysisData/model_df_climate/12_9_2022/climate_modeldf_16.csv"), row.names = FALSE)
+write.csv(clim_modeldf_16_year, file = here(gdrive_data, "/AnalysisData/robustness_check_data/wir_nonsightings/nonsightings_climate_modeldf_16.csv"), row.names = FALSE)
 
 ```
 
@@ -370,7 +370,7 @@ cabuff17_inv_pol <- as.polygons(conbuff17_inverse)
 cabuff17_inv_sf <- st_as_sf(cabuff17_inv_pol)
 
 #sampling random points from this misshapen california shpfile
-sample17 <- st_sample(cabuff17_inv_sf, 3345) %>% 
+sample17 <- st_sample(cabuff17_inv_sf, (nrow(conpoints17_sf) * 5)) %>% 
   st_as_sf()
 
 #mappping to see what it looks like 
@@ -426,7 +426,7 @@ clim_modeldf_17_year <- clim_model_df_17 %>%
 ```{r}
 #saving the files
 
-write.csv(clim_modeldf_17_year, file = here(gdrive_data, "/AnalysisData/model_df_climate/12_9_2022/climate_modeldf_17.csv"), row.names = FALSE)
+write.csv(clim_modeldf_17_year, file = here(gdrive_data, "/AnalysisData/robustness_check_data/wir_nonsightings/nonsightings_climate_modeldf_17.csv"), row.names = FALSE)
 
 ```
 
@@ -483,7 +483,7 @@ cabuff18_inv_sf <- st_as_sf(cabuff18_inv_pol)
 
 
 #sampling random points from this inverse shapefile
-sample18 <- st_sample(cabuff18_inv_sf, 3635) %>% 
+sample18 <- st_sample(cabuff18_inv_sf, (nrow(conpoints18_sf) * 5)) %>% 
   st_as_sf()
 
 #mappping to see what it looks like 
@@ -541,7 +541,7 @@ clim_modeldf_18_year <- clim_model_df_18 %>%
 ```{r}
 #save the file
 
-write.csv(clim_modeldf_18_year, file = here(gdrive_data, "/AnalysisData/model_df_climate/12_9_2022/climate_modeldf_18.csv"), row.names = FALSE)
+write.csv(clim_modeldf_18_year, file = here(gdrive_data, "/AnalysisData/robustness_check_data/wir_nonsightings/nonsightings_climate_modeldf_18.csv"), row.names = FALSE)
 ```
 
 ##2019
@@ -595,7 +595,7 @@ cabuff19_inv_pol <- as.polygons(conbuff19_inverse)
 cabuff19_inv_sf <- st_as_sf(cabuff19_inv_pol)
 
 #sampling random points from this inverted shapefile
-sample19 <- st_sample(cabuff19_inv_sf, 3045) %>% 
+sample19 <- st_sample(cabuff19_inv_sf, (nrow(conpoints19_sf) * 5)) %>% 
   st_as_sf()
 
 #mappping to see what it looks like 
@@ -652,7 +652,7 @@ clim_modeldf_19_year <- clim_model_df_19 %>%
 ```{r}
 #save the file
 
-write.csv(clim_modeldf_19_year, file = here(gdrive_data, "/AnalysisData/model_df_climate/12_9_2022/climate_modeldf_19.csv"), row.names = FALSE)
+write.csv(clim_modeldf_19_year, file = here(gdrive_data, "/AnalysisData/robustness_check_data/wir_nonsightings/nonsightings_climate_modeldf_19.csv"), row.names = FALSE)
 
 ```
 
@@ -710,7 +710,7 @@ cabuff20_inv_sf <- st_as_sf(cabuff20_inv_pol)
 
 #sampling random points from this misshapen california shpfile
 
-sample20 <- st_sample(cabuff20_inv_sf, 3995) %>% 
+sample20 <- st_sample(cabuff20_inv_sf, (nrow(conpoints20_sf) * 5)) %>% 
   st_as_sf()
 
 #mappping to see what it looks like 
@@ -768,7 +768,7 @@ clim_modeldf_20_year <- clim_model_df_20 %>%
 ```{r}
 #save the file
 
-write.csv(clim_modeldf_20_year, file = here(gdrive_data, "/AnalysisData/model_df_climate/12_9_2022/climate_modeldf_20.csv"), row.names = FALSE)
+write.csv(clim_modeldf_20_year, file = here(gdrive_data, "/AnalysisData/robustness_check_data/wir_nonsightings/nonsightings_climate_modeldf_20.csv"), row.names = FALSE)
 
 ```
 
@@ -824,7 +824,7 @@ cabuff21_inv_pol <- as.polygons(conbuff21_inverse)
 cabuff21_inv_sf <- st_as_sf(cabuff21_inv_pol)
 
 #sampling random points from the inverse shapefile
-sample21 <- st_sample(cabuff21_inv_sf, 6820) %>% 
+sample21 <- st_sample(cabuff21_inv_sf, (nrow(conpoints21_sf) * 5)) %>% 
   st_as_sf()
 
 #mappping to see what it looks like 
@@ -881,7 +881,7 @@ clim_modeldf_21_year <- clim_model_df_21 %>%
 ```{r}
 #save the file
 
-write.csv(clim_modeldf_21_year, file = here(gdrive_data, "/AnalysisData/model_df_climate/12_9_2022/climate_modeldf_21.csv"), row.names = FALSE)
+write.csv(clim_modeldf_21_year, file = here(gdrive_data, "/AnalysisData/robustness_check_data/wir_nonsightings/nonsightings_climate_modeldf_21.csv"), row.names = FALSE)
 
 ```
 
@@ -892,17 +892,17 @@ write.csv(clim_modeldf_21_year, file = here(gdrive_data, "/AnalysisData/model_df
 ```{r}
 #read them in
 
-climdf16 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/12_9_2022/climate_modeldf_16.csv"))
+climdf16 <- read_csv(here(gdrive_data, "/AnalysisData/robustness_check_data/wir_nonsightings/nonsightings_climate_modeldf_16.csv"))
 
-climdf17 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/12_9_2022/climate_modeldf_17.csv"))
+climdf17 <- read_csv(here(gdrive_data, "/AnalysisData/robustness_check_data/wir_nonsightings/nonsightings_climate_modeldf_17.csv"))
 
-climdf18 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/12_9_2022/climate_modeldf_18.csv"))
+climdf18 <- read_csv(here(gdrive_data, "/AnalysisData/robustness_check_data/wir_nonsightings/nonsightings_climate_modeldf_18.csv"))
 
-climdf19 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/12_9_2022/climate_modeldf_19.csv"))
+climdf19 <- read_csv(here(gdrive_data, "/AnalysisData/robustness_check_data/wir_nonsightings/nonsightings_climate_modeldf_19.csv"))
 
-climdf20 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/12_9_2022/climate_modeldf_20.csv"))
+climdf20 <- read_csv(here(gdrive_data, "/AnalysisData/robustness_check_data/wir_nonsightings/nonsightings_climate_modeldf_20.csv"))
 
-climdf21 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/12_9_2022/climate_modeldf_21.csv"))
+climdf21 <- read_csv(here(gdrive_data, "/AnalysisData/robustness_check_data/wir_nonsightings/nonsightings_climate_modeldf_21.csv"))
 
 climate_model_data_allyears <- rbind(climdf16, climdf17, climdf18, climdf19, climdf20, climdf21)
 
@@ -919,7 +919,7 @@ relevel(as.factor(climate_model_data_allyears$lc), ref = "barren_land")
 ```{r}
 #save the all year data frame
 
-write.csv(climate_model_data_allyears, file = here(gdrive_data, "/AnalysisData/model_df_climate/12_9_2022/climate_model_data_allyears.csv"), row.names = FALSE)
+write.csv(climate_model_data_allyears, file = here(gdrive_data, "/AnalysisData/robustness_check_data/wir_nonsightings/nonsightings_climate_model_data_allyears.csv"), row.names = FALSE)
 ```
 
 
@@ -927,7 +927,7 @@ write.csv(climate_model_data_allyears, file = here(gdrive_data, "/AnalysisData/m
 
 ```{r}
 #read in the data
-climate_model_data <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/12_9_2022/climate_model_data_allyears.csv"))
+climate_model_data <- read_csv(here(gdrive_data, "/AnalysisData/robustness_check_data/wir_nonsightings/nonsightings_climate_model_data_allyears.csv"))
 ```
 
 ```{r}
@@ -936,9 +936,9 @@ climate_model_data <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate
 climate_model_allyears <- rspf(conflict ~ dem + aspect + TRI + popdens + lc + road_dens + road_dist + streams_dist + urban_dist + rec_dist + forest_dist + forest_dens + dist_fire_1yr + dist_fire_23yrs + dist_fire_45yrs + drought, family = "binomial", m = 0, B = 1000, data = climate_model_data)
 
 #save the model 
-save(climate_model_allyears, file = here("models", "climate_model_allyears.rds"))
+save(climate_model_allyears, file = here("models", "robustness_checks", "filtered_conflict", "nonsightings_climate_model_allyears.rds"))
 
-save(climate_model_allyears, file = here(gdrive_data, "/AnalysisData/models/12_9_2022/model_allyears_climate/climate_model_allyears.rds"))
+# save(climate_model_allyears, file = here(gdrive_data, "/AnalysisData/models/12_9_2022/model_allyears_climate/climate_model_allyears.rds"))
 
 #update 11/28/22: this model needs to be rerun and saved with new lc raster
 #update 11/17/22: mod #3 is best option so rerunning with climate variables 
@@ -948,9 +948,9 @@ save(climate_model_allyears, file = here(gdrive_data, "/AnalysisData/models/12_9
 mod3climate <- rspf(conflict ~ dem + lc + forest_dist + popdens + rec_dist + streams_dist + TRI + urban_dist + dist_fire_1yr + dist_fire_23yrs + dist_fire_45yrs + drought, family = "binomial", m = 0, B = 1000, data = climate_model_data)
 
 #saving mod 3 with climate 
-save(mod3climate, file = here("models", "mod3climate.rds"))
+save(mod3climate, file = here("models", "robustness_checks", "filtered_conflict", "nonsightings_mod3climate.rds"))
 
-save(climate_model_allyears, file = here(gdrive_data, "/AnalysisData/models/12_9_2022/mod3_allyears_climate/mod3climate.rds"))
+# save(climate_model_allyears, file = here(gdrive_data, "/AnalysisData/models/12_9_2022/mod3_allyears_climate/mod3climate.rds"))
 
 
 ```
