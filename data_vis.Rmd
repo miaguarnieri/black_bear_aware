@@ -19,7 +19,10 @@ library(ResourceSelection)
 
 
 #mia, chase, and claire's file path
-gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+
+gdrive_data <- "/Users/mia/Library/CloudStorage/GoogleDrive-mguarnieri@ucsb.edu/Shared drives/Black_Bear_Aware/gdrive_data"
+
+#gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #sam's file path
 #gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
@@ -313,7 +316,7 @@ tm_shape(conflict_points) +
 ```{r}
 #read in the model
 
-model<- load(here("models", "robustness checks", "squares", "sq_model_climate_all.rds")) #you have to name the object "model or it will not read in right
+model<- load(here("models", "robustness_checks", "squares", "sq_model_climate_all.rds")) #you have to name the object "model or it will not read in right
 
 #elevation
 dem <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/elevation/dem_formatted.tif"))
@@ -400,7 +403,104 @@ map <- terra::predict(object = stackca_clim_rast, model = sq_model_climate_all, 
 
 #save the map
 
-#writeRaster(map, filename = here(gdrive_data, "/AnalysisData/model_outputs/allyear_clim_map.tif"), filetype = "GTiff", overwrite= TRUE)
+writeRaster(map, filename = here(gdrive_data, "/AnalysisData/model_outputs/allyear_clim_map_squared.tif"), filetype = "GTiff", overwrite= TRUE)
+
 plot(map, main="Model Predictions")
 ```
 
+#mod 3 climate squared
+
+```{r}
+#read in the model
+
+model<- load(here("models", "robustness_checks", "squares", "sq_mod3climate.rds")) #you have to name the object "model or it will not read in right
+
+#elevation
+dem <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/elevation/dem_formatted.tif"))
+
+#aspect
+aspect <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/aspect/aspect.tif"))
+
+#terrain ruggedness
+TRI <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/terrain_ruggedness/terrain_ruggedness.tif"))
+
+#human pop density
+
+popdens <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/population_density/pop_den_2021_mask.tif"))
+
+#land cover
+
+lc <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/land_cover/lc19_reclassed.tif"))
+
+#road density
+
+road_dens <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/road_density/road_density_ca.tif"))
+
+#distance to roads
+
+road_dist <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_road/model_ready/roads15_ca_distance.tif"))
+
+#distance to streams
+
+streams_dist <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_stream/model_ready/stream17_ca_distance.tif"))
+
+#distance to urban areas
+
+urban_dist <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_urban/model_ready/ua19_ca_distance.tif"))
+
+#distance to recreational areas
+
+rec_dist <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_rec/model_ready/rec_ca_distance.tif"))
+
+#distance to forest cover
+
+forest_dist <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_forest/model_ready/fc19_ca_distance.tif"))
+
+#forest density
+
+forest_dens <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/forest_density/forest_dens_2016_mask.tif"))
+
+
+#fire layers
+
+dist_fire_1yr <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/dist_fire/fire20_ca_distance.tif"))
+
+dist_fire_23yrs <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/dist_fire/fire18_19_ca_distance.tif"))
+
+dist_fire_45yrs <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/dist_fire/fire16_17_ca_distance.tif"))
+
+#drought current - historical
+
+drought <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2021/d2021_masked.tif"))
+
+
+stackca_clim_rast <- c(dem, aspect, TRI, popdens, lc, road_dens, road_dist, streams_dist, urban_dist, rec_dist, forest_dist, forest_dens, dist_fire_1yr, dist_fire_23yrs, dist_fire_45yrs, drought)
+
+climate_model_data <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/12_9_2022/climate_model_data_allyears.csv"))
+```
+
+```{r}
+#changing names of the raster stack to match our model exactly
+
+names(stackca_clim_rast) <- c("dem", "aspect", "TRI", "popdens", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens", "dist_fire_1yr", "dist_fire_23yrs", "dist_fire_45yrs", "drought")
+
+#any categorical variables used need to be identified first
+
+#making land cover categories factors
+lc_factors <- as.factor(climate_model_data$lc)
+
+#turning that into a list
+f <- as.list(levels(lc_factors))
+
+f_lc <- levels(lc)
+
+caraster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
+
+map <- terra::predict(object = stackca_clim_rast, model = mod3climate, fun = predict, factors = f_lc, na.rm = TRUE, type = "response")
+
+#save the map
+
+writeRaster(map, filename = here(gdrive_data, "/AnalysisData/model_outputs/mod3clim_map_squared.tif"), filetype = "GTiff", overwrite= TRUE)
+
+plot(map, main="Model Predictions")
+```
