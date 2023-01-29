@@ -1,0 +1,27 @@
+---
+title: "pdsi_exploration"
+author: "Sam Rozal"
+date: "2023-01-29"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(here)
+library(terra)
+
+#gdrive_data <- "/Users/mia/Library/CloudStorage/GoogleDrive-mguarnieri@ucsb.edu/Shared drives/Black_Bear_Aware/gdrive_data"
+
+#sam's file path
+gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
+
+```
+
+
+```{r}
+library(devtools)
+install_github("cszang/pdsi")
+```
+
