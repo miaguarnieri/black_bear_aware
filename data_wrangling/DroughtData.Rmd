@@ -23,8 +23,13 @@ library(raster)
 library(stars)
 library(purrr)
 
+<<<<<<< HEAD
 #mia and claire's file path
 #gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+=======
+#mia's file path
+gdrive_data <- "//Users/mia/Library/CloudStorage/GoogleDrive-mguarnieri@ucsb.edu/Shared drives/Black_Bear_Aware/gdrive_data"
+>>>>>>> b146e0e97a67fa5a80045261315ad1e829e4cb06
 
 #sam's file path
 gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
@@ -37,8 +42,8 @@ ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CA
 # Read in drought data
 
 ```{r}
-drought2016 <- vect(here(gdrive_data, "/InputData/InputData_Files/Drought/us_drought_monitor/2016/USDM_20161227.shp")) %>% 
-  terra::project(ca_raster)
+drought2016 <- read_sf(here(gdrive_data, "/InputData/InputData_Files/Drought/us_drought_monitor/2016/USDM_20161227.shp")) %>% 
+  select(DM, geometry)
 
 ```
 
@@ -47,9 +52,10 @@ drought2016 <- vect(here(gdrive_data, "/InputData/InputData_Files/Drought/us_dro
 
 ```{r}
 drought_2022 <- lapply(c("D0", "D1", "D2", "D3", "D4"), function(i){
+  ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
   shp <- readOGR(here(gdrive_data, "/InputData/InputData_Files/Drought/us_drought_monitor/2022/USDM_20221025.shp"))
-  template <- raster(ext = extent(shp), crs = projection(shp))
-  rst <- rasterize(shp, template, fun = 'first')
+  #template <- raster(ext = extent(shp), crs = projection(shp))
+  rst <- rasterize(shp, ca_raster, fun = 'first')
 })
 
 plot(drought_2022[[2]], xlab = "lon", ylab = "lat", main = "Drought Index 2022")
