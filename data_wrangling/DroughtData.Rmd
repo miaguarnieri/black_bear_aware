@@ -23,11 +23,16 @@ library(raster)
 library(stars)
 library(purrr)
 
+<<<<<<< HEAD
+#mia and claire's file path
+#gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+=======
 #mia's file path
 gdrive_data <- "//Users/mia/Library/CloudStorage/GoogleDrive-mguarnieri@ucsb.edu/Shared drives/Black_Bear_Aware/gdrive_data"
+>>>>>>> b146e0e97a67fa5a80045261315ad1e829e4cb06
 
 #sam's file path
-#gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
+gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 ```
 
 ```{r}
