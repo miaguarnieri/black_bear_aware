@@ -53,6 +53,7 @@ climate_model_data <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate
 
 ```
 ```{r}
+#construct correlation matrix
 data_model_matrix <- model.matrix(~0+., data=climate_model_data) 
 cor_matrix <- cor(data_model_matrix)
 corrplot(cor_matrix)
@@ -62,9 +63,12 @@ cor_matrix_2 <- cor(cor_matrix, method = c("pearson"))
 corrplot(cor_matrix_2)
 cor_matrix
 
-vif(climate_model_allyears)
-
 ```
+```{r}
+#construct correlation matrix with numbers
+cor_matrix_num <- corrplot(cor_matrix, method="number")
+```
+
 
 ```{r}
 #from Jason's code: 

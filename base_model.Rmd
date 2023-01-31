@@ -1037,6 +1037,7 @@ mod5 <- rspf(ID ~ dem + lc + forest_dist + popdens + streams_dist + TRI + urban_
 
 ```
 #save the 5 models 
+
 ```{r}
 #mod1
 save(mod1, file = here(gdrive_data, "/AnalysisData/models/12_13_2022/model_allyears_noclimate/mod1.rds"))
@@ -1075,7 +1076,6 @@ save(mod5, file = here(gdrive_data, "/AnalysisData/models/12_13_2022/model_allye
 save(mod5, file = here("models", "mod5.rds"))
 
 ```
-
 
 ```{r}
 #comparing AIC scores

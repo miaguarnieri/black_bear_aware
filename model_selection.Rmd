@@ -24,27 +24,21 @@ gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 #gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 ```
 
-#Read in all year models
+#Read in data and model
 
 ```{r}
-#base model
+
+#load in the data
+model_data <- read_csv(here(gdrive_data, "/AnalysisData/model_df_noclimate/12_13_2022/model_data_allyears.csv"))
+
+#load in the model
+
 load(here("models", "basemodel_allyears.rds"))
 
-#base model data
-base_model_data <- read_csv(here(gdrive_data, "/AnalysisData/model_df_noclimate/11_1_2022/model_data_allyears.csv"))
-
-#climate model
-
-load(here("models", "climate_model_allyears.rds"))
-
-#climate model data
-
-climate_model_data <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/11_10_2022/climate_model_data_allyears.csv"))
 ```
 
 
 #Attempt a dredge
-Note: this has not worked, takes too long to run
 
 ```{r}
 dredged_model <- dredge(global.model = basemodel_allyears, rank = "AIC")
