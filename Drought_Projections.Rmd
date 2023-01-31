@@ -181,7 +181,7 @@ pdsi <- function(P, PE, AWC = 100, start = NULL, end = NULL, cal_start = NULL, c
 
 
 ```{r}
-test<- pdsi(P, PE, AWC = 100, start = NULL, end = NULL, cal_start = NULL, cal_end = NULL,
+pdsi(P, PE, AWC = 100, start = NULL, end = NULL, cal_start = NULL, cal_end = NULL,
                  sc = TRUE)
 ```
 
