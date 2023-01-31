@@ -119,4 +119,9 @@ save(sq_mod3climate, file = here("models", "sq_mod3climate.rds"))
 
 AIC(sq_mod3climate)
 ```
+```{r}
+load(here("models", "sq_model_climate_all.rds"))
+
+summary(sq_model_climate_all)
+```
 
