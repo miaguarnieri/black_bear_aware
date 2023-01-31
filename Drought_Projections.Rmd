@@ -137,3 +137,9 @@ pdsi <- function(P, PE, AWC = 100, start = NULL, end = NULL, cal_start = NULL, c
 test<- pdsi(P = caladapt_rain_masked, PE = caladapt_masked)
 ```
 
+```{r}
+av <- available.packages(filters=list())
+av[av[, "PACKAGE"] == pkg, ]
+```
+
+
