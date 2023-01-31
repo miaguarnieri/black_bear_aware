@@ -22,6 +22,7 @@ library(rgdal)
 library(raster)
 library(stars)
 library(purrr)
+library(remotes)
 
 #mia and claire's and Chase's file path
 gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
@@ -29,6 +30,17 @@ gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 #sam's file path
 #gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 ```
+
+```{r}
+install_github("Sibada/scPDSI")
+
+```
+
+```{r}
+library(scPDSI)
+```
+
+
 
 ```{r}
 ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
@@ -74,6 +86,41 @@ PE <- caladapt_masked
 
 P <- caladapt_rain_masked
 ```
+
+```{r}
+.onLoad <- function(libname, pkgname) {
+  ops <- options()
+  pdsi.ops <- list(
+    # Calculating the conventional PDSI
+    # Duration factors
+    PDSI.p = 0.897,
+    PDSI.q = 1/3,
+
+    # Coefficients of climate characteristic
+    PDSI.coe.K1.1 = 1.5,
+    PDSI.coe.K1.2 = 2.8,
+    PDSI.coe.K1.3 = 0.5,
+
+    PDSI.coe.K2 = 17.67
+  )
+
+  toset <- !(names(pdsi.ops) %in% names(ops))
+  if(any(toset)) {
+    options(pdsi.ops[toset])
+  }
+}
+```
+
+```{r}
+options(PDSI.coe.K1.1 = 1.6)
+options(PDSI.coe.K1.3 = 0.4)
+options(PDSI.coe.K2 = 16.84)
+options(PDSI.p = 0.755)
+options(PDSI.q = 1/1.63)
+gb_pdsi <- pdsi(P, PE, start = 1960, sc = FALSE)
+lines(gb_pdsi$X, col = 'red')
+```
+
 
 ```{r}
 C_pdsi <- function(P, PE, AWC, s_yr, e_yr, calib_s_yr, calib_e_yr, sc, K1_1, K1_2, K1_3, K2, p, q) {
@@ -134,7 +181,8 @@ pdsi <- function(P, PE, AWC = 100, start = NULL, end = NULL, cal_start = NULL, c
 
 
 ```{r}
-test<- pdsi(P = caladapt_rain_masked, PE = caladapt_masked)
+test<- pdsi(P, PE, AWC = 100, start = NULL, end = NULL, cal_start = NULL, cal_end = NULL,
+                 sc = TRUE)
 ```
 
 ```{r}
