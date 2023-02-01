@@ -121,4 +121,19 @@ save(mod3climate, file = here("models", "robustness_checks", "squares", "sq_mod3
 AIC(mod3climate)
 
 ```
+#climate mod 3 
+```{r}
+#climate model 3 
+sq_mod3climate <- rspf(conflict ~ dem + lc + forest_dist + I(popdens^2) + rec_dist + streams_dist + TRI + urban_dist + dist_fire_1yr + dist_fire_23yrs + dist_fire_45yrs + drought, family = "binomial", m = 0, B = 1000, data = sq_model_data)
+
+#save the model 
+save(sq_mod3climate, file = here("models", "sq_mod3climate.rds"))
+
+AIC(sq_mod3climate)
+```
+```{r}
+load(here("models", "sq_model_climate_all.rds"))
+
+summary(sq_model_climate_all)
+```
 

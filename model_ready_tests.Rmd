@@ -12,6 +12,11 @@ library(here)
 library(terra)
 library(sf)
 library(tmap)
+
+
+#claire's file path 
+gdrive_data <- "/Users/clairemeuter/Library/CloudStorage/GoogleDrive-clairemeuter@ucsb.edu/Shared drives/Black_Bear_Aware/gdrive_data"
+
 ```
 
 ## In this rmarkdown we will double check that model inputs are in correct and ready to be fed into model stack 
@@ -213,6 +218,24 @@ ext(stream_dist_test)
 
 #Forest density (canopy cover) 
 ```{r}
+
+```
+
+#drought data
+```{r}
+drought_2016 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2016/d2016_masked.tif"))
+
+
+drought_2017 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2017/d2017_masked.tif"))
+
+drought_2018 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2018/d2018_masked.tif"))
+
+drought_2019 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2019/d2019_masked.tif"))
+
+drought_2020 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2020/d2020_masked.tif"))
+
+drought_2021 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2021/d2021_masked.tif"))
+
 
 ```
 
