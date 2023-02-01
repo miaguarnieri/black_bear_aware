@@ -229,11 +229,11 @@ av[av[, "PACKAGE"] == pkg, ]
 
 #example code used online
 ```{r}
-data(P_PE_filt)
+data(P_PE)
 
-P <- P_PE_filt$P
-PE <- P_PE_filt$PE
-sc_pdsi <- pdsi(P, PE, start = 2006)
+P <- P_PE$P
+PE <- P_PE$PE
+sc_pdsi_P_PE <- pdsi(P, PE, start = 2006)
 
 plot(sc_pdsi) # plot PDSI
 plot(sc_pdsi, index = "PHDI") # plot PHDI
