@@ -31,3 +31,68 @@ library(scPDSI)
 ```
 
 
+
+```{r}
+ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
+```
+
+# Read in drought data
+
+```{r}
+CalAdapt <- rast(here(gdrive_data, "/InputData/InputData_Files/Drought/CalAdapt/data-5/et_month_HadGEM2-CC_rcp45_2006-01.v0.CA_NV.tif"))  
+
+
+```
+
+```{r}
+CalAdapt_rain <- rast(here(gdrive_data, "/InputData/InputData_Files/Drought/CalAdapt/data-5/rainfall_month_CCSM4_rcp45_2006-01.v0.CA_NV.tif"))
+ 
+```
+
+
+```{r}
+caladapt_calbers <- terra::project(CalAdapt, ca_raster)
+
+#mask to CA
+caladapt_masked <- mask(caladapt_calbers, ca_raster)
+
+#test plot
+plot(caladapt_masked)
+```
+
+```{r}
+caladapt_rain_calbers <- terra::project(CalAdapt_rain, ca_raster)
+
+#mask to CA
+caladapt_rain_masked <- mask(caladapt_rain_calbers, ca_raster)
+
+#test plot
+plot(caladapt_rain_masked)
+```
+
+```{r}
+PE <- caladapt_masked$`et_month_HadGEM2-CC_rcp45_2006-01.v0.CA_NV`
+
+P <- caladapt_rain_masked$`rainfall_month_CCSM4_rcp45_2006-01.v0.CA_NV`
+```
+
+```{r}
+PE_double <- as.double(PE$`et_month_HadGEM2-CC_rcp45_2006-01.v0.CA_NV`)
+P_double <- as.double(P$`rainfall_month_CCSM4_rcp45_2006-01.v0.CA_NV`)
+```
+
+
+```{r}
+is.double(PE_double)
+```
+
+
+```{r}
+setClass("PE_double", representation("double"))
+```
+
+
+```{r}
+pdsi(P_double,PE_double, AWC = 100, start = NULL, end = NULL, cal_start = NULL, cal_end = NULL,sc = TRUE)
+```
+
