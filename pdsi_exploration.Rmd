@@ -14,6 +14,7 @@ library(here)
 library(terra)
 library(remotes)
 
+#mia's file path
 #gdrive_data <- "/Users/mia/Library/CloudStorage/GoogleDrive-mguarnieri@ucsb.edu/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #sam's file path
@@ -25,12 +26,11 @@ gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 ```{r}
 install_github("Sibada/scPDSI")
 
-```
-```{r}
 library(scPDSI)
 ```
 
 
+<<<<<<< HEAD
 
 ```{r}
 ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
@@ -69,30 +69,21 @@ caladapt_rain_masked <- mask(caladapt_rain_calbers, ca_raster)
 #test plot
 plot(caladapt_rain_masked)
 ```
-
 ```{r}
-PE <- caladapt_masked$`et_month_HadGEM2-CC_rcp45_2006-01.v0.CA_NV`
+#merging/stacking the rasters 
+caladpat_merged <- c(caladapt_masked,caladapt_rain_masked)
 
-P <- caladapt_rain_masked$`rainfall_month_CCSM4_rcp45_2006-01.v0.CA_NV`
-```
-
-```{r}
-PE_double <- as.double(PE$`et_month_HadGEM2-CC_rcp45_2006-01.v0.CA_NV`)
-P_double <- as.double(P$`rainfall_month_CCSM4_rcp45_2006-01.v0.CA_NV`)
-```
+#converting to a dataframe
+caladpat_merged_df <- as.data.frame(caladpat_merged, xy=TRUE) %>% 
+  rename(P = "rainfall_month_CCSM4_rcp45_2006-01.v0.CA_NV",
+    PE = "et_month_HadGEM2-CC_rcp45_2006-01.v0.CA_NV")
 
 
-```{r}
-is.double(PE_double)
-```
+# trying to figure out how to add PDSI calculation into DF
+pdsi_df<-(pdsi(P,PE))
 
+cal_adpat_pdsi_df <- dplyr::mutate(caladpat_merged_df,
+                            pdsi_measure = (pdsi(P, PE)))
 
-```{r}
-setClass("PE_double", representation("double"))
-```
-
-
-```{r}
-pdsi(P_double,PE_double, AWC = 100, start = NULL, end = NULL, cal_start = NULL, cal_end = NULL,sc = TRUE)
 ```
 
