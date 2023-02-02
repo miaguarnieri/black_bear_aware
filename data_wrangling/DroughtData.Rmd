@@ -24,7 +24,6 @@ library(stars)
 library(purrr)
 
 
-
 #mia and claire's file path
 #gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
@@ -504,6 +503,7 @@ saverast(d2051)
 saverast(d2052)
 ```
 
+<<<<<<< HEAD:DroughtData.Rmd
 
 ---
 title: "WIR_data_cleaning"
@@ -607,3 +607,5 @@ pdsi <- function(P, PE, AWC = 100, start = NULL, end = NULL, cal_start = NULL, c
 ```
 
 
+=======
+>>>>>>> 5e3ececbad33863cfcffc81c3c9dd920b93af680:data_wrangling/DroughtData.Rmd
