@@ -51,7 +51,7 @@ ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CA
 CalAdapt_PE <- rast(here(gdrive_data, "/InputData/InputData_Files/Drought/CalAdapt/data-5/et_month_HadGEM2-CC_rcp45_2006-01.v0.CA_NV.tif")) %>% 
   terra::project(ca_raster)
 
-plot(CalAdapt)
+plot(CalAdapt_PE)
 ```
 
 ```{r}
@@ -284,6 +284,60 @@ r.to.poly<-rasterToPolygons(rs, dissolve = T)
 int.r <-raster::intersect(r.to.poly,shp) 
 
 proj4string(shp) <- proj4string(r.to.poly)
+```
+
+trying sams merged files from pdsi exploration
+```{r}
+caladapt_pe_calbers <- terra::project(CalAdapt_PE, ca_raster)
+
+#mask to CA
+caladapt_pe_masked <- mask(caladapt_pe_calbers, ca_raster)
+
+#test plot
+plot(caladapt_pe_masked)
+```
+
+```{r}
+caladapt_P_calbers <- terra::project(CalAdapt_P, ca_raster)
+
+#mask to CA
+caladapt_P_masked <- mask(caladapt_P_calbers, ca_raster)
+
+#test plot
+plot(caladapt_P_masked)
+```
+
+```{r}
+#merging/stacking the rasters 
+caladapt_merged <- c(caladapt_pe_masked,caladapt_P_masked)
+
+#converting to a dataframe
+caladapt_merged_df <- as.data.frame(caladapt_merged, xy=TRUE) %>% 
+  rename(P = "rainfall_month_CCSM4_rcp45_2006-01.v0.CA_NV",
+    PE = "et_month_HadGEM2-CC_rcp45_2006-01.v0.CA_NV")
+
+
+P <- caladapt_merged_df$P
+PE <- caladapt_merged_df$PE
+
+# trying to figure out how to add PDSI calculation into DF
+pdsi_df<-(pdsi(P,PE, start = 2006))
+
+cal_adapt_pdsi_df <- dplyr::mutate(caladapt_merged_df,
+                            pdsi_measure = (pdsi_df[2]))
+
+#pdsi_raster <- 
+
+```
+
+```{r}
+WGScoor<-  cal_adapt_pdsi_df #data to convert
+coordinates(WGScoor)=~x+y #column names of the lat long cols
+proj4string(WGScoor)<- CRS("++proj=longlat +datum=WGS84") # set coordinate system to WGS
+WGScoor.df <- SpatialPointsDataFrame(WGScoor, data.frame(id=1:length(WGScoor)))
+LLcoor<-spTransform(WGScoor.df,CRS("+proj=longlat"))
+LLcoor.df=SpatialPointsDataFrame(LLcoor, data.frame(id=1:length(LLcoor)))
+writeOGR(LLcoor.df, dsn=getwd(),layer="MyShapefile",driver="ESRI Shapefile")
 ```
 
 
