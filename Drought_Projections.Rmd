@@ -18,7 +18,6 @@ library(tmap)
 library(beepr)
 library(rgeos)
 library(rmapshaper)
-library(rgdal)
 library(raster)
 library(stars)
 library(purrr)
@@ -51,13 +50,13 @@ ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CA
 # Read in drought data
 
 ```{r}
-CalAdapt <- rast(here(gdrive_data, "/InputData/InputData_Files/Drought/CalAdapt/data-5/et_month_HadGEM2-CC_rcp45_2006-01.v0.CA_NV.tif")) %>% 
+CalAdapt_PE <- rast(here(gdrive_data, "/InputData/InputData_Files/Drought/CalAdapt/data-5/et_month_HadGEM2-CC_rcp45_2006-01.v0.CA_NV.tif")) %>% 
   terra::project(ca_raster)
 ```
 
 Precip
 ```{r}
-CalAdapt_rain <- rast(here(gdrive_data, "/InputData/InputData_Files/Drought/CalAdapt/data-5/rainfall_month_CCSM4_rcp45_2006-01.v0.CA_NV.tif")) %>% 
+CalAdapt_P <- rast(here(gdrive_data, "/InputData/InputData_Files/Drought/CalAdapt/data-5/rainfall_month_CCSM4_rcp45_2006-01.v0.CA_NV.tif")) %>% 
   terra::project(ca_raster)
 ```
 
@@ -79,7 +78,7 @@ caladapt_rain_calbers <- terra::project(CalAdapt_rain, ca_raster)
 caladapt_rain_masked <- mask(caladapt_rain_calbers, ca_raster)
 
 #test plot
-#plot(caladapt_rain_masked)
+plot(caladapt_rain_masked)
 
 ```
 
@@ -234,6 +233,7 @@ data(P_PE)
 P <- P_PE$P
 PE <- P_PE$PE
 sc_pdsi_P_PE <- pdsi(P, PE, start = 2006)
+#stop here for pdsi (x) values
 
 plot(sc_pdsi) # plot PDSI
 plot(sc_pdsi, index = "PHDI") # plot PHDI
@@ -255,13 +255,28 @@ plot(gb_pdsi)
 ```
 
 ```{r}
+pdsi_merged <- terra::merge(sc_pdsi_P_PE[[2]], sc_pdsi_P_PE[[3]], sc_pdsi_P_PE[[4]], sc_pdsi_P_PE[[5]])
+
+pdsi_rast <- rast(pdsi_merged)
+
+#reproject
+pdsi_calbers <- terra::project(pdsi_rast, ca_raster)
+
+#mask to CA
+pdsi_masked <- mask(pdsi_calbers, ca_raster)
+```
+
+
+
+
+```{r}
 library(scPDSI)
 data(Lubuge)
 
  P <- Lubuge$P
  PE <- Lubuge$PE
- sc_pdsi <- pdsi(P, PE, start = 1960)
- plot(sc_pdsi$X)
+ lubugesc_pdsi <- pdsi(P, PE, start = 1960)
+ plot(lubugesc_pdsi$X)
 
  # Without self-calibrating.
  ori_pdsi <- pdsi(P, PE, start = 1960, sc = FALSE)
@@ -277,6 +292,33 @@ data(Lubuge)
  gb_pdsi <- pdsi(P, PE, start = 1960, sc = FALSE)
  lines(gb_pdsi$X, col = 'red')
 
+```
+
+
+```{r}
+require(raster)
+
+
+  
+
+shp.PE <- rasterToPolygons(CalAdapt_P)
+
+#ca_vector <- as.polygons(ca_raster)
+
+PE_calbers <- terra::project(shp.PE, ca_raster)
+
+rec_areas_PEP_mask <- crop(rec_areas_PEP_calbers, ca_raster)
+
+rec_areas_PEP_raster <- rasterize(rec_areas_PEP_mask, ca_raster)
+
+#mask to CA
+caladapt_masked <- mask(caladapt_calbers, ca_raster)
+
+r.to.poly<-rasterToPolygons(rs, dissolve = T)
+
+int.r <-raster::intersect(r.to.poly,shp) 
+
+proj4string(shp) <- proj4string(r.to.poly)
 ```
 
 
