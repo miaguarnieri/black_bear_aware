@@ -22,8 +22,6 @@ library(raster)
 library(stars)
 library(purrr)
 library(remotes)
-library(dplyr)
-library(data.table)
 
 #mia and claire's and Chase's file path
 gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
@@ -52,15 +50,16 @@ ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CA
 ```{r}
 CalAdapt_PE <- rast(here(gdrive_data, "/InputData/InputData_Files/Drought/CalAdapt/data-5/et_month_HadGEM2-CC_rcp45_2006-01.v0.CA_NV.tif")) %>% 
   terra::project(ca_raster)
+
+plot(CalAdapt)
 ```
 
-Precip
 ```{r}
 CalAdapt_P <- rast(here(gdrive_data, "/InputData/InputData_Files/Drought/CalAdapt/data-5/rainfall_month_CCSM4_rcp45_2006-01.v0.CA_NV.tif")) %>% 
   terra::project(ca_raster)
 ```
 
-Potential Evap
+
 ```{r}
 caladapt_calbers <- terra::project(CalAdapt, ca_raster)
 
@@ -68,7 +67,7 @@ caladapt_calbers <- terra::project(CalAdapt, ca_raster)
 caladapt_masked <- mask(caladapt_calbers, ca_raster)
 
 #test plot
-#plot(caladapt_masked)
+plot(caladapt_masked)
 ```
 
 ```{r}
@@ -79,38 +78,13 @@ caladapt_rain_masked <- mask(caladapt_rain_calbers, ca_raster)
 
 #test plot
 plot(caladapt_rain_masked)
-
 ```
-
-
-# Making P the rain value, and PE the potential Evap value from caladapt downloaded data and putting into one dataframe
 
 ```{r}
-rain_df <- as.data.frame(caladapt_rain_masked)
+PE <- caladapt_masked
 
-evap_df <- as.data.frame(caladapt_masked)
-
-
-#p_pe_binded <- bind_rows(rain_df, evap_df)
-
-#dataframe we will use
-p_pe_cbinded <- cbind(rain_df, evap_df)
-
-#reanaming columns
-P_PE <- p_pe_cbinded %>% 
-  rename(
-    P = "rainfall_month_CCSM4_rcp45_2006-01.v0.CA_NV",
-    PE = "et_month_HadGEM2-CC_rcp45_2006-01.v0.CA_NV")
-#P_PE <- na.omit(P_PE)
-
-P_PE_filt <- P_PE %>% 
-  filter(between(P, 0.5,1),
-         between(PE, 0.3,0.6))
-
-setDT(P_PE_filt)
+P <- caladapt_rain_masked
 ```
-
-
 
 ```{r}
 .onLoad <- function(libname, pkgname) {
@@ -134,8 +108,6 @@ setDT(P_PE_filt)
     options(pdsi.ops[toset])
   }
 }
-
-test <- .onLoad
 ```
 
 ```{r}
@@ -144,14 +116,9 @@ options(PDSI.coe.K1.3 = 0.4)
 options(PDSI.coe.K2 = 16.84)
 options(PDSI.p = 0.755)
 options(PDSI.q = 1/1.63)
-#gb_pdsi <- pdsi(P, PE, start = 1960, sc = FALSE)
-#lines(gb_pdsi$X, col = 'red')
+gb_pdsi <- pdsi(P, PE, start = 1960, sc = FALSE)
+lines(gb_pdsi$X, col = 'red')
 ```
-
-calculation in the pdsi: 
-\deqn{Ki0=coeK11 * lg(((PEi+Ri+ROi)/(Pi+Li)+coeK12)/Di)+coeK13}
-\deqn{Ki=coeK2/(\sum Dj*Kj) * Ki}
-\deqn{X[i]=p*X[i-1]+q*Z[i]}
 
 
 ```{r}
@@ -161,8 +128,6 @@ C_pdsi <- function(P, PE, AWC, s_yr, e_yr, calib_s_yr, calib_e_yr, sc, K1_1, K1_
 ```
 
 ```{r}
-#AWC = 100
-
 pdsi <- function(P, PE, AWC = 100, start = NULL, end = NULL, cal_start = NULL, cal_end = NULL,
                  sc = TRUE) {
 
@@ -213,11 +178,10 @@ pdsi <- function(P, PE, AWC = 100, start = NULL, end = NULL, cal_start = NULL, c
 ```
 
 
-```{r}
-test <- pdsi(P, PE, start = 2006)#AWC = 100, start = NULL, end = NULL, cal_start = 1, cal_end = 1,
-                 #sc = TRUE)
 
-plot(test)
+```{r}
+pdsi(P, PE, AWC = 100, start = NULL, end = NULL, cal_start = NULL, cal_end = NULL,
+                 sc = TRUE)
 ```
 
 ```{r}
@@ -226,6 +190,7 @@ av[av[, "PACKAGE"] == pkg, ]
 ```
 
 
+<<<<<<< HEAD
 #example code used online
 ```{r}
 data(P_PE)
