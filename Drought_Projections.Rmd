@@ -327,16 +327,21 @@ head(df)
 
 ```
 #raster package
-```{r}
+#```{r}
 pdsi_raster <- rasterFromXYZ(df)
 
 plot(pdsi_raster)
-```
+#```
 #terra package
 ```{r}
 pdsi_rast_2030 <- terra::rast(df)
 
 plot(pdsi_rast_2030)
+
+caladapt_Pdsi_calbers <- terra::project(pdsi_rast_2030, ca_raster)
+
+#mask to CA
+caladapt_pdsi_masked <- mask(caladapt_Pdsi_calbers, ca_raster)
 ```
 
 
@@ -350,7 +355,7 @@ saverast <- function(x){
 writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/drought", name), filetype = "Gtiff", overwrite=TRUE)
 }
 
-saverast(pdsi_rast_2030)
+saverast(caladapt_pdsi_masked)
 ```
 #no
 ```{r}
