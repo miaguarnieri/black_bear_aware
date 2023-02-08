@@ -18,13 +18,18 @@ library(tmap)
 library(beepr)
 library(rgeos)
 library(rmapshaper)
-library(rgdal)
 library(raster)
 library(stars)
 library(purrr)
 library(remotes)
+<<<<<<< HEAD
 library(dplyr)
 library(data.table)
+=======
+library(rgdal)
+library(sp)
+library(raster)
+>>>>>>> 16836ae08a2290b5cf6cdb45c0994895c999c2c8
 
 #mia and claire's and Chase's file path
 gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
@@ -43,31 +48,42 @@ library(scPDSI)
 ```
 
 
-
+# california raster
 ```{r}
 ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
+
 ```
 
 # Read in drought data
 
 ```{r}
-CalAdapt <- rast(here(gdrive_data, "/InputData/InputData_Files/Drought/CalAdapt/data-5/et_month_HadGEM2-CC_rcp45_2006-01.v0.CA_NV.tif")) %>% 
+CalAdapt_PE <- rast(here(gdrive_data, "/InputData/InputData_Files/Drought/CalAdapt/data-5/et_month_HadGEM2-CC_rcp45_2030-01.v0.CA_NV.tif")) %>%
   terra::project(ca_raster)
+<<<<<<< HEAD
+=======
+
+plot(CalAdapt_PE)
+
+>>>>>>> 16836ae08a2290b5cf6cdb45c0994895c999c2c8
 ```
 
 Precip
 ```{r}
-CalAdapt_rain <- rast(here(gdrive_data, "/InputData/InputData_Files/Drought/CalAdapt/data-5/rainfall_month_CCSM4_rcp45_2006-01.v0.CA_NV.tif")) %>% 
-  terra::project(ca_raster)
+CalAdapt_P <- rast(here(gdrive_data, "/InputData/InputData_Files/Drought/CalAdapt/data-5/rainfall_month_CCSM4_rcp45_2030-01.v0.CA_NV.tif"))%>% terra::project(ca_raster)
+
+plot(CalAdapt_P)
 ```
 
+<<<<<<< HEAD
 Potential Evap
 ```{r}
 caladapt_calbers <- terra::project(CalAdapt, ca_raster)
+=======
 
-#mask to CA
-caladapt_masked <- mask(caladapt_calbers, ca_raster)
+>>>>>>> 16836ae08a2290b5cf6cdb45c0994895c999c2c8
 
+
+<<<<<<< HEAD
 #test plot
 #plot(caladapt_masked)
 ```
@@ -114,6 +130,10 @@ setDT(P_PE_filt)
 
 
 ```{r}
+=======
+
+#```{r}
+>>>>>>> 16836ae08a2290b5cf6cdb45c0994895c999c2c8
 .onLoad <- function(libname, pkgname) {
   ops <- options()
   pdsi.ops <- list(
@@ -139,7 +159,7 @@ setDT(P_PE_filt)
 test <- .onLoad
 ```
 
-```{r}
+#```{r}
 options(PDSI.coe.K1.1 = 1.6)
 options(PDSI.coe.K1.3 = 0.4)
 options(PDSI.coe.K2 = 16.84)
@@ -155,15 +175,19 @@ calculation in the pdsi:
 \deqn{X[i]=p*X[i-1]+q*Z[i]}
 
 
-```{r}
+#```{r}
 C_pdsi <- function(P, PE, AWC, s_yr, e_yr, calib_s_yr, calib_e_yr, sc, K1_1, K1_2, K1_3, K2, p, q) {
     .Call('_scPDSI_C_pdsi', PACKAGE = 'scPDSI', P, PE, AWC, s_yr, e_yr, calib_s_yr, calib_e_yr, sc, K1_1, K1_2, K1_3, K2, p, q)
 }
 ```
 
+<<<<<<< HEAD
 ```{r}
 #AWC = 100
 
+=======
+#```{r}
+>>>>>>> 16836ae08a2290b5cf6cdb45c0994895c999c2c8
 pdsi <- function(P, PE, AWC = 100, start = NULL, end = NULL, cal_start = NULL, cal_end = NULL,
                  sc = TRUE) {
 
@@ -214,19 +238,27 @@ pdsi <- function(P, PE, AWC = 100, start = NULL, end = NULL, cal_start = NULL, c
 ```
 
 
+<<<<<<< HEAD
 ```{r}
 test <- pdsi(P, PE, start = 2006)#AWC = 100, start = NULL, end = NULL, cal_start = 1, cal_end = 1,
                  #sc = TRUE)
 
 plot(test)
+=======
+
+#```{r}
+pdsi(P, PE, AWC = 100, start = NULL, end = NULL, cal_start = NULL, cal_end = NULL,
+                 sc = TRUE)
+>>>>>>> 16836ae08a2290b5cf6cdb45c0994895c999c2c8
 ```
 
-```{r}
+#```{r}
 av <- available.packages(filters=list())
 av[av[, "PACKAGE"] == pkg, ]
 ```
 
 
+<<<<<<< HEAD
 #example code used online
 ```{r}
 data(P_PE_filt)
@@ -234,6 +266,17 @@ data(P_PE_filt)
 P <- P_PE_filt$P
 PE <- P_PE_filt$PE
 sc_pdsi <- pdsi(P, PE, start = 2006)
+=======
+<<<<<<< HEAD
+#example code used online
+#```{r}
+data(P_PE)
+
+P <- P_PE$P
+PE <- P_PE$PE
+sc_pdsi_P_PE <- pdsi(P, PE, start = 2006)
+#stop here for pdsi (x) values
+>>>>>>> 16836ae08a2290b5cf6cdb45c0994895c999c2c8
 
 plot(sc_pdsi) # plot PDSI
 plot(sc_pdsi, index = "PHDI") # plot PHDI
@@ -252,16 +295,42 @@ options(PDSI.p = 0.755)
 options(PDSI.q = 1/1.63)
 gb_pdsi <- pdsi(P, PE, start = 1960, sc = FALSE)
 plot(gb_pdsi)
+<<<<<<< HEAD
 ```
 
 ```{r}
+=======
+#```
+
+#```{r}
+pdsi_merged <- terra::merge(sc_pdsi_P_PE[[2]], sc_pdsi_P_PE[[3]], sc_pdsi_P_PE[[4]], sc_pdsi_P_PE[[5]])
+
+pdsi_rast <- rast(pdsi_merged)
+
+#reproject
+pdsi_calbers <- terra::project(pdsi_rast, ca_raster)
+
+#mask to CA
+pdsi_masked <- mask(pdsi_calbers, ca_raster)
+#```
+
+
+
+
+#```{r}
+>>>>>>> 16836ae08a2290b5cf6cdb45c0994895c999c2c8
 library(scPDSI)
 data(Lubuge)
 
  P <- Lubuge$P
  PE <- Lubuge$PE
+<<<<<<< HEAD
  sc_pdsi <- pdsi(P, PE, start = 1960)
  plot(sc_pdsi$X)
+=======
+ lubugesc_pdsi <- pdsi(P, PE, start = 1960)
+ plot(lubugesc_pdsi$X)
+>>>>>>> 16836ae08a2290b5cf6cdb45c0994895c999c2c8
 
  # Without self-calibrating.
  ori_pdsi <- pdsi(P, PE, start = 1960, sc = FALSE)
@@ -277,6 +346,198 @@ data(Lubuge)
  gb_pdsi <- pdsi(P, PE, start = 1960, sc = FALSE)
  lines(gb_pdsi$X, col = 'red')
 
+<<<<<<< HEAD
+=======
+#```
+
+
+#```{r}
+require(raster)
+
+
+  
+
+shp.PE <- rasterToPolygons(CalAdapt_P)
+
+#ca_vector <- as.polygons(ca_raster)
+
+PE_calbers <- terra::project(shp.PE, ca_raster)
+
+rec_areas_PEP_mask <- crop(rec_areas_PEP_calbers, ca_raster)
+
+rec_areas_PEP_raster <- rasterize(rec_areas_PEP_mask, ca_raster)
+
+#mask to CA
+caladapt_masked <- mask(caladapt_calbers, ca_raster)
+
+r.to.poly<-rasterToPolygons(rs, dissolve = T)
+
+int.r <-raster::intersect(r.to.poly,shp) 
+
+proj4string(shp) <- proj4string(r.to.poly)
+#```
+
+trying sams merged files from pdsi exploration
+```{r}
+caladapt_pe_calbers <- terra::project(CalAdapt_PE, ca_raster)
+
+#mask to CA
+caladapt_pe_masked <- mask(caladapt_pe_calbers, ca_raster)
+
+#test plot
+#plot(caladapt_pe_masked)
+```
+
+```{r}
+caladapt_P_calbers <- terra::project(CalAdapt_P, ca_raster)
+
+#mask to CA
+caladapt_P_masked <- mask(caladapt_P_calbers, ca_raster)
+
+#test plot
+#plot(caladapt_P_masked)
+```
+
+```{r}
+#merging/stacking the rasters 
+caladapt_merged <- c(caladapt_pe_masked,caladapt_P_masked)
+
+#plot(caladapt_merged)
+
+#converting to a dataframe
+caladapt_merged_df <- as.data.frame(caladapt_merged, xy=TRUE) %>% 
+  rename(P = "rainfall_month_CCSM4_rcp45_2030-01.v0.CA_NV",
+    PE = "et_month_HadGEM2-CC_rcp45_2030-01.v0.CA_NV")
+
+
+P <- caladapt_merged_df$P
+PE <- caladapt_merged_df$PE
+
+# trying to figure out how to add PDSI calculation into DF
+pdsi_df<-(pdsi(P,PE, start = 2030))
+
+cal_adapt_pdsi_Df <- dplyr::mutate(caladapt_merged_df,
+              pdsi_measure = (pdsi_df$X[1:7901930]))
+
+cal_adapt_pdsi_df <- as.matrix(cal_adapt_pdsi_Df)
+
+df <- subset(cal_adapt_pdsi_Df, select = -c(P,PE))
+
+head(cal_adapt_pdsi_Df)
+
+head(df)
+
+#df2 <- subset(df, select = -c(x,y))
+
+#write.table(cal_adapt_pdsi_Df, file = here(gdrive_data, "/InputData/InputData_Files/Drought/CalAdapt/pdsi_df.csv"), row.names = FALSE)
+
+#df_csv_write <- apply(df,2,as.character)
+
+```
+#raster package
+#```{r}
+pdsi_raster <- rasterFromXYZ(df)
+
+plot(pdsi_raster)
+#```
+#terra package
+```{r}
+pdsi_rast_2030 <- terra::rast(df)
+
+plot(pdsi_rast_2030)
+
+caladapt_Pdsi_calbers <- terra::project(pdsi_rast_2030, ca_raster)
+
+#mask to CA
+caladapt_pdsi_masked <- mask(caladapt_Pdsi_calbers, ca_raster)
+```
+
+
+```{r}
+saverast <- function(x){
+  
+ name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/drought", name), filetype = "Gtiff", overwrite=TRUE)
+}
+
+saverast(caladapt_pdsi_masked)
+```
+#no
+```{r}
+colnames(df) <- c('x','y','vals')
+
+r_obj <- raster(xmn=-180, xmx=180, ymn=-90, ymx=90, resolution=c(230,230))
+
+# use rasterize to create desired raster
+r_data <- rasterize(x=df[, 1:2], # lon-lat data
+                    y=r_obj, # raster object
+                    field=df[, 3], # vals to fill raster with
+                    fun=mean)
+```
+
+#no
+```{r}
+coordinates(df2) <- ~ x + y
+
+gridded(df2) <- TRUE
+
+class(df2)
+
+str(df2@data)
+
+m = SpatialPixelsDataFrame(points = df[c("x", "y")], data = df)
+
+
+r <- raster(m)
+
+r2 <- raster(m[3])
+
+#r2 <- rasterize(x=m,y=r, field="pdsi_measure")
+
+plot(r2)
+
+raster_pd <- raster(cal_adapt_psdi_df, xmn=0, xmx=1, ymn=0, ymx=1, crs="", template=NULL)
+
+rasterDF <- terra::rast(df)
+```
+
+#no
+```{r}
+df_num <- as.numeric(unlist(cal_adapt_pdsi_df))
+
+pdsi_raster <- rasterFromXYZ(cal_adapt_pdsi_df)
+```
+
+#no
+```{r}
+Proj4js.defs= "+proj=utm +zone=18 +ellps=WGS84 +datum=WGS84 +units=m +no_defs"
+
+st_crs(Proj4js.defs)
+
+utm18nCRS <- st_crs(Proj4js.defs)
+
+class(utm18nCRS)
+
+plot_locations_pdsi <- st_as_sf(cal_adapt_pdsi_df, coords = c("x", "y"), crs = utm18nCRS)
+
+st_crs(plot_locations_pdsi)
+
+
+```
+
+#no
+```{r}
+WGScoor<-  cal_adapt_pdsi_df #data to convert
+coordinates(WGScoor)=~x+y #column names of the lat long cols
+proj4string(WGScoor) <- CRS("+init=epsg:28992") # set coordinate system to WGS
+WGScoor.df <- SpatialPointsDataFrame(WGScoor, data.frame(id=1:length(WGScoor)))
+LLcoor<-spTransform(WGScoor.df,CRS("+proj=longlat"))
+LLcoor.df=SpatialPointsDataFrame(LLcoor, data.frame(id=1:length(LLcoor)))
+pdsi_shp <- writeOGR(LLcoor.df, dsn=getwd(),layer="MyShapefile1",driver="ESRI Shapefile")
+>>>>>>> 16836ae08a2290b5cf6cdb45c0994895c999c2c8
 ```
 
 

@@ -135,17 +135,13 @@ plot(top_con)
 ```
 
 
-#Climate model 
+#Climate model maps
 
 ```{r}
 
 #read in the model
 
-model<- load(here("models", "climate_model_allyears.rds")) #you have to name the object "model or it will not read in right
-
-# dem + aspect + TRI + popdens + lc + road_dens + road_dist + 
-   # streams_dist + urban_dist + rec_dist + forest_dist + forest_dens + 
-   # dist_fire_1yr + dist_fire_23yrs + dist_fire_45yrs
+model<- load(here("models", "robustness_checks", "squares", "sq_mod3climate.rds")) #you have to name the object "model or it will not read in right
 
 
 #elevation
@@ -204,12 +200,12 @@ dist_fire_45yrs <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Fi
 
 #drought current - historical
 
-drought <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2021/d2021_masked.tif"))
+drought <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/drought_rasters/UDM_2021/mean_drought_21.tif"))
 
 
 stackca_clim_rast <- c(dem, aspect, TRI, popdens, lc, road_dens, road_dist, streams_dist, urban_dist, rec_dist, forest_dist, forest_dens, dist_fire_1yr, dist_fire_23yrs, dist_fire_45yrs, drought)
 
-climate_model_data <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/12_9_2022/climate_model_data_allyears.csv"))
+climate_model_data <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/1_31_2023/climate_model_data_allyears.csv"))
 
 ```
 
@@ -225,42 +221,25 @@ names(stackca_clim_rast) <- c("dem", "aspect", "TRI", "popdens", "lc", "road_den
 lc_factors <- as.factor(climate_model_data$lc)
 
 #turning that into a list
-f <- as.list(levels(lc_factors))
-
-
-
-#f_lc <- list(levels(lc))
-
 
 f_lc <- levels(lc)
-# 
-# f_lc2 <- levels(lc2) 
-# 
-# #f_lc2 <- factor(f_lc2, levels = f_lc2)
-# 
-# f_lc2[!is.na(f_lc2)]
-
 
 #naming the list "lc" so it matches the model dataframe
-#names(f)[1:13] <- "lc"
-#naming the list "lc" so it matches the model dataframe
-names(f) <- "lc"
 
 names(f_lc) <- "lc"
 
-#names(f_lc2) <- "lc"
-
-#levels(lc) = levels(lc_factors)
 
 #read in ca raster for extent
 
 caraster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
 
-map <- terra::predict(object = stackca_clim_rast, model = climate_model_allyears, fun = predict, factors = f_lc, na.rm = TRUE, type = "response")
+map <- terra::predict(object = stackca_clim_rast, model = mod3climate, fun = predict, factors = f_lc, na.rm = TRUE, type = "response")
 
 #save the map
 
-#writeRaster(map, filename = here(gdrive_data, "/AnalysisData/model_outputs/allyear_clim_map.tif"), filetype = "GTiff", overwrite= TRUE)
+#writeRaster(map, filename = here(gdrive_data, "/AnalysisData/model_outputs/mod3sq_clim_map.tif"), filetype = "GTiff", overwrite= TRUE)
+
+
 plot(map, main="Model Predictions")
 ```
 
@@ -504,3 +483,20 @@ writeRaster(map, filename = here(gdrive_data, "/AnalysisData/model_outputs/mod3c
 
 plot(map, main="Model Predictions")
 ```
+
+
+#Model table
+
+```{r}
+library(stringr)
+library(ggplot2)
+
+
+coeff_table <- as.data.frame(mod3climate$coefficients)
+
+colnames(coeff_table) <- "Coefficient"
+
+coeff_nonlc <- coeff_table %>% 
+  filter(row.names(coeff_table !grepl('lc')))
+```
+

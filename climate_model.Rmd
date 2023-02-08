@@ -13,16 +13,19 @@ knitr::opts_chunk$set(echo = TRUE)
 #attach packages
 library(tidyverse)
 library(here)
-library(terra)
 library(sf)
 library(tmap)
 library(lubridate)
 library(ResourceSelection)
 library(rmapshaper)
+library(terra)
 
 #mia, chase, and claire's file path
 
-gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+#gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+
+#mia's file path
+gdrive_data <- "/Users/mia/Library/CloudStorage/GoogleDrive-mguarnieri@ucsb.edu/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #sam's file path
 #gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
@@ -106,17 +109,17 @@ fdens <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_
 
 #drought current - historical
 
-drought_2016 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2016/d2016_masked.tif"))
+drought_2016 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/drought_rasters/UDM_2016/mean_drought_16.tif"))
 
-drought_2017 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2017/d2017_masked.tif"))
+drought_2017 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/drought_rasters/UDM_2017/mean_drought_17.tif"))
 
-drought_2018 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2018/d2018_masked.tif"))
+drought_2018 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/drought_rasters/UDM_2018/mean_drought_18.tif"))
 
-drought_2019 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2019/d2019_masked.tif"))
+drought_2019 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/drought_rasters/UDM_2019/mean_drought_19.tif"))
 
-drought_2020 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2020/d2020_masked.tif"))
+drought_2020 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/drought_rasters/UDM_2020/mean_drought_20.tif"))
 
-drought_2021 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2021/d2021_masked.tif"))
+drought_2021 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/drought_rasters/UDM_2021/mean_drought_21.tif"))
 
 #fire
 
@@ -184,9 +187,9 @@ conbuff_16_sv <- vect(con_16_buff)
 ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
 
 #make sure conflict is in the same projection
-conpoints16_reproj <- project(conpoints_16_sv,crs(ca_raster))
+conpoints16_reproj <- terra::project(conpoints_16_sv,crs(ca_raster))
 
-conbuff16_reproj <- project(conbuff_16_sv,crs(ca_raster))
+conbuff16_reproj <- terra::project(conbuff_16_sv,crs(ca_raster))
 
 #convert back to sf for creation of inverse mask
 conpoints16_sf <- st_as_sf(conpoints16_reproj)
@@ -266,7 +269,7 @@ clim_modeldf_16_year <- clim_model_df_16 %>%
 ```{r}
 #saving the files
 
-write.csv(clim_modeldf_16_year, file = here(gdrive_data, "/AnalysisData/model_df_climate/12_9_2022/climate_modeldf_16.csv"), row.names = FALSE)
+write.csv(clim_modeldf_16_year, file = here(gdrive_data, "/AnalysisData/model_df_climate/1_31_2023/climate_modeldf_16.csv"), row.names = FALSE)
 
 ```
 
@@ -299,9 +302,9 @@ conbuff_17_sv <- vect(con_17_buff)
 ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
 
 #reproject the conflict data 
-conpoints17_reproj <- project(conpoints_17_sv, crs(ca_raster))
+conpoints17_reproj <- terra::project(conpoints_17_sv, crs(ca_raster))
 
-conbuff17_reproj <- project(conbuff_17_sv, crs(ca_raster))
+conbuff17_reproj <- terra::project(conbuff_17_sv, crs(ca_raster))
 
 conpoints17_sf <- st_as_sf(conpoints17_reproj)
 conbuff17_sf <- st_as_sf(conbuff17_reproj)
@@ -373,7 +376,7 @@ clim_modeldf_17_year <- clim_model_df_17 %>%
 ```{r}
 #saving the files
 
-write.csv(clim_modeldf_17_year, file = here(gdrive_data, "/AnalysisData/model_df_climate/12_9_2022/climate_modeldf_17.csv"), row.names = FALSE)
+write.csv(clim_modeldf_17_year, file = here(gdrive_data, "/AnalysisData/model_df_climate/1_31_2023/climate_modeldf_17.csv"), row.names = FALSE)
 
 ```
 
@@ -407,9 +410,9 @@ conbuff_18_sv <- vect(con_18_buff)
 ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
 
 #make sure conflict is in the same projection
-conpoints18_reproj <- project(conpoints_18_sv,crs(ca_raster))
+conpoints18_reproj <- terra::project(conpoints_18_sv,crs(ca_raster))
 
-conbuff18_reproj <- project(conbuff_18_sv,crs(ca_raster))
+conbuff18_reproj <- terra::project(conbuff_18_sv,crs(ca_raster))
 
 conpoints18_sf <- st_as_sf(conpoints18_reproj)
 
@@ -488,7 +491,7 @@ clim_modeldf_18_year <- clim_model_df_18 %>%
 ```{r}
 #save the file
 
-write.csv(clim_modeldf_18_year, file = here(gdrive_data, "/AnalysisData/model_df_climate/12_9_2022/climate_modeldf_18.csv"), row.names = FALSE)
+write.csv(clim_modeldf_18_year, file = here(gdrive_data, "/AnalysisData/model_df_climate/1_31_2023/climate_modeldf_18.csv"), row.names = FALSE)
 ```
 
 ##2019
@@ -520,9 +523,9 @@ conbuff_19_sv <- vect(con_19_buff)
 ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
 
 #make sure conflict is in the same projection
-conpoints19_reproj <- project(conpoints_19_sv,crs(ca_raster))
+conpoints19_reproj <- terra::project(conpoints_19_sv,crs(ca_raster))
 
-conbuff19_reproj <- project(conbuff_19_sv,crs(ca_raster))
+conbuff19_reproj <- terra::project(conbuff_19_sv,crs(ca_raster))
 
 conpoints19_sf <- st_as_sf(conpoints19_reproj)
 
@@ -599,7 +602,7 @@ clim_modeldf_19_year <- clim_model_df_19 %>%
 ```{r}
 #save the file
 
-write.csv(clim_modeldf_19_year, file = here(gdrive_data, "/AnalysisData/model_df_climate/12_9_2022/climate_modeldf_19.csv"), row.names = FALSE)
+write.csv(clim_modeldf_19_year, file = here(gdrive_data, "/AnalysisData/model_df_climate/1_31_2023/climate_modeldf_19.csv"), row.names = FALSE)
 
 ```
 
@@ -633,9 +636,9 @@ ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CA
 
 #make sure conflict is in the same projection
 
-conpoints20_reproj <- project(conpoints_20_sv,crs(ca_raster))
+conpoints20_reproj <- terra::project(conpoints_20_sv,crs(ca_raster))
 
-conbuff20_reproj <- project(conbuff_20_sv,crs(ca_raster))
+conbuff20_reproj <- terra::project(conbuff_20_sv,crs(ca_raster))
 
 conpoints20_sf <- st_as_sf(conpoints20_reproj)
 
@@ -715,7 +718,7 @@ clim_modeldf_20_year <- clim_model_df_20 %>%
 ```{r}
 #save the file
 
-write.csv(clim_modeldf_20_year, file = here(gdrive_data, "/AnalysisData/model_df_climate/12_9_2022/climate_modeldf_20.csv"), row.names = FALSE)
+write.csv(clim_modeldf_20_year, file = here(gdrive_data, "/AnalysisData/model_df_climate/1_31_2023/climate_modeldf_20.csv"), row.names = FALSE)
 
 ```
 
@@ -749,9 +752,9 @@ conbuff_21_sv <- vect(con_21_buff)
 ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
 
 #make sure conflict is in the same projection
-conpoints21_reproj <- project(conpoints_21_sv,crs(ca_raster))
+conpoints21_reproj <- terra::project(conpoints_21_sv,crs(ca_raster))
 
-conbuff21_reproj <- project(conbuff_21_sv,crs(ca_raster))
+conbuff21_reproj <- terra::project(conbuff_21_sv,crs(ca_raster))
 
 conpoints21_sf <- st_as_sf(conpoints21_reproj)
 
@@ -828,7 +831,7 @@ clim_modeldf_21_year <- clim_model_df_21 %>%
 ```{r}
 #save the file
 
-write.csv(clim_modeldf_21_year, file = here(gdrive_data, "/AnalysisData/model_df_climate/12_9_2022/climate_modeldf_21.csv"), row.names = FALSE)
+write.csv(clim_modeldf_21_year, file = here(gdrive_data, "/AnalysisData/model_df_climate/1_31_2023/climate_modeldf_21.csv"), row.names = FALSE)
 
 ```
 
@@ -839,17 +842,17 @@ write.csv(clim_modeldf_21_year, file = here(gdrive_data, "/AnalysisData/model_df
 ```{r}
 #read them in
 
-climdf16 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/12_9_2022/climate_modeldf_16.csv"))
+climdf16 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/1_31_2023/climate_modeldf_16.csv"))
 
-climdf17 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/12_9_2022/climate_modeldf_17.csv"))
+climdf17 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/1_31_2023/climate_modeldf_17.csv"))
 
-climdf18 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/12_9_2022/climate_modeldf_18.csv"))
+climdf18 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/1_31_2023/climate_modeldf_18.csv"))
 
-climdf19 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/12_9_2022/climate_modeldf_19.csv"))
+climdf19 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/1_31_2023/climate_modeldf_19.csv"))
 
-climdf20 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/12_9_2022/climate_modeldf_20.csv"))
+climdf20 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/1_31_2023/climate_modeldf_20.csv"))
 
-climdf21 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/12_9_2022/climate_modeldf_21.csv"))
+climdf21 <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/1_31_2023/climate_modeldf_21.csv"))
 
 climate_model_data_allyears <- rbind(climdf16, climdf17, climdf18, climdf19, climdf20, climdf21)
 
@@ -866,7 +869,7 @@ relevel(as.factor(climate_model_data_allyears$lc), ref = "barren_land")
 ```{r}
 #save the all year data frame
 
-write.csv(climate_model_data_allyears, file = here(gdrive_data, "/AnalysisData/model_df_climate/12_9_2022/climate_model_data_allyears.csv"), row.names = FALSE)
+write.csv(climate_model_data_allyears, file = here(gdrive_data, "/AnalysisData/model_df_climate/1_31_2023/climate_model_data_allyears.csv"), row.names = FALSE)
 ```
 
 
@@ -874,7 +877,8 @@ write.csv(climate_model_data_allyears, file = here(gdrive_data, "/AnalysisData/m
 
 ```{r}
 #read in the data
-climate_model_data <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/12_9_2022/climate_model_data_allyears.csv"))
+climate_model_data <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/1_31_2023/climate_model_data_allyears.csv")) %>% 
+  drop_na()
 ```
 
 ```{r}
@@ -885,7 +889,9 @@ climate_model_allyears <- rspf(conflict ~ dem + aspect + TRI + popdens + lc + ro
 #save the model 
 save(climate_model_allyears, file = here("models", "climate_model_allyears.rds"))
 
-save(climate_model_allyears, file = here(gdrive_data, "/AnalysisData/models/12_9_2022/model_allyears_climate/climate_model_allyears.rds"))
+# save(climate_model_allyears, file = here(gdrive_data, "/AnalysisData/models/1_31_2023/model_allyears_climate/climate_model_allyears.rds"))
+
+AIC(climate_model_allyears)
 
 #update 11/28/22: this model needs to be rerun and saved with new lc raster
 #update 11/17/22: mod #3 is best option so rerunning with climate variables 
@@ -897,9 +903,30 @@ mod3climate <- rspf(conflict ~ dem + lc + forest_dist + popdens + rec_dist + str
 #saving mod 3 with climate 
 save(mod3climate, file = here("models", "mod3climate.rds"))
 
-save(climate_model_allyears, file = here(gdrive_data, "/AnalysisData/models/12_9_2022/mod3_allyears_climate/mod3climate.rds"))
+#save(climate_model_allyears, file = here(gdrive_data, "/AnalysisData/models/1_31_2023/mod3_allyears_climate/mod3climate.rds"))
 
+AIC(mod3climate)
 
 ```
 
+#squared models 
+```{r}
+#climate model with all variables 
+sq_model_climate_all <- rspf(conflict ~ dem + aspect + TRI + I(popdens^2)+ lc +  I(road_dens^2) + road_dist + streams_dist + urban_dist + rec_dist + forest_dist + forest_dens + dist_fire_1yr + dist_fire_23yrs + dist_fire_45yrs + drought, family = "binomial", m = 0, B = 1000, data = climate_model_data)
+
+#save the model 
+save(sq_model_climate_all, file = here("models", "robustness_checks", "squares", "sq_model_climate_all.rds"))
+
+AIC(sq_model_climate_all)
+
+#model 3
+
+mod3climate <- rspf(conflict ~ dem + lc + forest_dist + I(popdens^2) + rec_dist + streams_dist + TRI + urban_dist + dist_fire_1yr + dist_fire_23yrs + dist_fire_45yrs + drought, family = "binomial", m = 0, B = 1000, data = climate_model_data)
+
+#save the model 
+save(mod3climate, file = here("models", "robustness_checks", "squares", "sq_mod3climate.rds"))
+
+AIC(mod3climate)
+
+```
 
