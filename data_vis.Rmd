@@ -497,6 +497,6 @@ coeff_table <- as.data.frame(mod3climate$coefficients)
 colnames(coeff_table) <- "Coefficient"
 
 coeff_nonlc <- coeff_table %>% 
-  filter(row.names(coeff_table !grepl('lc'))
+  filter(row.names(coeff_table !grepl('lc')))
 ```
 
