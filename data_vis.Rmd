@@ -450,7 +450,7 @@ dist_fire_45yrs <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Fi
 
 #drought current - historical
 
-drought <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/us_drought_monitor/2021/d2021_masked.tif"))
+drought <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/drought_rasters/UDM_2021/mean_drought_21.tif"))
 
 
 stackca_clim_rast <- c(dem, aspect, TRI, popdens, lc, road_dens, road_dist, streams_dist, urban_dist, rec_dist, forest_dist, forest_dens, dist_fire_1yr, dist_fire_23yrs, dist_fire_45yrs, drought)
@@ -609,6 +609,10 @@ future <- rast(here(gdrive_data, "/AnalysisData/model_outputs/projected_mod3_cli
 diff <- future - current
 
 plot(diff)
+
+plot(current)
+
+plot(future)
 
 writeRaster(diff, filename = here(gdrive_data, "/AnalysisData/model_outputs/differenced_conflict_risk.tif"), filetype = "GTiff", overwrite= TRUE)
 ```
