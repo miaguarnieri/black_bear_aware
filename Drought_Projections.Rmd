@@ -338,10 +338,20 @@ pdsi_rast_2030 <- terra::rast(df)
 
 plot(pdsi_rast_2030)
 
+crs(pdsi_rast_2030) <- "PROJCRS[\"NAD_1983_2011_California_Teale_Albers\",\n    BASEGEOGCRS[\"NAD83(2011)\",\n        DATUM[\"NAD83 (National Spatial Reference System 2011)\",\n            ELLIPSOID[\"GRS 1980\",6378137,298.257222101004,\n                LENGTHUNIT[\"metre\",1]]],\n        PRIMEM[\"Greenwich\",0,\n            ANGLEUNIT[\"degree\",0.0174532925199433]],\n        ID[\"EPSG\",6318]],\n    CONVERSION[\"Albers Equal Area\",\n        METHOD[\"Albers Equal Area\",\n            ID[\"EPSG\",9822]],\n        PARAMETER[\"Latitude of false origin\",0,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8821]],\n        PARAMETER[\"Longitude of false origin\",-120,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8822]],\n        PARAMETER[\"Latitude of 1st standard parallel\",34,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8823]],\n        PARAMETER[\"Latitude of 2nd standard parallel\",40.5,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8824]],\n        PARAMETER[\"Easting at false origin\",0,\n            LENGTHUNIT[\"metre\",1],\n            ID[\"EPSG\",8826]],\n        PARAMETER[\"Northing at false origin\",-4000000,\n            LENGTHUNIT[\"metre\",1],\n            ID[\"EPSG\",8827]]],\n    CS[Cartesian,2],\n        AXIS[\"easting\",east,\n            ORDER[1],\n            LENGTHUNIT[\"metre\",1]],\n        AXIS[\"northing\",north,\n            ORDER[2],\n            LENGTHUNIT[\"metre\",1]],\n    ID[\"EPSG\",6414]]" 
+
 caladapt_Pdsi_calbers <- terra::project(pdsi_rast_2030, ca_raster)
 
 #mask to CA
 caladapt_pdsi_masked <- mask(caladapt_Pdsi_calbers, ca_raster)
+
+plot(pdsi_rast_2030)
+
+pdsi_rast_2030_mr <- pdsi_rast_2030
+
+pdsi_calbers <- terra::project(pdsi_rast_2030_mr, ca_raster)
+
+pdsi_masked <- mask(pdsi_calbers, ca_raster)
 ```
 
 
@@ -355,7 +365,12 @@ saverast <- function(x){
 writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/drought", name), filetype = "Gtiff", overwrite=TRUE)
 }
 
-saverast(caladapt_pdsi_masked)
+saverast(pdsi_rast_2030)
+
+saverast(pdsi_rast_2030_mr)
+
+saverast(pdsi_masked)
+plot(pdsi_masked)
 ```
 #no
 ```{r}
