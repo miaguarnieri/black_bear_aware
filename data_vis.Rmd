@@ -14,8 +14,8 @@ library(tmap)
 library(here)
 library(sf)
 library(ResourceSelection)
-
-
+library(ggplot2)
+library(ggtext)
 
 
 #mia, chase, and claire's file path
@@ -101,7 +101,7 @@ names(stackca_base_rast) <- c("dem", "aspect", "TRI", "popdens", "lc", "road_den
 #any categorical variables used need to be identified first
 
 #making land cover categories factors
-lc_factors <- as.factor(climate_model_data$lc)
+lc_factors <- as.factor(base_model_data$lc)
 
 #turning that into a list
 
@@ -135,161 +135,9 @@ plot(top_con)
 ```
 
 
-#Climate model maps
 
-```{r}
 
-#read in the model
-
-model<- load(here("models", "robustness_checks", "squares", "sq_mod3climate.rds")) #you have to name the object "model or it will not read in right
-
-
-#elevation
-dem <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/elevation/dem_formatted.tif"))
-
-#aspect
-aspect <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/aspect/aspect.tif"))
-
-#terrain ruggedness
-TRI <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/terrain_ruggedness/terrain_ruggedness.tif"))
-
-#human pop density
-
-popdens <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/population_density/pop_den_2021_mask.tif"))
-
-#land cover
-
-lc <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/land_cover/lc19_reclassed.tif"))
-
-#road density
-
-road_dens <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/road_density/road_density_ca.tif"))
-
-#distance to roads
-
-road_dist <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_road/model_ready/roads15_ca_distance.tif"))
-
-#distance to streams
-
-streams_dist <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_stream/model_ready/stream17_ca_distance.tif"))
-
-#distance to urban areas
-
-urban_dist <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_urban/model_ready/ua19_ca_distance.tif"))
-
-#distance to recreational areas
-
-rec_dist <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_rec/model_ready/rec_ca_distance.tif"))
-
-#distance to forest cover
-
-forest_dist <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_forest/model_ready/fc19_ca_distance.tif"))
-
-#forest density
-
-forest_dens <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/forest_density/forest_dens_2016_mask.tif"))
-
-
-#fire layers
-
-dist_fire_1yr <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/dist_fire/fire20_ca_distance.tif"))
-
-dist_fire_23yrs <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/dist_fire/fire18_19_ca_distance.tif"))
-
-dist_fire_45yrs <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/dist_fire/fire16_17_ca_distance.tif"))
-
-#drought current - historical
-
-drought <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/drought_rasters/UDM_2021/mean_drought_21.tif"))
-
-
-stackca_clim_rast <- c(dem, aspect, TRI, popdens, lc, road_dens, road_dist, streams_dist, urban_dist, rec_dist, forest_dist, forest_dens, dist_fire_1yr, dist_fire_23yrs, dist_fire_45yrs, drought)
-
-climate_model_data <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/1_31_2023/climate_model_data_allyears.csv"))
-
-```
-
-```{r}
-
-#changing names of the raster stack to match our model exactly
-
-names(stackca_clim_rast) <- c("dem", "aspect", "TRI", "popdens", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens", "dist_fire_1yr", "dist_fire_23yrs", "dist_fire_45yrs", "drought")
-
-#any categorical variables used need to be identified first
-
-#making land cover categories factors
-lc_factors <- as.factor(climate_model_data$lc)
-
-#turning that into a list
-
-f_lc <- levels(lc)
-
-#naming the list "lc" so it matches the model dataframe
-
-names(f_lc) <- "lc"
-
-
-#read in ca raster for extent
-
-caraster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
-
-map <- terra::predict(object = stackca_clim_rast, model = mod3climate, fun = predict, factors = f_lc, na.rm = TRUE, type = "response")
-
-#save the map
-
-#writeRaster(map, filename = here(gdrive_data, "/AnalysisData/model_outputs/mod3sq_clim_map.tif"), filetype = "GTiff", overwrite= TRUE)
-
-
-plot(map, main="Model Predictions")
-```
-
-
-```{r}
-current_map <- rast((here(gdrive_data, "/AnalysisData/model_outputs/allyear_clim_map21_v2.tif")))
-
-terra::plot(current_map)
-```
-
-#fire model high probability (remember to change this later to incorporate drought)
-
-```{r}
-#high probability only
-
-clim_con <- rast(here(gdrive_data, "/AnalysisData/model_outputs/firemod_map.tif"))
-
-top_con_clim <- clim_con
-
-top_con_clim[top_con_clim < 0.7] <- NA
-
-top_con_clim[top_con_clim >= 0.7] <- top_con_clim
-
-plot(top_con_clim)
-
-
-tm_shape(top_con_clim) +
-  tm_raster() +
-  tmap_mode("view")
-
-
-writeRaster(top_con_clim, filename = here(gdrive_data, "/AnalysisData/model_outputs/fire_map_top70.tif"), filetype = "GTiff", overwrite= TRUE)
-```
-
-
-```{r}
-#zonal statistics
-conflict_points <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_points/conflict_points.shp"))
-
-
-fire_map <- rast(here(gdrive_data, "/AnalysisData/model_outputs/firemod_map.tif"))
-
-tm_shape(fire_map) +
-  tm_raster() +
-tm_shape(conflict_points) +
-  tm_dots() +
-  tmap_mode("view")
-```
-
-#Data vis with squared model
+#Data vis with squared climate model
 
 ##Climate model all variables
 ```{r}
@@ -392,7 +240,7 @@ plot(map, main="Model Predictions")
 ```{r}
 #read in the model
 
-model<- load(here("models", "robustness_checks", "squares", "sq_mod3climate.rds")) #you have to name the object "model or it will not read in right
+model<- load(here("models", "sq_mod3climate.rds")) #you have to name the object "model or it will not read in right
 
 #elevation
 dem <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/elevation/dem_formatted.tif"))
@@ -475,7 +323,7 @@ f_lc <- levels(lc)
 
 caraster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
 
-map <- terra::predict(object = stackca_clim_rast, model = mod3climate, fun = predict, factors = f_lc, na.rm = TRUE, type = "response")
+map <- terra::predict(object = stackca_clim_rast, model = sq_mod3climate, fun = predict, factors = f_lc, na.rm = TRUE, type = "response")
 
 #save the map
 
@@ -488,17 +336,88 @@ plot(map, main="Model Predictions")
 #Model table
 
 ```{r}
-library(stringr)
-library(ggplot2)
+#load in the model
 
+model<- load(here("models", "sq_mod3climate.rds")) #you have to name the object "model or it will not read in right
 
-coeff_table <- as.data.frame(mod3climate$coefficients)
+#create a model summary object
+mod_sum <- summary(sq_mod3climate)
 
-colnames(coeff_table) <- "Coefficient"
+#extract the coefficients from the model summary object
+coeffs <- mod_sum$coefficients
 
-coeff_nonlc <- coeff_table %>% 
-  filter(row.names(coeff_table !grepl('lc')))
+#convert the row names (variables) to a column for plotting
+coeffs_tidy <- cbind(rownames(coeffs), data.frame(coeffs, row.names=NULL)) %>% 
+  janitor::clean_names()
+
+#remove perennial ice and snow to make plot look more reasonable
+coeffs_tidy_nosnow <- coeffs_tidy %>% 
+  filter(rownames_coeffs != "lcperrenial_ice_snow")
+
+#test plot
+ggplot(coeffs_tidy_nosnow, aes(x = estimate, y = rownames_coeffs)) + 
+  geom_point() +
+  geom_pointrange(aes(xmin = estimate-std_error, xmax = estimate+std_error)) +
+  scale_x_continuous(breaks = seq(-3, 4, 0.5))
+
+##Making a nicer table
+
+#separate into df by variable type
+
+bluevar <- coeffs_tidy_nosnow[c(2:12, 18), ] %>% 
+  mutate(rownames_coeffs = c("Elevation", "High-Intensity Development", "Low-Intensity Development", "Medium-Intensity Development", "Developed Open Space", "Forest", "Grassland/Herbaceous", "Open Water", "Planted/Cultivated", "Shrub/Scrub", "Wetlands", "Terrain Ruggedness"))
+
+greenvar <- coeffs_tidy_nosnow[c(13, 17), ] %>% 
+  mutate(rownames_coeffs = c("Distance to Forest", "Distance to Streams"))
+
+grayvar<- coeffs_tidy_nosnow[c(14:16, 19), ] %>% 
+  mutate(rownames_coeffs = c("Population Density", "(Population Density)^2", "Distance to Recreational Areas", "Distance to Urban Areas"))
+
+orangevar <- coeffs_tidy_nosnow[c(20:22), ] %>% 
+  mutate(rownames_coeffs = c("Distance to Fire 1 Year Ago", "Distance to Fire 2-3 Years Ago", "Distance to Fire 4-5 Years Ago"))
+
+brownvar <- coeffs_tidy_nosnow[c(23), ] %>% 
+  mutate (rownames_coeffs = c("Drought"))
+
+intercept <- coeffs_tidy_nosnow[c(1), ] %>% 
+  mutate (rownames_coeffs = c("Intercept"))
+
+#nice plot
+ggplot() + 
+  geom_point(bluevar, mapping = aes(x = estimate, y = rownames_coeffs), color = "#528faa") +
+  geom_pointrange(bluevar, mapping = aes(x = estimate, y = rownames_coeffs, xmin = estimate-std_error, xmax = estimate+std_error), color = "#528faa") +
+  geom_point(greenvar, mapping = aes(x = estimate, y = rownames_coeffs), color = "#89a676") +
+  geom_pointrange(greenvar, mapping = aes(x = estimate, y = rownames_coeffs, xmin = estimate-std_error, xmax = estimate+std_error), color = "#89a676") +
+  geom_point(grayvar, mapping = aes(x = estimate, y = rownames_coeffs), color = "#c3c2b1") +
+  geom_pointrange(grayvar, mapping = aes(x = estimate, y = rownames_coeffs, xmin = estimate-std_error, xmax = estimate+std_error), color = "#c3c2b1") +
+  geom_point(orangevar, mapping = aes(x = estimate, y = rownames_coeffs), color = "#ffbd59") +
+  geom_pointrange(orangevar, mapping = aes(x = estimate, y = rownames_coeffs, xmin = estimate-std_error, xmax = estimate+std_error), color = "#ffbd59") +
+  geom_point(brownvar, mapping = aes(x = estimate, y = rownames_coeffs), color = "#b68a67") +
+  geom_pointrange(brownvar, mapping = aes(x = estimate, y = rownames_coeffs, xmin = estimate-std_error, xmax = estimate+std_error), color = "#b68a67") +
+  geom_point(intercept, mapping = aes(x = estimate, y = rownames_coeffs)) +
+  geom_pointrange(intercept, mapping = aes(x = estimate, y = rownames_coeffs, xmin = estimate-std_error, xmax = estimate+std_error)) +
+  scale_x_continuous(breaks = seq(-3, 4, 0.5)) +
+  labs(y = "Coefficient", x = "Estimate") +
+  theme_minimal() +
+  theme(plot.caption = ggtext::element_markdown(hjust = 0),
+        text = element_text(family = "Times New Roman"))
+
 ```
+
+```{r}
+library(kableExtra)
+
+coeffs_nicetable <- coeffs_tidy %>%
+  kable(escape = FALSE) %>% 
+  kable_styling(full_width = FALSE, position = "center") 
+
+coeffs_nicetable
+
+library(magick)
+
+save_kable(coeffs_nicetable, file = here("/Users/mia/Desktop/Black Bear Aware/coeffs_nicetable.jpeg"), zoom = 2.5)
+```
+
 
 
 #Projection map
@@ -506,7 +425,7 @@ coeff_nonlc <- coeff_table %>%
 ```{r}
 #read in the model
 
-model<- load(here("models", "robustness_checks", "squares", "sq_mod3climate.rds")) #you have to name the object "model or it will not read in right
+model<- load(here("models", "sq_mod3climate.rds")) #you have to name the object "model or it will not read in right
 
 #elevation
 dem <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/elevation/dem_formatted.tif"))
@@ -589,7 +508,7 @@ f_lc <- levels(lc)
 
 caraster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
 
-map <- terra::predict(object = stackca_clim_rast, model = mod3climate, fun = predict, factors = f_lc, na.rm = TRUE, type = "response")
+map <- terra::predict(object = stackca_clim_rast, model = sq_mod3climate, fun = predict, factors = f_lc, na.rm = TRUE, type = "response")
 
 #save the map
 
@@ -616,4 +535,5 @@ plot(future)
 
 writeRaster(diff, filename = here(gdrive_data, "/AnalysisData/model_outputs/differenced_conflict_risk.tif"), filetype = "GTiff", overwrite= TRUE)
 ```
+
 
