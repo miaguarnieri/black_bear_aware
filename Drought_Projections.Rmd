@@ -22,9 +22,14 @@ library(raster)
 library(stars)
 library(purrr)
 library(remotes)
+<<<<<<< HEAD
+library(dplyr)
+library(data.table)
+=======
 library(rgdal)
 library(sp)
 library(raster)
+>>>>>>> 16836ae08a2290b5cf6cdb45c0994895c999c2c8
 
 #mia and claire's and Chase's file path
 gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
@@ -54,22 +59,81 @@ ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CA
 ```{r}
 CalAdapt_PE <- rast(here(gdrive_data, "/InputData/InputData_Files/Drought/CalAdapt/data-5/et_month_HadGEM2-CC_rcp45_2030-01.v0.CA_NV.tif")) %>%
   terra::project(ca_raster)
+<<<<<<< HEAD
+=======
 
 plot(CalAdapt_PE)
 
+>>>>>>> 16836ae08a2290b5cf6cdb45c0994895c999c2c8
 ```
 
+Precip
 ```{r}
 CalAdapt_P <- rast(here(gdrive_data, "/InputData/InputData_Files/Drought/CalAdapt/data-5/rainfall_month_CCSM4_rcp45_2030-01.v0.CA_NV.tif"))%>% terra::project(ca_raster)
 
 plot(CalAdapt_P)
 ```
 
+<<<<<<< HEAD
+Potential Evap
+```{r}
+caladapt_calbers <- terra::project(CalAdapt, ca_raster)
+=======
+
+>>>>>>> 16836ae08a2290b5cf6cdb45c0994895c999c2c8
+
+
+<<<<<<< HEAD
+#test plot
+#plot(caladapt_masked)
+```
+
+```{r}
+caladapt_rain_calbers <- terra::project(CalAdapt_rain, ca_raster)
+
+#mask to CA
+caladapt_rain_masked <- mask(caladapt_rain_calbers, ca_raster)
+
+#test plot
+#plot(caladapt_rain_masked)
+
+```
+
+
+# Making P the rain value, and PE the potential Evap value from caladapt downloaded data and putting into one dataframe
+
+```{r}
+rain_df <- as.data.frame(caladapt_rain_masked)
+
+evap_df <- as.data.frame(caladapt_masked)
+
+
+#p_pe_binded <- bind_rows(rain_df, evap_df)
+
+#dataframe we will use
+p_pe_cbinded <- cbind(rain_df, evap_df)
+
+#reanaming columns
+P_PE <- p_pe_cbinded %>% 
+  rename(
+    P = "rainfall_month_CCSM4_rcp45_2006-01.v0.CA_NV",
+    PE = "et_month_HadGEM2-CC_rcp45_2006-01.v0.CA_NV")
+#P_PE <- na.omit(P_PE)
+
+P_PE_filt <- P_PE %>% 
+  filter(between(P, 0.5,1),
+         between(PE, 0.3,0.6))
+
+setDT(P_PE_filt)
+```
 
 
 
+```{r}
+=======
 
 #```{r}
+>>>>>>> 16836ae08a2290b5cf6cdb45c0994895c999c2c8
 .onLoad <- function(libname, pkgname) {
   ops <- options()
   pdsi.ops <- list(
@@ -91,6 +155,8 @@ plot(CalAdapt_P)
     options(pdsi.ops[toset])
   }
 }
+
+test <- .onLoad
 ```
 
 #```{r}
@@ -99,9 +165,14 @@ options(PDSI.coe.K1.3 = 0.4)
 options(PDSI.coe.K2 = 16.84)
 options(PDSI.p = 0.755)
 options(PDSI.q = 1/1.63)
-gb_pdsi <- pdsi(P, PE, start = 1960, sc = FALSE)
-lines(gb_pdsi$X, col = 'red')
+#gb_pdsi <- pdsi(P, PE, start = 1960, sc = FALSE)
+#lines(gb_pdsi$X, col = 'red')
 ```
+
+calculation in the pdsi: 
+\deqn{Ki0=coeK11 * lg(((PEi+Ri+ROi)/(Pi+Li)+coeK12)/Di)+coeK13}
+\deqn{Ki=coeK2/(\sum Dj*Kj) * Ki}
+\deqn{X[i]=p*X[i-1]+q*Z[i]}
 
 
 #```{r}
@@ -110,7 +181,13 @@ C_pdsi <- function(P, PE, AWC, s_yr, e_yr, calib_s_yr, calib_e_yr, sc, K1_1, K1_
 }
 ```
 
+<<<<<<< HEAD
+```{r}
+#AWC = 100
+
+=======
 #```{r}
+>>>>>>> 16836ae08a2290b5cf6cdb45c0994895c999c2c8
 pdsi <- function(P, PE, AWC = 100, start = NULL, end = NULL, cal_start = NULL, cal_end = NULL,
                  sc = TRUE) {
 
@@ -161,10 +238,18 @@ pdsi <- function(P, PE, AWC = 100, start = NULL, end = NULL, cal_start = NULL, c
 ```
 
 
+<<<<<<< HEAD
+```{r}
+test <- pdsi(P, PE, start = 2006)#AWC = 100, start = NULL, end = NULL, cal_start = 1, cal_end = 1,
+                 #sc = TRUE)
+
+plot(test)
+=======
 
 #```{r}
 pdsi(P, PE, AWC = 100, start = NULL, end = NULL, cal_start = NULL, cal_end = NULL,
                  sc = TRUE)
+>>>>>>> 16836ae08a2290b5cf6cdb45c0994895c999c2c8
 ```
 
 #```{r}
@@ -175,6 +260,15 @@ av[av[, "PACKAGE"] == pkg, ]
 
 <<<<<<< HEAD
 #example code used online
+```{r}
+data(P_PE_filt)
+
+P <- P_PE_filt$P
+PE <- P_PE_filt$PE
+sc_pdsi <- pdsi(P, PE, start = 2006)
+=======
+<<<<<<< HEAD
+#example code used online
 #```{r}
 data(P_PE)
 
@@ -182,6 +276,7 @@ P <- P_PE$P
 PE <- P_PE$PE
 sc_pdsi_P_PE <- pdsi(P, PE, start = 2006)
 #stop here for pdsi (x) values
+>>>>>>> 16836ae08a2290b5cf6cdb45c0994895c999c2c8
 
 plot(sc_pdsi) # plot PDSI
 plot(sc_pdsi, index = "PHDI") # plot PHDI
@@ -200,6 +295,11 @@ options(PDSI.p = 0.755)
 options(PDSI.q = 1/1.63)
 gb_pdsi <- pdsi(P, PE, start = 1960, sc = FALSE)
 plot(gb_pdsi)
+<<<<<<< HEAD
+```
+
+```{r}
+=======
 #```
 
 #```{r}
@@ -218,13 +318,19 @@ pdsi_masked <- mask(pdsi_calbers, ca_raster)
 
 
 #```{r}
+>>>>>>> 16836ae08a2290b5cf6cdb45c0994895c999c2c8
 library(scPDSI)
 data(Lubuge)
 
  P <- Lubuge$P
  PE <- Lubuge$PE
+<<<<<<< HEAD
+ sc_pdsi <- pdsi(P, PE, start = 1960)
+ plot(sc_pdsi$X)
+=======
  lubugesc_pdsi <- pdsi(P, PE, start = 1960)
  plot(lubugesc_pdsi$X)
+>>>>>>> 16836ae08a2290b5cf6cdb45c0994895c999c2c8
 
  # Without self-calibrating.
  ori_pdsi <- pdsi(P, PE, start = 1960, sc = FALSE)
@@ -240,6 +346,8 @@ data(Lubuge)
  gb_pdsi <- pdsi(P, PE, start = 1960, sc = FALSE)
  lines(gb_pdsi$X, col = 'red')
 
+<<<<<<< HEAD
+=======
 #```
 
 
@@ -444,6 +552,7 @@ WGScoor.df <- SpatialPointsDataFrame(WGScoor, data.frame(id=1:length(WGScoor)))
 LLcoor<-spTransform(WGScoor.df,CRS("+proj=longlat"))
 LLcoor.df=SpatialPointsDataFrame(LLcoor, data.frame(id=1:length(LLcoor)))
 pdsi_shp <- writeOGR(LLcoor.df, dsn=getwd(),layer="MyShapefile1",driver="ESRI Shapefile")
+>>>>>>> 16836ae08a2290b5cf6cdb45c0994895c999c2c8
 ```
 
 
