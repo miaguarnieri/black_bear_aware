@@ -1,0 +1,85 @@
+---
+title: "Data Exploration on Public vs Private Lands in California"
+author: "Claire Meuter"
+date: "2023-03-06"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(here)
+library(terra)
+library(sf)
+library(tmap)
+
+#claire's file path
+gdrive_data <- "/Users/clairemeuter/Library/CloudStorage/GoogleDrive-clairemeuter@ucsb.edu/Shared drives/Black_Bear_Aware/gdrive_data"
+```
+
+## **Introduction:** Here, we explore the relationship between ownership of land and locations of human-black bear conflict in across California. 
+
+## Data wrangling
+My data wrangling to-do list:
+- Read in my .gdl (geodatabase)
+- explore maps
+- Add shp files for private land (this source leaves all private land unlabeled, with areas without an ownership feature are ASSUMED to be private (but not included in the dataset as such)).
+- intersect my maps 
+
+Reading in land ownership .gdl
+```{r}
+land_own <- sf::st_read(here(gdrive_data, "/InputData/InputData_Files/2022_CA_ownershipFrap.gdb"))
+```
+Mapping land_own to see what it looks like 
+```{r}
+#tm_shape(land_own) +
+ # tm_polygons() +
+  #tmap_options(check.and.fix = TRUE) +
+ # tmap_mode("view")
+# currently, this map is massive with 52056 obs. I want to combine all of my polygons by the ownership level (Own_Level)
+#Using unique(), I see that Own_Level has 7 distinctions, so hopefully at the end of this I'll have 7 multipolygons 
+unique(land_own$Own_Level)
+# City, County, Federal, Non Profit, Special District, State, Tribal          
+```
+Simplifying land_own
+```{r}
+
+# using dplyr to group by own_level
+land_own <- as.data.frame(land_own) 
+
+# Because this df is so large, I'm going to split it into 7 groups 
+land_city <- land_own %>% 
+  mutate(land_own, Own_Level = City)
+
+
+
+
+# convert to raster 
+class(land_own)
+# [1] "sf"         "grouped_df" "tbl_df"     "tbl"        "data.frame"
+
+#sf to SpatVector
+land_own_spat <- vect(land_own, type = "polygons")
+
+class(land_own)
+```
+
+
+```{r}
+# Read example data from sf package
+nc <-  sf::st_read(system.file("shape/nc.shp", package="sf"))
+
+# add a dummy column do dissolve with
+nc <- dplyr::mutate(nc, example = c(rep('a', 50), rep('b', 50)))
+
+# group the data by the new column
+nc <- dplyr::group_by(nc, example)
+
+# summarize the data
+nc <- dplyr::summarise(nc)
+```
+
+
+## Our conflict points and public vs private lands
+
+## Our projected high conflict locations and 
