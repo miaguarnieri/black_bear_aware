@@ -1,0 +1,38 @@
+---
+title: "exploring_parallel_p"
+author: "Claire Meuter"
+date: "2023-02-02"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#attach packages
+library(tidyverse)
+library(here)
+library(terra)
+library(sf)
+library(tmap)
+library(lubridate)
+library(ResourceSelection)
+library(rmapshaper)
+library(purrr)
+library(tictoc)
+library(furrr)
+
+#claire's file path
+gdrive_data <- "/Users/clairemeuter/Library/CloudStorage/GoogleDrive-clairemeuter@ucsb.edu/Shared drives/Black_Bear_Aware/gdrive_data"
+```
+
+```{r}
+#read in the data
+model_data <- read_csv(here(gdrive_data, "/AnalysisData/model_df_noclimate/12_13_2022/model_data_allyears.csv"))
+```
+
+
+```{r}
+plan(multisession, workers = 4) %>% 
+basemodel_allyears <- rspf(ID ~ dem + aspect + TRI + popdens + lc + road_dens + road_dist + streams_dist + urban_dist + rec_dist + forest_dist + forest_dens, family = "binomial", m = 0, B = 1000, data = model_data)
+```
+
+
