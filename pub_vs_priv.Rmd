@@ -11,6 +11,7 @@ library(tidyverse)
 library(here)
 library(terra)
 library(sf)
+library(stars)
 library(tmap)
 
 #claire's file path
@@ -28,10 +29,17 @@ My data wrangling to-do list:
 
 Reading in land ownership .gdl
 ```{r}
-land_own <- sf::st_read(here(gdrive_data, "/InputData/InputData_Files/2022_CA_ownershipFrap.gdb"))
+land_own <- sf::st_read(here(gdrive_data, "/InputData/InputData_Files/2022_CA_ownershipFrap.gdb"), layer = "ownership22_1")
+
+# Checking the class of land_own
+class(land_own)
+# sf and data.frame
+
 ```
 Mapping land_own to see what it looks like 
 ```{r}
+
+
 #tm_shape(land_own) +
  # tm_polygons() +
   #tmap_options(check.and.fix = TRUE) +
@@ -43,41 +51,111 @@ unique(land_own$Own_Level)
 ```
 Simplifying land_own
 ```{r}
+ land_own_sim <- land_own %>% 
+  group_by(Own_Level) %>% 
+  summarise(Shape = sf::st_union(Shape)) %>% 
+  ungroup()
+class(land_own_sim)
 
-# using dplyr to group by own_level
-land_own <- as.data.frame(land_own) 
+land_own_sf <- st_as_sf(land_own_sim)
+class(land_own_sf)
+# This works, but I don't really have an attribute table.. 
+plot(land_own_sim)
 
-# Because this df is so large, I'm going to split it into 7 groups 
-land_city <- land_own %>% 
-  mutate(land_own, Own_Level = City)
-
-
+#looking into recalculating geometrys (like in Arc) 
 
 
-# convert to raster 
-class(land_own)
-# [1] "sf"         "grouped_df" "tbl_df"     "tbl"        "data.frame"
+#saving the new file so I don't have to deal with the larger 
+st_write(land_own_sim, dsn = here(gdrive_data, "/IntermediateData/IntermediateData_Files/land_own", "land_own_sim.shp"))
 
-#sf to SpatVector
-land_own_spat <- vect(land_own, type = "polygons")
+#read in the raster I made in arc 
+land_own_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/land_own/own_level_raster/own_level_raster.tif"))
 
-class(land_own)
+plot(land_own_raster)
+
+
+```
+Now that I have a raste land_own_raster, I want to make a raster layer that represents private land and then merge the rasters together 
+
+```{r}
+#read in holy raster layer 
+ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
+
+#make sure raster is in the same projection
+land_own_raster_reproj <- project(land_own_raster,ca_raster)
+
+land_own_raster_reproj <- ex
+
+#Using an inverse mask, anything outside og 
+private_land <- mask(ca_raster, land_own_raster_reproj, inverse = TRUE)
+
+tm_shape(private_land) +
+  tm_raster() +
+  tmap_mode("view")
+
+#exporting the raster to arcgis so I can visualize it there
+writeRaster(private_land, filename = here(gdrive_data, "IntermediateData/IntermediateData_Files/land_own", private_land), filetype = "GTiff", overwrite = TRUE)
+
+
 ```
 
 
 ```{r}
-# Read example data from sf package
-nc <-  sf::st_read(system.file("shape/nc.shp", package="sf"))
+land_own_no_nas <- sf::st_read(here(gdrive_data, "/IntermediateData/IntermediateData_Files/land_own/land_own_sim.shp"))
+#reading in the dissolved land ownership shp
 
-# add a dummy column do dissolve with
-nc <- dplyr::mutate(nc, example = c(rep('a', 50), rep('b', 50)))
+ 
+#some exploration
+#class(land_own_no_nas)
+# [1] "sf"         "data.frame"
 
-# group the data by the new column
-nc <- dplyr::group_by(nc, example)
+unique(land_own_no_nas$Own_Level)
+# unique(land_own_no_nas$geometry)
 
-# summarize the data
-nc <- dplyr::summarise(nc)
+#read in holy raster layer 
+ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
+
+land_own_vect <- vect(x = land_own_no_nas)
+class(land_own_vect)
+
+plot(land_own_vect)
 ```
+
+# sorting out attribute table problems 
+```{r}
+#make sure vect is in the same projection
+land_own_reproj <- project(land_own_vect,crs(ca_raster))
+crs(land_own_reproj)
+
+land_own_df <- as.data.frame(land_own_reproj, XY = TRUE)
+
+```
+##creating CA private land 
+```{r}
+#Using an inverse mask, anything outside og 
+private_land <- mask(ca_raster, land_own_reproj, inverse = TRUE)
+
+tm_shape(private_land) +
+  tm_raster() +
+  tmap_mode("view")
+#convert private land to shp file and combine with land_own_no_nas
+
+private_land_shp <- as.polygons(private_land)
+
+p <- as.data.frame(private_land_shp)
+g <- geom(private_land_shp)
+head(g) 
+
+
+g <- geom(private_land_shp, wkt = TRUE)
+substr(g, 1, 50)
+```
+
+# adding NAs 
+
+# wrtite the similified 
+#disignate any nas as public 
+# finding area of polygon within other polygons 
 
 
 ## Our conflict points and public vs private lands
