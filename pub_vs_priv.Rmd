@@ -68,36 +68,122 @@ plot(land_own_sim)
 #saving the new file so I don't have to deal with the larger 
 st_write(land_own_sim, dsn = here(gdrive_data, "/IntermediateData/IntermediateData_Files/land_own", "land_own_sim.shp"))
 
+# I made this shp into a raster in arc because it was easier (having trouble w/ coding. If I could fix later that'd be cool )
+
 #read in the raster I made in arc 
 land_own_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/land_own/own_level_raster/own_level_raster.tif"))
 
-plot(land_own_raster)
+plot(is.na(land_own_raster))
+
 
 
 ```
-Now that I have a raste land_own_raster, I want to make a raster layer that represents private land and then merge the rasters together 
 
+# reclassify land_own_raster with NAs as private 
 ```{r}
+# first a little exploration 
+unique(land_own_raster$Own_Level)
+
+
+levels(land_own_raster)
+
+
+
+
+land_own_raster[is.na(land_own_raster[])] <- 0
+
+# value   own level 
+#1	City			
+#2	County			
+#3	Federal			
+#4	Non Profit			
+#5	`Special District`			
+#6	State			
+#7	Tribal
+
+cats(land_own_raster_reproj)
+ 
+NAvalue()
+
+
+
+
+#Create reclassification matrix for land own values (from, to)
+
+#list out the from, to values in an object
+m <- c(1, 1, #city
+       2, 2, #county
+       3, 3, #federal
+       4, 4, #nonprofit
+       5, 5, #special district
+       6, 6, #state
+       7, 7, #tribal
+       NA, 8) #private 
+
+#turn those values into a matrix
+mat <- matrix(m, ncol = 2, byrow = TRUE) 
+
+#set categories (labels) for each numeric index
+
+#index vector
+index <- c(1, 2, 3, 4, 5, 6, 7, 8)
+
+#categories vector
+cats <- c("City", "County", "Federal","Non Profit", "Special District", "State", "Tribal", "Private")
+
+#combine those into a dataframe
+catdat <- data.frame(id = index, category = cats)
+
+#Reclassify
+
+#create reclassification function
+
+reclassify <- function(x){
+  x_reclassed <- classify(x, mat, others = NA) #reclassify using the matrix above
+  
+  levels(x_reclassed) <- catdat #then reassign levels (labels) using the dataframe above
+  
+  return(x_reclassed)
+}
+
+#Apply function to each layer
+
+
+
+land_own_reclassed <- reclassify(land_own_raster)
+plot(land_own_reclassed)
+
+# now land own reclassed needs to be reprojected and clipped the og cal_raster 
+
 #read in holy raster layer 
 ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
 
 #make sure raster is in the same projection
-land_own_raster_reproj <- project(land_own_raster,ca_raster)
+land_own_reclass_reproject <- project(land_own_reclassed,ca_raster)
 
-land_own_raster_reproj <- ex
+#mask to clear out NAs around california. land_own_mask is the raster i need!
+land_own_mask <- mask(land_own_reclass_reproject, ca_raster)
 
-#Using an inverse mask, anything outside og 
-private_land <- mask(ca_raster, land_own_raster_reproj, inverse = TRUE)
-
-tm_shape(private_land) +
-  tm_raster() +
-  tmap_mode("view")
-
-#exporting the raster to arcgis so I can visualize it there
-writeRaster(private_land, filename = here(gdrive_data, "IntermediateData/IntermediateData_Files/land_own", private_land), filetype = "GTiff", overwrite = TRUE)
-
-
+plot(land_own_mask)
+#looks beautiful
 ```
+
+# Find the area of high conflict zone in each type of land 
+```{r}
+#reading in the high conflict layer 
+high_con <- rast(here(gdrive_data, "/AnalysisData/model_outputs/mod3sq_current_highconf.tif"))
+
+#using an extract() function to find values
+extract() 
+```
+
+
+
+
+
+
+
+
 
 
 ```{r}
@@ -121,15 +207,7 @@ class(land_own_vect)
 plot(land_own_vect)
 ```
 
-# sorting out attribute table problems 
-```{r}
-#make sure vect is in the same projection
-land_own_reproj <- project(land_own_vect,crs(ca_raster))
-crs(land_own_reproj)
 
-land_own_df <- as.data.frame(land_own_reproj, XY = TRUE)
-
-```
 ##creating CA private land 
 ```{r}
 #Using an inverse mask, anything outside og 
@@ -156,8 +234,59 @@ substr(g, 1, 50)
 # wrtite the similified 
 #disignate any nas as public 
 # finding area of polygon within other polygons 
+```{r}
+
+```
 
 
 ## Our conflict points and public vs private lands
 
 ## Our projected high conflict locations and 
+
+
+# shortcutting here because our meeting is in a few hours and I'm trying to have any results 
+
+# read in the high conflict zones 
+```{r}
+high_con <- rast(here(gdrive_data, "/AnalysisData/model_outputs/mod3sq_current_highconf.tif"))
+#finding the area
+as.data.frame(high_con) %>%
+  group_by(lyr1) %>%
+  tally() %>%
+  mutate(area = n * res(high_con)[1] * res(high_con)[2])
+# area = 54,955,379	
+unique(high_con$lyr1)
+
+
+
+#finding the area of land_own_raster_reprojected 
+as.data.frame(land_own_raster_reproj) %>%
+  tally() %>%
+  mutate(area = n * res(land_own_raster_reproj)[1] * res(land_own_raster_reproj)[2])
+# area = 219,531,226,282	
+
+
+
+```
+convert land_own_raster_reproj to shp file 
+
+```{r}
+reproj_shp <- as.polygons(land_own_raster_reproj)
+```
+
+clip high conflict  by shp file 
+
+```{r}
+cropped_high_con <- crop(high_con, reproj_shp)
+
+plot(cropped_high_con)
+```
+```{r}
+#finding the area of the cropped high conflict raster 
+as.data.frame(cropped_high_con) %>%
+  tally() %>%
+  mutate(area = n * res(cropped_high_con)[1] * res(cropped_high_con)[2])
+# area = 54,955,379	
+```
+
+recalculate high conflict area 
