@@ -536,4 +536,20 @@ plot(future)
 writeRaster(diff, filename = here(gdrive_data, "/AnalysisData/model_outputs/differenced_conflict_risk.tif"), filetype = "GTiff", overwrite= TRUE)
 ```
 
+#CDFW administrative regions
+
+```{r}
+#read in raster for reprojection
+
+ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
+
+#read in regions shapefile and reproject
+cdfw_regions <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CDFW_Regions/CDFW_Regions_20221031_wm.shp")) %>% 
+  st_transform(crs = crs(ca_raster))
+
+#save reprojected shapefile
+
+st_write(cdfw_regions, dsn = here(gdrive_data, "/IntermediateData/IntermediateData_Files/cdfw_regions_reproj/cdfw_regions.shp"))
+
+```
 
