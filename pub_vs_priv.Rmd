@@ -51,14 +51,15 @@ unique(land_own$Own_Level)
 ```
 Simplifying land_own
 ```{r}
+#simplifying land_own 
  land_own_sim <- land_own %>% 
   group_by(Own_Level) %>% 
   summarise(Shape = sf::st_union(Shape)) %>% 
   ungroup()
-class(land_own_sim)
 
-land_own_sf <- st_as_sf(land_own_sim)
-class(land_own_sf)
+
+
+
 # This works, but I don't really have an attribute table.. 
 plot(land_own_sim)
 
@@ -73,6 +74,7 @@ st_write(land_own_sim, dsn = here(gdrive_data, "/IntermediateData/IntermediateDa
 #read in the raster I made in arc 
 land_own_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/land_own/own_level_raster/own_level_raster.tif"))
 
+#exploring what the NAs look like 
 plot(is.na(land_own_raster))
 
 
@@ -88,10 +90,6 @@ unique(land_own_raster$Own_Level)
 levels(land_own_raster)
 
 
-
-
-land_own_raster[is.na(land_own_raster[])] <- 0
-
 # value   own level 
 #1	City			
 #2	County			
@@ -101,9 +99,6 @@ land_own_raster[is.na(land_own_raster[])] <- 0
 #6	State			
 #7	Tribal
 
-cats(land_own_raster_reproj)
- 
-NAvalue()
 
 
 
@@ -151,9 +146,20 @@ reclassify <- function(x){
 
 
 land_own_reclassed <- reclassify(land_own_raster)
-plot(land_own_reclassed)
+#plot(land_own_reclassed)
+#levels(land_own_reclassed)
+#[[1]]
+#  id         category
+#1  1             City
+#2  2           County
+#3  3          Federal
+#4  4       Non Profit
+#5  5 Special District
+#6  6            State
+#7  7           Tribal
+#8  8          Private
 
-# now land own reclassed needs to be reprojected and clipped the og cal_raster 
+# now land_own_reclassed needs to be reprojected and clipped to the ca_raster 
 
 #read in holy raster layer 
 ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
@@ -167,126 +173,23 @@ land_own_mask <- mask(land_own_reclass_reproject, ca_raster)
 plot(land_own_mask)
 #looks beautiful
 ```
-
-# Find the area of high conflict zone in each type of land 
+# clip the CA raster by the high conflict vect 
 ```{r}
-#reading in the high conflict layer 
-high_con <- rast(here(gdrive_data, "/AnalysisData/model_outputs/mod3sq_current_highconf.tif"))
-
-#using an extract() function to find values
-extract() 
-```
+#reading in present day high conflict shp layer 
+high_con_sf <- vect(here(gdrive_data, "/AnalysisData/model_outputs/shapefiles/high_conflict/mod3sq_current_highconf.shp"))
 
 
+#masking to high conflict areas
 
+masked_own <- mask(land_own_mask, high_con_sf)
 
-
-
-
-
-
-
-```{r}
-land_own_no_nas <- sf::st_read(here(gdrive_data, "/IntermediateData/IntermediateData_Files/land_own/land_own_sim.shp"))
-#reading in the dissolved land ownership shp
-
- 
-#some exploration
-#class(land_own_no_nas)
-# [1] "sf"         "data.frame"
-
-unique(land_own_no_nas$Own_Level)
-# unique(land_own_no_nas$geometry)
-
-#read in holy raster layer 
-ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
-
-land_own_vect <- vect(x = land_own_no_nas)
-class(land_own_vect)
-
-plot(land_own_vect)
-```
-
-
-##creating CA private land 
-```{r}
-#Using an inverse mask, anything outside og 
-private_land <- mask(ca_raster, land_own_reproj, inverse = TRUE)
-
-tm_shape(private_land) +
-  tm_raster() +
-  tmap_mode("view")
-#convert private land to shp file and combine with land_own_no_nas
-
-private_land_shp <- as.polygons(private_land)
-
-p <- as.data.frame(private_land_shp)
-g <- geom(private_land_shp)
-head(g) 
-
-
-g <- geom(private_land_shp, wkt = TRUE)
-substr(g, 1, 50)
-```
-
-# adding NAs 
-
-# wrtite the similified 
-#disignate any nas as public 
-# finding area of polygon within other polygons 
-```{r}
-
-```
-
-
-## Our conflict points and public vs private lands
-
-## Our projected high conflict locations and 
-
-
-# shortcutting here because our meeting is in a few hours and I'm trying to have any results 
-
-# read in the high conflict zones 
-```{r}
-high_con <- rast(here(gdrive_data, "/AnalysisData/model_outputs/mod3sq_current_highconf.tif"))
-#finding the area
-as.data.frame(high_con) %>%
-  group_by(lyr1) %>%
-  tally() %>%
-  mutate(area = n * res(high_con)[1] * res(high_con)[2])
-# area = 54,955,379	
-unique(high_con$lyr1)
-
-
-
-#finding the area of land_own_raster_reprojected 
-as.data.frame(land_own_raster_reproj) %>%
-  tally() %>%
-  mutate(area = n * res(land_own_raster_reproj)[1] * res(land_own_raster_reproj)[2])
-# area = 219,531,226,282	
+#finding the area of each category from masked_own 
+area_by_category <- as.data.frame(masked_own) %>% 
+  group_by(category) %>% 
+  tally() %>% 
+  mutate(area = n * res(masked_own)[1] * res(masked_own)[2]) 
 
 
 
 ```
-convert land_own_raster_reproj to shp file 
 
-```{r}
-reproj_shp <- as.polygons(land_own_raster_reproj)
-```
-
-clip high conflict  by shp file 
-
-```{r}
-cropped_high_con <- crop(high_con, reproj_shp)
-
-plot(cropped_high_con)
-```
-```{r}
-#finding the area of the cropped high conflict raster 
-as.data.frame(cropped_high_con) %>%
-  tally() %>%
-  mutate(area = n * res(cropped_high_con)[1] * res(cropped_high_con)[2])
-# area = 54,955,379	
-```
-
-recalculate high conflict area 
