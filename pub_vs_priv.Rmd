@@ -190,6 +190,12 @@ area_by_category <- as.data.frame(masked_own) %>%
   mutate(area = n * res(masked_own)[1] * res(masked_own)[2]) 
 
 
+ggplot(data = area_by_category) + geom_col(aes(x = category, y = area, fill = category)) + theme_minimal()
+
+ggplot(area_by_category, aes(x = "", y = area, fill = category)) +
+       geom_col()  +
+       scale_fill_brewer(palette = "Set1") +
+       labs(x="", y="area")
 
 ```
 
