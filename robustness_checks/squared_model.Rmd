@@ -22,24 +22,29 @@ library(rmapshaper)
 
 #mia, chase, and claire's file path
 
-gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+#gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+
+#mia's file path
+
+gdrive_data <- "/Users/mia/Library/CloudStorage/GoogleDrive-mguarnieri@ucsb.edu/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #sam's file path
 #gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 
 ```
+
 ##base model code
+
 #read in the required data
 ```{r}
 #read in the data
-model_data_sq <- read_csv(here(gdrive_data, "/AnalysisData/model_df_noclimate/12_13_2022/model_data_allyears.csv"))
+model_data_sq <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/1_31_2023/climate_model_data_allyears.csv"))
 ```
 
 ```{r}
 #base model run
-basemodel_allyears_sq <- rspf(ID ~ dem + aspect + TRI + I(popdens^2) + lc + I(road_dens^2) + road_dist + streams_dist + urban_dist + rec_dist + forest_dist + forest_dens, family = "binomial", m = 0, B = 1000, data = model_data_sq)
-```
-```{r}
+basemodel_allyears_sq <- rspf(conflict ~ dem + aspect + TRI + I(popdens^2) + lc + I(road_dens^2) + road_dist + streams_dist + urban_dist + rec_dist + forest_dist + forest_dens, family = "binomial", m = 0, B = 1000, data = model_data_sq)
+
 AIC(basemodel_allyears_sq)
 ```
 
@@ -61,10 +66,10 @@ save(mod2_sq, file = here("models", "robustness_checks", "mod2_sq.rds"))
 
 #Model 3: elevation + land cover + distance to forests + population density^2 + distance to recreational areas + distance to streams + terrain ruggedness + distance to urban areas
 
-mod3_sq <- rspf(ID ~ dem + lc + forest_dist + I(popdens^2) + rec_dist + streams_dist + TRI + urban_dist, family = "binomial", m = 0, B = 1000, data = model_data_sq)
+mod3_sq <- rspf(conflict ~ dem + lc + forest_dist + popdens + I(popdens^2) + rec_dist + streams_dist + TRI + urban_dist, family = "binomial", m = 0, B = 1000, data = model_data_sq)
 
 #save model 
-save(mod3_sq, file = here("models", "robustness_checks", "mod3_sq.rds"))
+save(mod3_sq, file = here("models", "robustness_checks", "squares", "mod3_sq.rds"))
 
 #Model 4: elevation + forest density + land cover + distance to forests + population density^2 + distance to recreational areas + distance to streams + distance to urban areas
 
@@ -83,6 +88,7 @@ save(mod5_sq, file = here("models", "robustness_checks", "mod5_sq.rds"))
 
 
 ```
+
 #check AICS
 ```{r}
 AIC(mod1_sq)
@@ -97,10 +103,10 @@ AIC(mod5_sq)
 #read in the data 
 ```{r}
 #read in the data
-sq_model_data <- read_csv(here("/Users/clairemeuter/Library/CloudStorage/GoogleDrive-clairemeuter@ucsb.edu/Shared drives/Black_Bear_Aware/gdrive_data/AnalysisData/model_df_climate/12_9_2022/climate_model_data_allyears.csv"))
+sq_model_data <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/1_31_2023/climate_model_data_allyears.csv"))
 
-sq_model_data <- read_csv(here("/Users/mia/Library/CloudStorage/GoogleDrive-mguarnieri@ucsb.edu/Shared drives/Black_Bear_Aware/gdrive_data/AnalysisData/model_df_climate/12_9_2022/climate_model_data_allyears.csv"))
 ```
+
 #run the rspf 
 ```{r}
 #climate model with all variables 
@@ -113,27 +119,12 @@ AIC(sq_model_climate_all)
 
 #model 3
 
-mod3climate <- rspf(conflict ~ dem + lc + forest_dist + I(popdens^2) + rec_dist + streams_dist + TRI + urban_dist + dist_fire_1yr + dist_fire_23yrs + dist_fire_45yrs + drought, family = "binomial", m = 0, B = 1000, data = sq_model_data)
-
-#save the model 
-save(mod3climate, file = here("models", "robustness_checks", "squares", "sq_mod3climate.rds"))
-
-AIC(mod3climate)
-
-```
-#climate mod 3 
-```{r}
-#climate model 3 
-sq_mod3climate <- rspf(conflict ~ dem + lc + forest_dist + I(popdens^2) + rec_dist + streams_dist + TRI + urban_dist + dist_fire_1yr + dist_fire_23yrs + dist_fire_45yrs + drought, family = "binomial", m = 0, B = 1000, data = sq_model_data)
+sq_mod3climate <- rspf(conflict ~ dem + lc + forest_dist + popdens + I(popdens^2) + rec_dist + streams_dist + TRI + urban_dist + dist_fire_1yr + dist_fire_23yrs + dist_fire_45yrs + drought, family = "binomial", m = 0, B = 1000, data = sq_model_data)
 
 #save the model 
 save(sq_mod3climate, file = here("models", "sq_mod3climate.rds"))
 
 AIC(sq_mod3climate)
-```
-```{r}
-load(here("models", "sq_model_climate_all.rds"))
 
-summary(sq_model_climate_all)
 ```
 
