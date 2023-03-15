@@ -333,7 +333,19 @@ plot(map, main="Model Predictions")
 ```
 
 
-#Model table
+#Model table and plot
+
+```{r}
+#mini model to test relation btwn coeffs and std error
+mod_dat <- read_csv(here("dredge_data", "climate_model_data_allyears.csv")) %>% 
+  mutate(forest_alt = forest_dist * 1000)
+
+mini_mod <- rspf(formula = conflict ~ forest_dist, data = mod_dat, m = 0, B = 1000, family = "binomial")
+
+mini_mod_alt <- rspf(formula = conflict ~ forest_alt, data = mod_dat, m = 0, B = 1000, family = "binomial")
+
+```
+
 
 ```{r}
 #load in the model
@@ -352,10 +364,11 @@ coeffs_tidy <- cbind(rownames(coeffs), data.frame(coeffs, row.names=NULL)) %>%
 
 #remove perennial ice and snow to make plot look more reasonable
 coeffs_tidy_nosnow <- coeffs_tidy %>% 
-  filter(rownames_coeffs != "lcperrenial_ice_snow")
+  filter(rownames_coeffs != "lcperrenial_ice_snow") %>% 
+  mutate(coeff_trans = (exp(estimate)/(1 + exp(estimate))))
 
 #test plot
-ggplot(coeffs_tidy_nosnow, aes(x = estimate, y = rownames_coeffs)) + 
+ggplot(coeffs_tidy_nosnow, aes(x = coeff_trans, y = rownames_coeffs)) + 
   geom_point() +
   geom_pointrange(aes(xmin = estimate-std_error, xmax = estimate+std_error)) +
   scale_x_continuous(breaks = seq(-3, 4, 0.5))
@@ -384,18 +397,18 @@ intercept <- coeffs_tidy_nosnow[c(1), ] %>%
 
 #nice plot
 ggplot() + 
-  geom_point(bluevar, mapping = aes(x = estimate, y = rownames_coeffs), color = "#528faa") +
-  geom_pointrange(bluevar, mapping = aes(x = estimate, y = rownames_coeffs, xmin = estimate-std_error, xmax = estimate+std_error), color = "#528faa") +
-  geom_point(greenvar, mapping = aes(x = estimate, y = rownames_coeffs), color = "#89a676") +
-  geom_pointrange(greenvar, mapping = aes(x = estimate, y = rownames_coeffs, xmin = estimate-std_error, xmax = estimate+std_error), color = "#89a676") +
-  geom_point(grayvar, mapping = aes(x = estimate, y = rownames_coeffs), color = "#c3c2b1") +
-  geom_pointrange(grayvar, mapping = aes(x = estimate, y = rownames_coeffs, xmin = estimate-std_error, xmax = estimate+std_error), color = "#c3c2b1") +
-  geom_point(orangevar, mapping = aes(x = estimate, y = rownames_coeffs), color = "#ffbd59") +
-  geom_pointrange(orangevar, mapping = aes(x = estimate, y = rownames_coeffs, xmin = estimate-std_error, xmax = estimate+std_error), color = "#ffbd59") +
-  geom_point(brownvar, mapping = aes(x = estimate, y = rownames_coeffs), color = "#b68a67") +
-  geom_pointrange(brownvar, mapping = aes(x = estimate, y = rownames_coeffs, xmin = estimate-std_error, xmax = estimate+std_error), color = "#b68a67") +
-  geom_point(intercept, mapping = aes(x = estimate, y = rownames_coeffs)) +
-  geom_pointrange(intercept, mapping = aes(x = estimate, y = rownames_coeffs, xmin = estimate-std_error, xmax = estimate+std_error)) +
+  geom_point(bluevar, mapping = aes(x = coeff_trans, y = rownames_coeffs), color = "#528faa") +
+  #geom_pointrange(bluevar, mapping = aes(x = coeff_trans, y = rownames_coeffs, xmin = estimate-std_error, xmax = estimate+std_error), color = "#528faa") +
+  geom_point(greenvar, mapping = aes(x = coeff_trans, y = rownames_coeffs), color = "#89a676") +
+  #geom_pointrange(greenvar, mapping = aes(x = coeff_trans, y = rownames_coeffs, xmin = estimate-std_error, xmax = estimate+std_error), color = "#89a676") +
+  geom_point(grayvar, mapping = aes(x = coeff_trans, y = rownames_coeffs), color = "#c3c2b1") +
+ # geom_pointrange(grayvar, mapping = aes(x = coeff_trans, y = rownames_coeffs, xmin = estimate-std_error, xmax = estimate+std_error), color = "#c3c2b1") +
+  geom_point(orangevar, mapping = aes(x = coeff_trans, y = rownames_coeffs), color = "#ffbd59") +
+  #geom_pointrange(orangevar, mapping = aes(x = coeff_trans, y = rownames_coeffs, xmin = estimate-std_error, xmax = estimate+std_error), color = "#ffbd59") +
+  geom_point(brownvar, mapping = aes(x = coeff_trans, y = rownames_coeffs), color = "#b68a67") +
+  #geom_pointrange(brownvar, mapping = aes(x = coeff_trans, y = rownames_coeffs, xmin = estimate-std_error, xmax = estimate+std_error), color = "#b68a67") +
+  geom_point(intercept, mapping = aes(x = coeff_trans, y = rownames_coeffs)) +
+  #geom_pointrange(intercept, mapping = aes(x = coeff_trans, y = rownames_coeffs, xmin = estimate-std_error, xmax = estimate+std_error)) +
   scale_x_continuous(breaks = seq(-3, 4, 0.5)) +
   labs(y = "Coefficient", x = "Estimate") +
   theme_minimal() +

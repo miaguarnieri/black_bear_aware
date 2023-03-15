@@ -158,12 +158,30 @@ regional_summary_projected <- projected_regional_conf %>%
 
 #find counties with the most area of high conflict
 
+#current day
 current_county_conf <- extract(current_highconf_raster, ca_county_vect, na.rm = TRUE, fun = "sum")
 
 county_summary_current <- current_county_conf %>%
   mutate(area = lyr1 * 52943.53) #multiply cell count by area per cell
 
-current_countysumm <- full_join(county_summary_current, asia_s3change_wide, by = "suitability_change")
+colnames(county_summary_current) <- c("OBJECTID", "cells", "area")
+
+current_countysumm <- full_join(county_summary_current, ca_county, by = "OBJECTID")
+
+#projected
+projected_county_conf <- extract(projected_highconf_raster, ca_county_vect, na.rm = TRUE, fun = "sum")
+
+county_summary_projected <- projected_county_conf %>%
+  mutate(area = lyr1 * 52943.53) #multiply cell count by area per cell
+
+colnames(county_summary_projected) <- c("OBJECTID", "cells", "area")
+
+projected_countysumm <- full_join(county_summary_projected, ca_county, by = "OBJECTID")
+
+#export county summary shps
+st_write(current_countysumm, dsn = here(gdrive_data, "/AnalysisData/model_outputs/shapefiles/county_stats/current_county_highconf.shp"))
+
+st_write(projected_countysumm, dsn = here(gdrive_data, "/AnalysisData/model_outputs/shapefiles/county_stats/projected_county_highconf.shp"))
 
 ```
 
