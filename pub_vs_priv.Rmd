@@ -13,6 +13,7 @@ library(terra)
 library(sf)
 library(stars)
 library(tmap)
+library(kableExtra)
 
 #claire's file path
 gdrive_data <- "/Users/clairemeuter/Library/CloudStorage/GoogleDrive-clairemeuter@ucsb.edu/Shared drives/Black_Bear_Aware/gdrive_data"
@@ -29,11 +30,11 @@ My data wrangling to-do list:
 
 Reading in land ownership .gdl
 ```{r}
-land_own <- sf::st_read(here(gdrive_data, "/InputData/InputData_Files/2022_CA_ownershipFrap.gdb"), layer = "ownership22_1")
-
-# Checking the class of land_own
-class(land_own)
-# sf and data.frame
+# land_own <- sf::st_read(here(gdrive_data, "/InputData/InputData_Files/2022_CA_ownershipFrap.gdb"), layer = "ownership22_1")
+# 
+# # Checking the class of land_own
+# class(land_own)
+# # sf and data.frame
 
 ```
 Mapping land_own to see what it looks like 
@@ -46,30 +47,30 @@ Mapping land_own to see what it looks like
  # tmap_mode("view")
 # currently, this map is massive with 52056 obs. I want to combine all of my polygons by the ownership level (Own_Level)
 #Using unique(), I see that Own_Level has 7 distinctions, so hopefully at the end of this I'll have 7 multipolygons 
-unique(land_own$Own_Level)
+#unique(land_own$Own_Level)
 # City, County, Federal, Non Profit, Special District, State, Tribal          
 ```
 Simplifying land_own
 ```{r}
-#simplifying land_own 
- land_own_sim <- land_own %>% 
-  group_by(Own_Level) %>% 
-  summarise(Shape = sf::st_union(Shape)) %>% 
-  ungroup()
-
-
-
-
-# This works, but I don't really have an attribute table.. 
-plot(land_own_sim)
-
-#looking into recalculating geometrys (like in Arc) 
-
-
-#saving the new file so I don't have to deal with the larger 
-st_write(land_own_sim, dsn = here(gdrive_data, "/IntermediateData/IntermediateData_Files/land_own", "land_own_sim.shp"))
-
-# I made this shp into a raster in arc because it was easier (having trouble w/ coding. If I could fix later that'd be cool )
+# #simplifying land_own 
+#  land_own_sim <- land_own %>% 
+#   group_by(Own_Level) %>% 
+#   summarise(Shape = sf::st_union(Shape)) %>% 
+#   ungroup()
+# 
+# 
+# 
+# 
+# # This works, but I don't really have an attribute table.. 
+# plot(land_own_sim)
+# 
+# #looking into recalculating geometrys (like in Arc) 
+# 
+# 
+# #saving the new file so I don't have to deal with the larger 
+# st_write(land_own_sim, dsn = here(gdrive_data, "/IntermediateData/IntermediateData_Files/land_own", "land_own_sim.shp"))
+# 
+# # I made this shp into a raster in arc because it was easier (having trouble w/ coding. If I could fix later that'd be cool )
 
 #read in the raster I made in arc 
 land_own_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/land_own/own_level_raster/own_level_raster.tif"))
@@ -187,15 +188,30 @@ masked_own <- mask(land_own_mask, high_con_sf)
 area_by_category <- as.data.frame(masked_own) %>% 
   group_by(category) %>% 
   tally() %>% 
-  mutate(area = n * res(masked_own)[1] * res(masked_own)[2]) 
+  mutate(area = (n * res(masked_own)[1] * res(masked_own)[2])) %>% 
+  select(-n) %>% 
+  mutate(area_km = area / 1000000)
 
 
-ggplot(data = area_by_category) + geom_col(aes(x = category, y = area, fill = category)) + theme_minimal()
+nice_table <- area_by_category %>% 
+  kbl(col.names = c("Land Ownership Type", "Area (m^2)", "Area (km^2)")) %>% 
+ kable_classic(full_width = TRUE, html_font = "Cambria")
 
-ggplot(area_by_category, aes(x = "", y = area, fill = category)) +
+
+ggplot(data = area_by_category) + geom_col(aes(x = category, y = area_km, fill = category)) + theme_minimal()
+
+ggplot(area_by_category, aes(x = "", y = area_km, fill = category, legend(title = "Land ownership type"))) +
        geom_col()  +
-       scale_fill_brewer(palette = "Set1") +
-       labs(x="", y="area")
+       scale_fill_brewer(palette = "Set3") +
+       labs(x="", y="Area (km^2)") 
+nice_table
+#151,153,763.8 total area 
+
+high_con_sf_count <- as.data.frame(high_con_sf) %>% 
+  tally() %>% 
+  mutate(area = (n * res(ca_raster)[1] * res(ca_raster)[2]))
+ca_count
+
 
 ```
 
