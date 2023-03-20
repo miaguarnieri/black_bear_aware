@@ -38,12 +38,67 @@ mod3_rast <- rast(here(gdrive_data, "/AnalysisData/model_outputs/projected_mod3_
 ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
 
 county_demographics <- vect(here(gdrive_data, "/IntermediateData/IntermediateData_Files/census_demographics/MSSA_Detail.shp"))
+
+demog_csv <- read.csv(here(gdrive_data, "/IntermediateData/IntermediateData_Files/zonal_statistics/population_usafacts.csv")) %>% select(Years, X2019)
+
+demog_csv_2 <- read.csv(here(gdrive_data, "/IntermediateData/IntermediateData_Files/zonal_statistics/cc-est2021-alldata-06.csv")) %>% 
+  group_by(CTYNAME) %>% 
+  summarise(pop = sum(TOT_POP),
+            male_white_pop = (sum(WA_MALE)/pop)*100,
+            fem_white_pop = (sum(WA_FEMALE) / pop)*100,
+            male_black = (sum(BAC_MALE)/pop)*100,
+            fem_black = (sum(BAC_FEMALE)/pop)*100,
+            male_asian = (sum(AA_MALE)/pop)*100,
+            fem_asian = (sum(AA_FEMALE)/pop)*100,
+            male_ind = (sum(IA_MALE)/pop)*100,
+            fem_ind = (sum(IA_FEMALE)/pop)*100,
+            male_isl = (sum(NAC_MALE)/pop)*100,
+            fem_isl = (sum(NAC_FEMALE)/pop)*100,
+            male_hisp = (sum(H_MALE)/pop)*100,
+            fem_hisp = (sum(H_FEMALE)/pop)*100) %>% 
+  rename(COUNTY_NAM = "CTYNAME") %>% 
+  mutate(OBJECTID = 1:58)
+
+counties_shp_geoportal<- vect(here(gdrive_data,"/InputData/InputData_Files/geoportal_ca_counties/cnty19_1.shp"))
+
+poverty <- demog_csv <- read.csv(here(gdrive_data, "/IntermediateData/IntermediateData_Files/zonal_statistics/allpovu.csv"))
+
+Ca_pov <- poverty[c(202:259),] %>% 
+  select(Table.with.column.headers.in.rows.3.and.4, X.1, X.5) %>% 
+  mutate(OBJECTID = 1:58)
+
+#buffered conflict points refined
+
+buffered_conflict <- vect(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/conflict_buffered_refined/conflict_buffered_refined.shp"))
+
+high_conf <- vect(here(gdrive_data, "/AnalysisData/model_outputs/shapefiles/high_conflict/mod3sq_current_highconf.shp"))
+
 ```
 
 ```{r}
-census_df <- as.data.frame(county_demographics)
-plot(proj_high_conflict)
-plot(county_demographics)
+counties_calber_shp <- project(counties_shp_geoportal, ca_raster)
+
+counties_crop <- crop(counties_calber_shp, ca_raster) %>% 
+  st_as_sf()
+
+zonal_statistic <-extract(mod3_rast, counties_crop, fun="mean", na.rm=TRUE) 
+
+colnames(zonal_statistic) = c("OBJECTID", "Conflict_Risk")
+
+counties_zonal <- full_join(counties_crop, zonal_statistic, by = "OBJECTID")
+
+counties_high_conf <- counties_zonal[-c(59:69),]
+
+counties_conf_demog <- full_join(demog_csv_2, counties_high_conf, by = "OBJECTID") 
+  
+new_data <- subset(counties_conf_demog, select = c(1:14, 22:26)) %>% 
+  mutate(OBJECTID = 1:58)
+
+
+pov_demog <- full_join(new_data, Ca_pov, by = "OBJECTID")
+
+new_data_vect <- vect(pov_demog)
+
 ```
 
 
@@ -74,11 +129,18 @@ plot(demog_group)
 
 ```{r}
 #run the zonal stats
-zonal_statistic <-extract(mod3_rast, demog_crop, fun="mean", na.rm=TRUE) 
 
 colnames(zonal_statistic) = c("COUNTY", "Conflict_Risk")
 
 demog_zonal <- full_join(demog_group, zonal_statistic, by = "COUNTY")
+```
+
+
+#raster math
+```{r}
+high_conf_minus_buffered <- high_conf - buffered_conflict
+
+plot(high_conf_minus_buffered)
 ```
 
 
