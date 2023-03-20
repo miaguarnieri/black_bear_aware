@@ -59,7 +59,7 @@ demog_csv_2 <- read.csv(here(gdrive_data, "/IntermediateData/IntermediateData_Fi
   rename(COUNTY_NAM = "CTYNAME") %>% 
   mutate(OBJECTID = 1:58)
 
-counties_shp_geoportal<- vect(here(gdrive_data,"/InputData/InputData_Files/geoportal_ca_counties/cnty19_1.shp"))
+county_shp<- vect(here(gdrive_data,"/InputData/InputData_Files/geoportal_ca_counties/cnty19_1.shp"))
 
 poverty <- demog_csv <- read.csv(here(gdrive_data, "/IntermediateData/IntermediateData_Files/zonal_statistics/allpovu.csv"))
 
@@ -76,9 +76,9 @@ high_conf <- vect(here(gdrive_data, "/AnalysisData/model_outputs/shapefiles/high
 ```
 
 ```{r}
-counties_calber_shp <- project(counties_shp_geoportal, ca_raster)
+county_calber <- project(county_shp, ca_raster)
 
-counties_crop <- crop(counties_calber_shp, ca_raster) %>% 
+counties_crop <- crop(county_calber, ca_raster) %>% 
   st_as_sf()
 
 zonal_statistic <-extract(mod3_rast, counties_crop, fun="mean", na.rm=TRUE) 
