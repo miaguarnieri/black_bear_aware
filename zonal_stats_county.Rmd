@@ -164,7 +164,8 @@ mod3_rast <- rast(here(gdrive_data, "/AnalysisData/model_outputs/projected_mod3_
 
 ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
 
-ca_places<- vect(here(gdrive_data,"/IntermediateData/IntermediateData_Files/ca_places_formatted/ca_places_for.shp"))
+ca_places<- vect(here(gdrive_data,"/IntermediateData/IntermediateData_Files/ca_places_formatted/ca_places_for.shp")) %>%
+  mutate()
 
 
 ```
@@ -208,4 +209,39 @@ savevect <- function(x){
 #save the file
 savevect(cdfw_zonal)
 ```
+
+#By Metropolitian Statistcal Area 
+
+
+```{r}
+#load in data
+mod3_rast <- rast(here(gdrive_data, "/AnalysisData/model_outputs/projected_mod3_clim_map_squared.tif"))
+
+
+ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
+
+ca_msa<- vect(here(gdrive_data,"/InputData/InputData_Files/cali_MSA_cagov/geo_export_e85822fa-0851-4d09-bf19-148d6887d851.shp"))
+
+
+```
+
+```{r}
+ca_msa_project <- project(ca_msa, ca_raster)
+
+ca_msa_crop<- crop(ca_msa_project, ca_raster) %>% 
+  st_as_sf() %>%
+  mutate(OBJECTID=row_number())
+```
+
+```{r}
+zonal_statistic_msa <-extract(mod3_rast, ca_msa_crop, fun="mean", na.rm=TRUE) 
+
+colnames(zonal_statistic_msa) = c("OBJECTID", "Conflict_Risk")
+```
+
+```{r}
+#merge the zonal stats and the orignial shapefile 
+ca_msa_zonal <- full_join(ca_msa_crop, zonal_statistic_msa, by = "OBJECTID")
+```
+
 
