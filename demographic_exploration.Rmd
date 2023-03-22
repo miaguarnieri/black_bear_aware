@@ -49,6 +49,8 @@ ca_amind_combo <- rast(here(gdrive_data,"/InputData/InputData_Files/demographics
 
 ca_hisp <- rast(here(gdrive_data,"/InputData/InputData_Files/demographics_data_2020/CAPOP_2020_100m_HISP.tif/CAPOP_2020_100m_HISP.tif"))
 
+ca_black <- rast(here(gdrive_data,"/InputData/InputData_Files/demographics_data_2020/CAPOP_2020_100m_NHBLACK.tif/CAPOP_2020_100m_NHBLACK.tif"))
+
 ca_minors <- rast(here(gdrive_data,"/InputData/InputData_Files/demographics_data_2020/CAPOP_2020_100m_MINORS.tif/CAPOP_2020_100m_MINORS.tif"))
 
 ca_nhamind <- rast(here(gdrive_data, "/InputData/InputData_Files/demographics_data_2020/CAPOP_2020_100m_NHAMIND.tif/CAPOP_2020_100m_NHAMIND.tif"))
@@ -75,7 +77,7 @@ ca_hisp_proj <- project(ca_hisp, "epsg:6414")
 
 ca_minors_proj <- project(ca_minors, "epsg:6414")
 
-ca_nhamind_proj <- project(ca_minors,"epsg:6414")
+ca_nhamind_proj <- project(ca_nhamind,"epsg:6414")
 
 ca_nhasain_proj <- project(ca_nhasian,"epsg:6414")
 
@@ -87,31 +89,31 @@ ca_nhwhite_proj <- project(ca_nhwhite,"epsg:6414")
 
 ca_total_proj <- project(ca_total, "epsg:6414")
 
-
+ca_black_proj <- project(ca_black, "epsg:6414")
 ```
 
 ```{r}
-demographic_stack <- c(ca_amind_alone_proj, ca_amind_combo_proj, ca_hisp_proj, ca_minors_proj, ca_nhamind_proj, ca_nhasain_proj, ca_nhhipi_proj, ca_nhothermulti_proj, ca_nhwhite_proj, ca_total_proj)
+demographic_stack <- c(ca_amind_alone_proj, ca_amind_combo_proj, ca_hisp_proj, ca_minors_proj, ca_nhamind_proj, ca_nhasain_proj, ca_nhhipi_proj, ca_nhothermulti_proj, ca_nhwhite_proj, ca_total_proj, ca_black_proj)
 
 ```
 
 ```{r}
 #read in model data 
 
-high_conflict_current <- rast(here(gdrive_data,"/AnalysisData/model_outputs/mod3sq_current_highconf.tif"))
+high_conflict <- rast(here(gdrive_data, "/AnalysisData/model_outputs/mod3clim_map_squared.tif"))
 
-buffered_conflict <- vect(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/conflict_buffered_refined/conflict_buffered_refined.shp"))
+buffer_conflict <- vect(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/conflict_buffered_refined/conflict_buffered_refined.shp"))
 
 ```
 
 ```{r}
-high_conflict_reporting <- mask(high_conflict_current, buffered_conflict)
+high_conflict_reporting <- mask(high_conflict, buffer_conflict)
 
 high_conflict_reporting_proj <- project(high_conflict_reporting,ca_total_proj)
 ```
 
 ```{r}
-high_conflict_no_reporting <- mask(high_conflict_current, buffered_conflict, inverse=TRUE)
+high_conflict_no_reporting <- mask(high_conflict, buffer_conflict, inverse=TRUE)
 
 high_conflict_no_reporting_proj <- project(high_conflict_no_reporting, ca_total_proj)
 
@@ -123,8 +125,34 @@ demographic_mask_reporting <- mask(demographic_stack, high_conflict_reporting_pr
 demographic_mask_no_reporting <- mask(demographic_stack, high_conflict_no_reporting_proj)
 ```
 ```{r}
+reporting_data_frame <- as.data.frame(demographic_mask_reporting)
+
+no_reporting_data_frame <- as.data.frame(demographic_mask_no_reporting)
 
 ```
 
+```{r}
+
+reporting_df_filter<- reporting_data_frame %>% select(CAPOP_2020_100m_HISP,
+                                                      CAPOP_2020_100m_NHBLACK,
+                                                      CAPOP_2020_100m_AMIND_COMBO,
+                                                      CAPOP_2020_100m_NHASIAN,
+                                                      CAPOP_2020_100m_NHHIPI,
+                                                      CAPOP_2020_100m_NHWHITE)
+
+no_reporting_df_filter <- no_reporting_data_frame %>% select(CAPOP_2020_100m_HISP,
+                                                      CAPOP_2020_100m_NHBLACK,
+                                                      CAPOP_2020_100m_AMIND_COMBO,
+                                                      CAPOP_2020_100m_NHASIAN,
+                                                      CAPOP_2020_100m_NHHIPI,
+                                                      CAPOP_2020_100m_NHWHITE)
+
+```
+
+
+
+```{r}
+t_test <- t.test(reporting_data_frame,no_reporting_data_frame)
+```
 
 
