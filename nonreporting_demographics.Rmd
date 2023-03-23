@@ -73,6 +73,9 @@ buffered_conflict <- vect(here(gdrive_data, "/IntermediateData/IntermediateData_
 
 high_conf <- vect(here(gdrive_data, "/AnalysisData/model_outputs/shapefiles/high_conflict/mod3sq_current_highconf.shp"))
 
+poverty <- rast((here(gdrive_data, "/IntermediateData/IntermediateData_Files/zonal_statistics/svi_2018_tract_overall_nad83.tif")))
+
+plot(poverty)
 ```
 
 ```{r}
@@ -99,6 +102,14 @@ pov_demog <- full_join(new_data, Ca_pov, by = "OBJECTID")
 
 new_data_vect <- vect(pov_demog)
 
+```
+
+```{r}
+proj_poverty <- project(poverty, ca_raster)
+
+proj_mask <- mask(proj_poverty, ca_raster)
+
+plot(proj_mask)
 ```
 
 
@@ -141,6 +152,11 @@ demog_zonal <- full_join(demog_group, zonal_statistic, by = "COUNTY")
 high_conf_minus_buffered <- high_conf - buffered_conflict
 
 plot(high_conf_minus_buffered)
+
+
 ```
 
+```{r}
+
+```
 
