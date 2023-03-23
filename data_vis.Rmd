@@ -360,12 +360,17 @@ coeffs <- mod_sum$coefficients
 
 #convert the row names (variables) to a column for plotting
 coeffs_tidy <- cbind(rownames(coeffs), data.frame(coeffs, row.names=NULL)) %>% 
-  janitor::clean_names()
+  janitor::clean_names() %>% 
+  mutate(coeff_trans = exp(estimate),
+         ster_trans = exp(std_error),
+         prob_change = ifelse(coeff_trans < 1,
+                              (1 - coeff_trans)*100,
+                              (coeff_trans - 1)*100))
 
-#remove perennial ice and snow to make plot look more reasonable
+#remove perennial ice and snow to make plot look more reasonable and convert log odds to probability
 coeffs_tidy_nosnow <- coeffs_tidy %>% 
   filter(rownames_coeffs != "lcperrenial_ice_snow") %>% 
-  mutate(coeff_trans = (exp(estimate)/(1 + exp(estimate))))
+  mutate(coeff_trans = exp(estimate)) 
 
 #test plot
 ggplot(coeffs_tidy_nosnow, aes(x = coeff_trans, y = rownames_coeffs)) + 
@@ -377,27 +382,81 @@ ggplot(coeffs_tidy_nosnow, aes(x = coeff_trans, y = rownames_coeffs)) +
 
 #separate into df by variable type
 
-bluevar <- coeffs_tidy_nosnow[c(2:12, 18), ] %>% 
-  mutate(rownames_coeffs = c("Elevation", "High-Intensity Development", "Low-Intensity Development", "Medium-Intensity Development", "Developed Open Space", "Forest", "Grassland/Herbaceous", "Open Water", "Planted/Cultivated", "Shrub/Scrub", "Wetlands", "Terrain Ruggedness"))
+elev <- coeffs_tidy_nosnow[c(2), ] %>% 
+  mutate(coeff_trans = exp(estimate*1000),
+         prob_change = (coeff_trans - 1)*100) %>% 
+  mutate(rownames_coeffs = c("Elevation"))
+
+tri <- coeffs_tidy_nosnow[c(18), ] %>% 
+  mutate(coeff_trans = exp(estimate),
+         prob_change = (1 - coeff_trans)*100) %>% 
+  mutate(rownames_coeffs = c("Terrain Ruggedness"))
+
+bluevar_lconly <- coeffs_tidy_nosnow[c(3:12), ] %>% 
+  mutate(coeff_trans = exp(estimate),
+         prob_change = (coeff_trans - 1) * 100,
+         ster_min = exp(estimate - (2 * std_error)),
+         ster_max = exp(estimate + (2 * std_error)),
+         cimax = (ster_max - 1) * 100,
+         cimin = ifelse(ster_min > 1,
+                        (ster_min - 1) * 100,
+                        (1 - ster_min) * 100)) %>% 
+  mutate(rownames_coeffs = c("High-Intensity Development", "Low-Intensity Development", "Medium-Intensity Development", "Developed Open Space", "Forest", "Grassland/Herbaceous", "Open Water", "Planted/Cultivated", "Shrub/Scrub", "Wetlands"))
 
 greenvar <- coeffs_tidy_nosnow[c(13, 17), ] %>% 
+  mutate(coeff_trans = exp(estimate*1000),
+         prob_change = (1 - coeff_trans)*100) %>% 
   mutate(rownames_coeffs = c("Distance to Forest", "Distance to Streams"))
 
-grayvar<- coeffs_tidy_nosnow[c(14:16, 19), ] %>% 
-  mutate(rownames_coeffs = c("Population Density", "(Population Density)^2", "Distance to Recreational Areas", "Distance to Urban Areas"))
+#setting up the human variables
+#separate the distance variables
+
+gray_dist <- coeffs_tidy_nosnow[c(16, 19), ] %>% 
+  mutate(coeff_trans = exp(estimate*1000),
+         ster_trans = exp(std_error * 1000),
+         prob_change = (1 - coeff_trans)*100,
+         ster_min = exp((estimate - (2 * std_error))*1000),
+         ster_max = exp((estimate + (2 * std_error))*1000),
+         cimax = (1 - ster_min)*100,
+         cimin = (1 - ster_max)*100) %>% 
+  mutate(rownames_coeffs = c( "Distance to Recreational Areas", "Distance to Urban Areas"))
+
+gray_pop <- coeffs_tidy_nosnow[c(14), ] %>% 
+  mutate(coeff_trans = exp(estimate),
+         ster_trans = exp(std_error),
+         prob_change = ifelse(coeff_trans < 1,
+                              (1 - coeff_trans)*100,
+                              (coeff_trans - 1)*100),
+         ster_min = exp(estimate - (2 * std_error)),
+         ster_max = exp(estimate + (2 * std_error)),
+         cimax = (ster_min - 1)*100,
+         cimin = (ster_max - 1)*100) %>% 
+  mutate(rownames_coeffs = c("Population Density"))
+
+grayvar<- rbind(gray_dist, gray_pop)
 
 orangevar <- coeffs_tidy_nosnow[c(20:22), ] %>% 
+  mutate(coeff_mult = estimate * 1000,
+         ster_mult = std_error * 1000,
+         coeff_trans = exp(coeff_mult),
+         prob_change = (1 - coeff_trans) * 100,
+         ster_min = exp((estimate - (2 * std_error))*1000),
+         ster_max = exp((estimate + (2 * std_error))*1000),
+         cimax = (1 - ster_min)*100,
+         cimin = (1 - ster_max)*100) %>% 
   mutate(rownames_coeffs = c("Distance to Fire 1 Year Ago", "Distance to Fire 2-3 Years Ago", "Distance to Fire 4-5 Years Ago"))
 
 brownvar <- coeffs_tidy_nosnow[c(23), ] %>% 
-  mutate (rownames_coeffs = c("Drought"))
+  mutate (coeff_trans = exp(estimate),
+         ster_trans = exp(std_error),
+         prob_change = (1 - coeff_trans)*100)
 
 intercept <- coeffs_tidy_nosnow[c(1), ] %>% 
   mutate (rownames_coeffs = c("Intercept"))
 
-#nice plot
+#nice plot of all variables - OUTDATED, DO NOT USE
 ggplot() + 
-  geom_point(bluevar, mapping = aes(x = coeff_trans, y = rownames_coeffs), color = "#528faa") +
+  geom_point(bluevar_nonlc, mapping = aes(x = coeff_trans, y = rownames_coeffs), color = "#528faa") +
   #geom_pointrange(bluevar, mapping = aes(x = coeff_trans, y = rownames_coeffs, xmin = estimate-std_error, xmax = estimate+std_error), color = "#528faa") +
   geom_point(greenvar, mapping = aes(x = coeff_trans, y = rownames_coeffs), color = "#89a676") +
   #geom_pointrange(greenvar, mapping = aes(x = coeff_trans, y = rownames_coeffs, xmin = estimate-std_error, xmax = estimate+std_error), color = "#89a676") +
@@ -407,9 +466,38 @@ ggplot() +
   #geom_pointrange(orangevar, mapping = aes(x = coeff_trans, y = rownames_coeffs, xmin = estimate-std_error, xmax = estimate+std_error), color = "#ffbd59") +
   geom_point(brownvar, mapping = aes(x = coeff_trans, y = rownames_coeffs), color = "#b68a67") +
   #geom_pointrange(brownvar, mapping = aes(x = coeff_trans, y = rownames_coeffs, xmin = estimate-std_error, xmax = estimate+std_error), color = "#b68a67") +
-  geom_point(intercept, mapping = aes(x = coeff_trans, y = rownames_coeffs)) +
+  #geom_point(intercept, mapping = aes(x = coeff_trans, y = rownames_coeffs)) +
   #geom_pointrange(intercept, mapping = aes(x = coeff_trans, y = rownames_coeffs, xmin = estimate-std_error, xmax = estimate+std_error)) +
-  scale_x_continuous(breaks = seq(-3, 4, 0.5)) +
+  #scale_x_continuous(breaks = seq(-3, 4, 0.5)) +
+  labs(y = "Coefficient", x = "Estimate") +
+  theme_minimal() +
+  theme(plot.caption = ggtext::element_markdown(hjust = 0),
+        text = element_text(family = "Times New Roman"))
+
+
+#nice plot for climate
+ggplot(orangevar, mapping = aes(x = prob_change, y = reorder(rownames_coeffs, prob_change))) + 
+  geom_point(color = "#cc5500", size = 3) +
+  geom_linerange(aes(xmin = cimin, xmax = cimax), color = "#cc5500") +
+  labs(y = "Coefficient", x = "Estimate") +
+  theme_minimal() +
+  theme(plot.caption = ggtext::element_markdown(hjust = 0),
+        text = element_text(family = "Times New Roman")) 
+
+#nice plot for land cover
+
+ggplot(bluevar_lconly, mapping = aes(x = prob_change, y = reorder(rownames_coeffs, prob_change))) + 
+  geom_point(color = "#528faa", size = 3) +
+  geom_linerange(aes(xmin = cimin, xmax = cimax), color = "#528faa") +
+  labs(y = "Coefficient", x = "Estimate") +
+  theme_minimal() +
+  theme(plot.caption = ggtext::element_markdown(hjust = 0),
+        text = element_text(family = "Times New Roman"))
+
+#nice plot for human correlates
+ggplot(grayvar, mapping = aes(x = prob_change, y = reorder(rownames_coeffs, prob_change))) + 
+  geom_point(color = "#777777", size = 3) +
+  geom_linerange(aes(xmin = cimin, xmax = cimax), color = "#777777") +
   labs(y = "Coefficient", x = "Estimate") +
   theme_minimal() +
   theme(plot.caption = ggtext::element_markdown(hjust = 0),
@@ -563,6 +651,36 @@ cdfw_regions <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Fi
 #save reprojected shapefile
 
 st_write(cdfw_regions, dsn = here(gdrive_data, "/IntermediateData/IntermediateData_Files/cdfw_regions_reproj/cdfw_regions.shp"))
+
+```
+
+#Marginal effects
+
+```{r}
+#attempt to plot the predicted conflec against pop dens - didn't work so well
+
+popdens <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/population_density/pop_den_2021_mask.tif"))
+
+popdens_sq <- popdens^2
+
+proj_conf <- rast(here(gdrive_data, "/AnalysisData/model_outputs/projected_mod3_clim_map_squared.tif"))
+
+pop_stack <- c(proj_conf, popdens, popdens_sq)
+
+pop_conf_df <- values(pop_stack, dataframe = TRUE, na.rm = TRUE)
+
+colnames(pop_conf_df) <- c("pred_conf", "popdens", "popdens_sq")
+
+ggplot(pop_conf_df) +
+  #geom_point(aes(x = popdens, y = pred_conf)) +
+  geom_point(aes(x = popdens_sq, y = pred_conf))
+
+#marginal effects plot
+library(ResourceSelection)
+
+model<- load(here("models", "sq_mod3climate.rds")) #you have to name the object "model or it will not read in right
+
+mep(sq_mod3climate, which = c("popdens", "popdens"))
 
 ```
 

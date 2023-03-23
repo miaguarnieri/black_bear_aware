@@ -1,5 +1,5 @@
 ---
-title: "High conflict vectors"
+title: "Conflict Change Shapefiles"
 author: "Mia Guarnieri"
 date: "2023-03-01"
 output: html_document
@@ -64,6 +64,7 @@ plot(poly_per80)
 plot(poly_per90)
 
 ```
+
 #Create high conflict layer and vectorize it
 
 ```{r}
@@ -182,6 +183,60 @@ projected_countysumm <- full_join(county_summary_projected, ca_county, by = "OBJ
 st_write(current_countysumm, dsn = here(gdrive_data, "/AnalysisData/model_outputs/shapefiles/county_stats/current_county_highconf.shp"))
 
 st_write(projected_countysumm, dsn = here(gdrive_data, "/AnalysisData/model_outputs/shapefiles/county_stats/projected_county_highconf.shp"))
+
+```
+
+#Filter current day for only 0 values and projected for nonzero values
+
+```{r}
+#read in current raster and keep only the lowest decile
+
+current_conf <- rast(here(gdrive_data, "/AnalysisData/model_outputs/mod3clim_map_squared.tif"))
+
+decs_current <- global(current_conf, quantile, probs = seq(0, 1, 0.1), na.rm = TRUE)
+
+current_zeros <- current_conf #assign conflict raster to new object
+
+current_zeros[current_zeros > 0.01] <- NA #anything greater than 1 percent
+
+#read in projected raster and keep only top 50%
+
+proj_conf <- rast(here(gdrive_data, "/AnalysisData/model_outputs/projected_mod3_clim_map_squared.tif"))
+
+proj_nonzero <- proj_conf
+
+proj_nonzero[proj_nonzero < 0.5] <- NA #set anything lower than  50% to NA
+proj_nonzero[proj_nonzero > 0.5] <- 1 #and anything higher to 1 
+```
+
+#Mask and take the difference
+
+```{r}
+#CA counties
+
+ca_county <- read_sf(here(gdrive_data, "/InputData/InputData_Files/geoportal_ca_counties/cnty19_1.shp")) %>% 
+  st_transform(crs = crs(cdfw_regions))
+
+ca_county_vect <- ca_county %>% 
+  select(COUNTY_NAM, geometry) %>% 
+  vect()
+
+# mask it - keep only zeros that will be in the top 50
+
+masked_proj_nonzero <- mask(current_zeros, proj_nonzero)
+
+
+plot(proj_nonzero_change)
+
+#extract # of cells by county
+projected_county_nonzero_change <- extract(proj_nonzero_change, ca_county_vect, na.rm = TRUE, fun = "mean")
+
+colnames(projected_county_nonzero_change) <- c("OBJECTID", "avg_conf")
+
+projected_countysumm_nonzeros <- full_join(projected_county_nonzero_change, ca_county, by = "OBJECTID")
+
+#export county summary shps
+st_write(current_countysumm, dsn = here(gdrive_data, "/AnalysisData/model_outputs/shapefiles/county_stats/current_county_highconf.shp"))
 
 ```
 
