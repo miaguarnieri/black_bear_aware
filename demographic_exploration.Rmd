@@ -150,9 +150,19 @@ no_reporting_df_filter <- no_reporting_data_frame %>% select(CAPOP_2020_100m_HIS
 ```
 
 
+```{r}
+hisp_mean_reporting <- mean(reporting_df_filter$CAPOP_2020_100m_HISP)
+hisp_mean_no_reporting <- mean(no_reporting_df_filter$CAPOP_2020_100m_HISP)
+```
 
 ```{r}
-t_test <- t.test(reporting_data_frame,no_reporting_data_frame)
+t_test_hisp <- t.test(reporting_df_filter$CAPOP_2020_100m_HISP,no_reporting_df_filter$CAPOP_2020_100m_HISP)
+t_test_nhblack <- t.test(reporting_df_filter$CAPOP_2020_100m_NHBLACK,no_reporting_df_filter$CAPOP_2020_100m_NHBLACK)
+t_test_amind_combo <- t.test(reporting_df_filter$CAPOP_2020_100m_AMIND_COMBO,no_reporting_df_filter$CAPOP_2020_100m_AMIND_COMBO)
+t_test_nhasian <- t.test(reporting_df_filter$CAPOP_2020_100m_NHASIAN,no_reporting_df_filter$CAPOP_2020_100m_NHASIAN)
+t_test_nhhipi <- t.test(reporting_df_filter$CAPOP_2020_100m_NHHIPI,no_reporting_df_filter$CAPOP_2020_100m_NHHIPI)
+t_testnhwhite <- t.test(reporting_df_filter$CAPOP_2020_100m_NHWHITE,no_reporting_df_filter$CAPOP_2020_100m_NHWHITE)
 ```
+
 
 
