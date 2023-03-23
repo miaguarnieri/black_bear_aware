@@ -223,15 +223,44 @@ plot(poverty)
 
 
 ```{r}
-proj_poverty <- project(poverty, ca_total_proj)
-proj_mask <- mask(proj_poverty, ca_total_proj)
+proj_poverty <- project(poverty, ca_raster)
+proj_mask <- mask(proj_poverty, ca_raster)
 plot(proj_mask)
 ```
 
 ```{r}
-poverty_mask_reporting <- mask(proj_mask, high_conflict_reporting_proj)
+high_conflict_reporting_pov <- mask(high_conflict, buffer_conflict)
 
-poverty_mask_no_reporting <- mask(proj_mask, high_conflict_no_reporting_proj)
+high_conflict_reporting_proj_pov <- project(high_conflict_reporting_pov,ca_raster)
 ```
 
+```{r}
+high_conflict_no_reporting_pov <- mask(high_conflict, buffer_conflict, inverse=TRUE)
+
+high_conflict_no_reporting_proj_pov <- project(high_conflict_no_reporting_pov, ca_raster)
+
+```
+
+```{r}
+poverty_mask_reporting <- mask(proj_mask, high_conflict_reporting_proj_pov)
+
+poverty_mask_no_reporting <- mask(proj_mask, high_conflict_no_reporting_proj_pov)
+```
+
+```{r}
+poverty_reporting_data_frame <- as.data.frame(poverty_mask_reporting)
+
+poverty_no_reporting_data_frame <- as.data.frame(poverty_mask_no_reporting)
+
+```
+
+```{r}
+mean_poverty_reporting <- mean(poverty_reporting_data_frame$svi_2018_tract_overall_nad83)
+mean_poverty_no_reporting <- mean(poverty_no_reporting_data_frame$svi_2018_tract_overall_nad83)
+#mean_poverty_reporting = 0.531186
+#mean_poverty_no_reporting = 0.6585639
+```
+```{r}
+t_test_poverty <- t.test(poverty_reporting_data_frame$svi_2018_tract_overall_nad83,poverty_no_reporting_data_frame$svi_2018_tract_overall_nad83)
+```
 
