@@ -164,5 +164,103 @@ t_test_nhhipi <- t.test(reporting_df_filter$CAPOP_2020_100m_NHHIPI,no_reporting_
 t_testnhwhite <- t.test(reporting_df_filter$CAPOP_2020_100m_NHWHITE,no_reporting_df_filter$CAPOP_2020_100m_NHWHITE)
 ```
 
+```{r}
+hisp_reporting_mean <- mean(reporting_df_filter$CAPOP_2020_100m_HISP)
+hisp_no_reporting_mean <- mean(no_reporting_df_filter$CAPOP_2020_100m_HISP)
+#hisp_reporting_mean = 3.368873
+#hisp_no_reporting_mean = 6.021271
 
+```
+
+```{r}
+nhblack_reporting_mean <- mean(reporting_df_filter$CAPOP_2020_100m_NHBLACK)
+nhblack_no_reporting_mean <- mean(no_reporting_df_filter$CAPOP_2020_100m_NHBLACK)
+
+#nhblack_reporting_mean = 0.3998586
+#nhblack_no_reporting_mean =  0.8407307
+```
+
+```{r}
+amind_combo_reporting_mean <- mean(reporting_df_filter$CAPOP_2020_100m_AMIND_COMBO)
+amind_combo_no_reporting_mean <- mean(no_reporting_df_filter$CAPOP_2020_100m_AMIND_COMBO)
+
+#amind_combo_reporting_mean = 0.4012271
+#amind_combo_no_reporting_mean = 0.5081011
+```
+
+```{r}
+nhasian_reporting_mean <- mean(reporting_df_filter$CAPOP_2020_100m_NHASIAN)
+nhasian_no_reporting_mean <- mean(no_reporting_df_filter$CAPOP_2020_100m_NHASIAN)
+
+#nhasian_reporting_mean = 1.260077
+#nhasian_no_reporting_mean = 2.320014
+```
+
+```{r}
+nhhipi_reporting_mean <- mean(reporting_df_filter$CAPOP_2020_100m_NHHIPI)
+nhhipi_no_reporting_mean <- mean(no_reporting_df_filter$CAPOP_2020_100m_NHHIPI)
+
+#nhhipi_reporting_mean  = 0.02249208
+#nhhipi_no_reporting_mean = 0.05605196
+
+```
+
+```{r}
+nhwhite_reporting_mean <- mean(reporting_df_filter$CAPOP_2020_100m_NHWHITE)
+nhwhite_no_reporting_mean <- mean(no_reporting_df_filter$CAPOP_2020_100m_NHWHITE)
+
+#nhwhite_reporting_mean = 4.724358 
+#nhwhite_no_reporting_mean = 4.624486
+
+```
+# Poverty Reporting 
+```{r}
+poverty <- rast((here(gdrive_data, "/IntermediateData/IntermediateData_Files/zonal_statistics/svi_2018_tract_overall_nad83.tif")))
+
+plot(poverty)
+
+```
+
+
+```{r}
+proj_poverty <- project(poverty, ca_raster)
+proj_mask <- mask(proj_poverty, ca_raster)
+plot(proj_mask)
+```
+
+```{r}
+high_conflict_reporting_pov <- mask(high_conflict, buffer_conflict)
+
+high_conflict_reporting_proj_pov <- project(high_conflict_reporting_pov,ca_raster)
+```
+
+```{r}
+high_conflict_no_reporting_pov <- mask(high_conflict, buffer_conflict, inverse=TRUE)
+
+high_conflict_no_reporting_proj_pov <- project(high_conflict_no_reporting_pov, ca_raster)
+
+```
+
+```{r}
+poverty_mask_reporting <- mask(proj_mask, high_conflict_reporting_proj_pov)
+
+poverty_mask_no_reporting <- mask(proj_mask, high_conflict_no_reporting_proj_pov)
+```
+
+```{r}
+poverty_reporting_data_frame <- as.data.frame(poverty_mask_reporting)
+
+poverty_no_reporting_data_frame <- as.data.frame(poverty_mask_no_reporting)
+
+```
+
+```{r}
+mean_poverty_reporting <- mean(poverty_reporting_data_frame$svi_2018_tract_overall_nad83)
+mean_poverty_no_reporting <- mean(poverty_no_reporting_data_frame$svi_2018_tract_overall_nad83)
+#mean_poverty_reporting = 0.531186
+#mean_poverty_no_reporting = 0.6585639
+```
+```{r}
+t_test_poverty <- t.test(poverty_reporting_data_frame$svi_2018_tract_overall_nad83,poverty_no_reporting_data_frame$svi_2018_tract_overall_nad83)
+```
 
