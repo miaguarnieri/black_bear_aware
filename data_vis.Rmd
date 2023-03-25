@@ -358,6 +358,15 @@ mod_sum <- summary(sq_mod3climate)
 #extract the coefficients from the model summary object
 coeffs <- mod_sum$coefficients
 
+library(kableExtra)
+nice_table <- coeffs %>% 
+  kable() %>% 
+  kable_classic(full_width = TRUE, html_font = "Times New Roman")
+
+nice_table
+
+save_kable(nice_table, file = here("/Users/mia/Desktop/Black Bear Aware/coeffs_nicetable.jpeg"), zoom = 2.5)
+
 #convert the row names (variables) to a column for plotting
 coeffs_tidy <- cbind(rownames(coeffs), data.frame(coeffs, row.names=NULL)) %>% 
   janitor::clean_names() %>% 
@@ -381,6 +390,14 @@ ggplot(coeffs_tidy_nosnow, aes(x = coeff_trans, y = rownames_coeffs)) +
 ##Making a nicer table
 
 #separate into df by variable type
+
+ice_snow <- coeffs_tidy[10,] %>% 
+  mutate(coeff_trans = exp(estimate),
+         prob_change = (coeff_trans - 1) * 100,
+         ster_min = exp(estimate - (2 * std_error)),
+         ster_max = exp(estimate + (2 * std_error)),
+         cimax = (1 - ster_min)*100,
+         cimin = (1 - ster_max)*100)
 
 elev <- coeffs_tidy_nosnow[c(2), ] %>% 
   mutate(coeff_trans = exp(estimate*1000),
@@ -659,28 +676,12 @@ st_write(cdfw_regions, dsn = here(gdrive_data, "/IntermediateData/IntermediateDa
 ```{r}
 #attempt to plot the predicted conflec against pop dens - didn't work so well
 
-popdens <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/population_density/pop_den_2021_mask.tif"))
-
-popdens_sq <- popdens^2
-
-proj_conf <- rast(here(gdrive_data, "/AnalysisData/model_outputs/projected_mod3_clim_map_squared.tif"))
-
-pop_stack <- c(proj_conf, popdens, popdens_sq)
-
-pop_conf_df <- values(pop_stack, dataframe = TRUE, na.rm = TRUE)
-
-colnames(pop_conf_df) <- c("pred_conf", "popdens", "popdens_sq")
-
-ggplot(pop_conf_df) +
-  #geom_point(aes(x = popdens, y = pred_conf)) +
-  geom_point(aes(x = popdens_sq, y = pred_conf))
-
 #marginal effects plot
 library(ResourceSelection)
 
 model<- load(here("models", "sq_mod3climate.rds")) #you have to name the object "model or it will not read in right
 
-mep(sq_mod3climate, which = c("popdens", "popdens"))
+mep(sq_mod3climate, which = "popdens", col.points = "#c3c2b1", pch = 1, n = 100, family = "Times New Roman")
 
 ```
 
