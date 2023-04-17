@@ -1,0 +1,162 @@
+---
+title: "lowreporting_zonal"
+author: "Chase Tarr"
+date: "2023-03-13"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+#attach packages
+library(tidyverse)
+library(here)
+library(sf)
+library(tmap)
+library(lubridate)
+library(ResourceSelection)
+library(rmapshaper)
+library(terra)
+
+#mia, chase, and claire's file path
+
+gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+
+#mia's file path
+#gdrive_data <- "/Users/mia/Library/CloudStorage/GoogleDrive-mguarnieri@ucsb.edu/Shared drives/Black_Bear_Aware/gdrive_data"
+
+#sam's file path
+#gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
+
+```
+
+# exploring high conflict points where nonreporting is occurring and understanding the demographics of the areas
+```{r}
+#loading in data
+mod3_rast <- rast(here(gdrive_data, "/AnalysisData/model_outputs/projected_mod3_clim_map_squared.tif"))
+
+ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
+
+county_demographics <- vect(here(gdrive_data, "/IntermediateData/IntermediateData_Files/census_demographics/MSSA_Detail.shp"))
+
+demog_csv <- read.csv(here(gdrive_data, "/IntermediateData/IntermediateData_Files/zonal_statistics/population_usafacts.csv")) %>% select(Years, X2019)
+
+demog_csv_2 <- read.csv(here(gdrive_data, "/IntermediateData/IntermediateData_Files/zonal_statistics/cc-est2021-alldata-06.csv")) %>% 
+  group_by(CTYNAME) %>% 
+  summarise(pop = sum(TOT_POP),
+            male_white_pop = (sum(WA_MALE)/pop)*100,
+            fem_white_pop = (sum(WA_FEMALE) / pop)*100,
+            male_black = (sum(BAC_MALE)/pop)*100,
+            fem_black = (sum(BAC_FEMALE)/pop)*100,
+            male_asian = (sum(AA_MALE)/pop)*100,
+            fem_asian = (sum(AA_FEMALE)/pop)*100,
+            male_ind = (sum(IA_MALE)/pop)*100,
+            fem_ind = (sum(IA_FEMALE)/pop)*100,
+            male_isl = (sum(NAC_MALE)/pop)*100,
+            fem_isl = (sum(NAC_FEMALE)/pop)*100,
+            male_hisp = (sum(H_MALE)/pop)*100,
+            fem_hisp = (sum(H_FEMALE)/pop)*100) %>% 
+  rename(COUNTY_NAM = "CTYNAME") %>% 
+  mutate(OBJECTID = 1:58)
+
+county_shp<- vect(here(gdrive_data,"/InputData/InputData_Files/geoportal_ca_counties/cnty19_1.shp"))
+
+poverty <- demog_csv <- read.csv(here(gdrive_data, "/IntermediateData/IntermediateData_Files/zonal_statistics/allpovu.csv"))
+
+Ca_pov <- poverty[c(202:259),] %>% 
+  select(Table.with.column.headers.in.rows.3.and.4, X.1, X.5) %>% 
+  mutate(OBJECTID = 1:58)
+
+#buffered conflict points refined
+
+buffered_conflict <- vect(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/conflict_buffered_refined/conflict_buffered_refined.shp"))
+
+high_conf <- vect(here(gdrive_data, "/AnalysisData/model_outputs/shapefiles/high_conflict/mod3sq_current_highconf.shp"))
+
+poverty <- rast((here(gdrive_data, "/IntermediateData/IntermediateData_Files/zonal_statistics/svi_2018_tract_overall_nad83.tif")))
+
+plot(poverty)
+```
+
+```{r}
+county_calber <- project(county_shp, ca_raster)
+
+counties_crop <- crop(county_calber, ca_raster) %>% 
+  st_as_sf()
+
+zonal_statistic <-extract(mod3_rast, counties_crop, fun="mean", na.rm=TRUE) 
+
+colnames(zonal_statistic) = c("OBJECTID", "Conflict_Risk")
+
+counties_zonal <- full_join(counties_crop, zonal_statistic, by = "OBJECTID")
+
+counties_high_conf <- counties_zonal[-c(59:69),]
+
+counties_conf_demog <- full_join(demog_csv_2, counties_high_conf, by = "OBJECTID") 
+  
+new_data <- subset(counties_conf_demog, select = c(1:14, 22:26)) %>% 
+  mutate(OBJECTID = 1:58)
+
+
+pov_demog <- full_join(new_data, Ca_pov, by = "OBJECTID")
+
+new_data_vect <- vect(pov_demog)
+
+```
+
+```{r}
+proj_poverty <- project(poverty, ca_raster)
+
+proj_mask <- mask(proj_poverty, ca_raster)
+
+plot(proj_mask)
+```
+
+
+#```{r}
+#reformatt raster
+
+demog_calber <- project(county_demographics, ca_raster)
+
+demog_mask <- mask(demog_calber, ca_raster)
+
+plot(demog_mask)
+#```
+
+```{r}
+demog_calber_shp <- project(county_demographics, ca_raster)
+
+demog_crop <- crop(demog_calber_shp, ca_raster) %>% 
+  st_as_sf()
+  
+demog_group <- demog_crop %>% 
+  group_by(COUNTY) %>% 
+  summarize(mean_white=mean(PCT_WHITE), mean_black = mean(PCT_BLACK), mean_asian=mean(PCT_ASIAN), mean_amind=mean(PCT_AMIND_), mean_hispanic=mean(PCT_HSPNC), mean_islander=mean(PCT_ISLAND), pop_under18=mean(PCT_UNDR18), pop_over65=mean(PCT_65OVER))
+
+
+
+plot(demog_group)
+```
+
+```{r}
+#run the zonal stats
+
+colnames(zonal_statistic) = c("COUNTY", "Conflict_Risk")
+
+demog_zonal <- full_join(demog_group, zonal_statistic, by = "COUNTY")
+```
+
+
+#raster math
+```{r}
+high_conf_minus_buffered <- high_conf - buffered_conflict
+
+plot(high_conf_minus_buffered)
+
+
+```
+
+```{r}
+
+```
+
