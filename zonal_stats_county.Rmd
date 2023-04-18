@@ -1,0 +1,257 @@
+---
+title: "zonal_stats_county"
+author: "Sam Rozal"
+date: "2023-02-28"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+#attach packages
+library(tidyverse)
+library(here)
+library(sf)
+library(tmap)
+library(lubridate)
+library(ResourceSelection)
+library(rmapshaper)
+library(terra)
+
+#mia, chase, and claire's file path
+
+#gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+
+#mia's file path
+#gdrive_data <- "/Users/mia/Library/CloudStorage/GoogleDrive-mguarnieri@ucsb.edu/Shared drives/Black_Bear_Aware/gdrive_data"
+
+#sam's file path
+gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
+
+```
+
+
+#By county 
+```{r}
+#load in data
+mod3_rast <- rast(here(gdrive_data, "/AnalysisData/model_outputs/projected_mod3_clim_map_squared.tif"))
+
+
+ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
+
+counties_shp_geoportal<- vect(here(gdrive_data,"/InputData/InputData_Files/geoportal_ca_counties/cnty19_1.shp"))
+
+counties_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/ca_counties_2_28/ca_counties_new.tif"))
+
+```
+
+```{r}
+#reformatt raster
+
+#counties_calber <- project(counties_raster, ca_raster)
+
+#counties_mask <- mask(counties_calber, ca_raster)
+
+#plot(counties_mask)
+
+```
+
+```{r}
+#reproject/format the counties shp 
+counties_calber_shp <- project(counties_shp_geoportal, ca_raster)
+
+counties_crop <- crop(counties_calber_shp, ca_raster) %>% 
+  st_as_sf()
+
+plot(counties_crop)
+
+```
+
+
+```{r}
+#run the zonal stats
+zonal_statistic <-extract(mod3_rast, counties_crop, fun="mean", na.rm=TRUE) 
+
+colnames(zonal_statistic) = c("OBJECTID", "Conflict_Risk")
+
+
+```
+
+```{r}
+#merge the zonal stats and the orignial shapefile 
+counties_zonal <- full_join(counties_crop, zonal_statistic, by = "OBJECTID")
+
+```
+
+```{r}
+#select for object ID, county, and conflict risk 
+counties_select <- counties_zonal %>% select('OBJECTID', 'COUNTY_NAM', 'Conflict_Risk')
+```
+
+```{r}
+#write function
+st_write(counties_select, dsn=here(gdrive_data, "/IntermediateData/IntermediateData_Files/storymap_data/counties_select.shp"), driver="ESRI Shapefile", append = TRUE)
+      
+```
+
+```{r}
+counties_zonal_vect <- vect(counties_zonal)
+```
+
+```{r}
+savevect <- function(x){
+  
+  name <- paste0(deparse(substitute(x)), ".shp") #the name of the file will be the same as the input object, plus '.hp' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a shapefile
+  
+  writeVector(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/zonal_statistics/zonal_county", name), filetype = "ESRI Shapefile", overwrite=TRUE)
+}
+
+
+#save the file
+savevect(counties_zonal_vect)
+```
+
+# By CDFW Region 
+```{r}
+#load in data
+mod3_rast <- rast(here(gdrive_data, "/AnalysisData/model_outputs/projected_mod3_clim_map_squared.tif"))
+
+
+ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
+
+cdfw_regions<- vect(here(gdrive_data,"/IntermediateData/IntermediateData_Files/cdfw_regions_reproj/cdfw_regions.shp"))
+
+```
+
+
+```{r}
+#reproject/format the shp 
+
+cdfw_regions_crop <- crop(cdfw_regions, ca_raster) %>% 
+  st_as_sf()
+
+```
+
+
+```{r}
+#run the zonal stats
+zonal_statistic_cdfw <-extract(mod3_rast, cdfw_regions_crop, fun="mean", na.rm=TRUE) 
+
+colnames(zonal_statistic_cdfw) = c("OBJECTID", "Conflict_Risk")
+
+```
+
+```{r}
+#merge the zonal stats and the orignial shapefile 
+cdfw_zonal <- full_join(cdfw_regions_crop, zonal_statistic_cdfw, by = "OBJECTID")
+
+```
+
+
+```{r}
+savevect <- function(x){
+  
+  name <- paste0(deparse(substitute(x)), ".shp") #the name of the file will be the same as the input object, plus '.hp' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a shapefile
+  
+  writeVector(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/zonal_statistics/zonal_county", name), filetype = "ESRI Shapefile", overwrite=TRUE)
+}
+
+
+#save the file
+savevect(cdfw_zonal)
+```
+
+#By Cities 
+
+```{r}
+#load in data
+mod3_rast <- rast(here(gdrive_data, "/AnalysisData/model_outputs/projected_mod3_clim_map_squared.tif"))
+
+
+ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
+
+ca_places<- vect(here(gdrive_data,"/IntermediateData/IntermediateData_Files/ca_places_formatted/ca_places_for.shp")) %>%
+  mutate()
+
+
+```
+
+
+```{r}
+#reproject/format the shp 
+
+ca_places_crop <- crop(ca_places, ca_raster) %>% 
+  st_as_sf()
+
+```
+
+
+```{r}
+#run the zonal stats
+zonal_statistic_places <-extract(mod3_rast, ca_places_crop, fun="mean", na.rm=TRUE) 
+
+colnames(zonal_statistic_places) = c("OBJECTID", "Conflict_Risk")
+
+```
+
+```{r}
+#merge the zonal stats and the orignial shapefile 
+ca_places_zonal <- full_join(ca_places_crop, zonal_statistic_places, by = "OBJECTID")
+
+```
+
+
+```{r}
+savevect <- function(x){
+  
+  name <- paste0(deparse(substitute(x)), ".shp") #the name of the file will be the same as the input object, plus '.hp' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a shapefile
+  
+  writeVector(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/zonal_statistics/zonal_county", name), filetype = "ESRI Shapefile", overwrite=TRUE)
+}
+
+
+#save the file
+savevect(cdfw_zonal)
+```
+
+#By Metropolitian Statistcal Area 
+
+
+```{r}
+#load in data
+mod3_rast <- rast(here(gdrive_data, "/AnalysisData/model_outputs/projected_mod3_clim_map_squared.tif"))
+
+
+ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
+
+ca_msa<- vect(here(gdrive_data,"/InputData/InputData_Files/cali_MSA_cagov/geo_export_e85822fa-0851-4d09-bf19-148d6887d851.shp"))
+
+
+```
+
+```{r}
+ca_msa_project <- project(ca_msa, ca_raster)
+
+ca_msa_crop<- crop(ca_msa_project, ca_raster) %>% 
+  st_as_sf() %>%
+  mutate(OBJECTID=row_number())
+```
+
+```{r}
+zonal_statistic_msa <-extract(mod3_rast, ca_msa_crop, fun="mean", na.rm=TRUE) 
+
+colnames(zonal_statistic_msa) = c("OBJECTID", "Conflict_Risk")
+```
+
+```{r}
+#merge the zonal stats and the orignial shapefile 
+ca_msa_zonal <- full_join(ca_msa_crop, zonal_statistic_msa, by = "OBJECTID")
+```
+
+
