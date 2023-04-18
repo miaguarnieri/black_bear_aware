@@ -138,14 +138,16 @@ reporting_df_filter<- reporting_data_frame %>% select(CAPOP_2020_100m_HISP,
                                                       CAPOP_2020_100m_AMIND_COMBO,
                                                       CAPOP_2020_100m_NHASIAN,
                                                       CAPOP_2020_100m_NHHIPI,
-                                                      CAPOP_2020_100m_NHWHITE)
+                                                      CAPOP_2020_100m_NHWHITE,
+                                                      CAPOP_2020_100m_NHOTHERMULTI)
 
 no_reporting_df_filter <- no_reporting_data_frame %>% select(CAPOP_2020_100m_HISP,
                                                       CAPOP_2020_100m_NHBLACK,
                                                       CAPOP_2020_100m_AMIND_COMBO,
                                                       CAPOP_2020_100m_NHASIAN,
                                                       CAPOP_2020_100m_NHHIPI,
-                                                      CAPOP_2020_100m_NHWHITE)
+                                                      CAPOP_2020_100m_NHWHITE,
+                                                      CAPOP_2020_100m_NHOTHERMULTI)
 
 ```
 

@@ -84,8 +84,18 @@ counties_zonal <- full_join(counties_crop, zonal_statistic, by = "OBJECTID")
 ```
 
 ```{r}
-counties_zonal_vect <- vect(counties_zonal)
+#select for object ID, county, and conflict risk 
+counties_select <- counties_zonal %>% select('OBJECTID', 'COUNTY_NAM', 'Conflict_Risk')
+```
 
+```{r}
+#write function
+st_write(counties_select, dsn=here(gdrive_data, "/IntermediateData/IntermediateData_Files/storymap_data/counties_select.shp"), driver="ESRI Shapefile", append = TRUE)
+      
+```
+
+```{r}
+counties_zonal_vect <- vect(counties_zonal)
 ```
 
 ```{r}
