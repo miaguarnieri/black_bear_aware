@@ -1,0 +1,64 @@
+---
+title: "wir_viz"
+author: "Claire Meuter"
+date: "2023-03-21"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(here)
+library(lubridate)
+
+#claire's file path
+gdrive_data <- "/Users/clairemeuter/Library/CloudStorage/GoogleDrive-clairemeuter@ucsb.edu/Shared drives/Black_Bear_Aware/gdrive_data"
+```
+#read in the WIR data
+```{r}
+wir <- read_csv(here("WIR_clean.csv")) %>% 
+  mutate(date = lubridate::mdy_hm(incident_date),
+         year = year(date),
+         month = month(date)) %>% 
+  filter(year < 2022)
+```
+
+
+#graph of wir reports yearly
+```{r}
+
+x_var <- "month"
+      x_scale <- scale_x_continuous( breaks = seq(min(wir$month), max(wir$month), by=1), labels = month.abb)
+      x_limits <- coord_cartesian(xlim = c(min(wir$month), max(wir$month)))
+
+yearly <- ggplot(data = wir) +
+  geom_bar(aes(fill = confirmed_category, x = year)) +
+  scale_fill_manual(
+    breaks = c(
+      "Depredation", "General Nuisance", "Potential Human Conflict", "Sighting"),
+                        values = c("#df7d60", "#aca0bd", "#778aab", "#b9cdca")) +
+  labs(y = "Number of observations",
+           fill = "Conflict Type", x = "Month") +
+  theme_bw() +
+  coord_cartesian(ylim = c(0, NA)) +
+  theme(text = element_text(family = "Times New Roman"))
+
+yearly
+```
+
+#graph of wir reports seasonally 
+```{r}
+ggplot(data = wir) +
+  geom_bar(aes(fill = confirmed_category, x = month)) +
+    x_scale+ 
+  scale_fill_manual(
+    breaks = c(
+      "Depredation", "General Nuisance", "Potential Human Conflict", "Sighting"),
+                        values = c("#df7d60", "#aca0bd", "#778aab", "#b9cdca")) +
+  labs(y = "Number of observations",
+           fill = "Conflict Type", x = "Year") +
+  theme_bw() +
+  coord_cartesian(ylim = c(0, NA)) +
+   theme(text = element_text(family = "Times New Roman"))
+```
+
