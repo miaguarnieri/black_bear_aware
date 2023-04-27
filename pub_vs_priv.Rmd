@@ -14,6 +14,7 @@ library(sf)
 library(stars)
 library(tmap)
 library(kableExtra)
+library(webshot)
 
 #claire's file path
 gdrive_data <- "/Users/clairemeuter/Library/CloudStorage/GoogleDrive-clairemeuter@ucsb.edu/Shared drives/Black_Bear_Aware/gdrive_data"
@@ -190,13 +191,22 @@ area_by_category <- as.data.frame(masked_own) %>%
   tally() %>% 
   mutate(area = (n * res(masked_own)[1] * res(masked_own)[2])) %>% 
   select(-n) %>% 
-  mutate(area_km = area / 1000000)
+  mutate(area_km = area / 1000000) %>% 
+  select(-area) %>% 
+  mutate(land_total = sum(area_km)) %>% 
+  mutate(per_area = (area_km/land_total)*100) %>% 
+  select(-land_total) %>% 
+  select(-area_km)
+  
 
 
 nice_table <- area_by_category %>% 
-  kbl(col.names = c("Land Ownership Type", "Area (m^2)", "Area (km^2)")) %>% 
- kable_classic(full_width = TRUE, html_font = "Cambria")
-
+  kbl(col.names = c("Land Ownership Type", "Percent")) %>% 
+ kable_classic(full_width = TRUE, html_font = "Times New Roman") %>% 
+  as_image()
+#row_spec to bold top two 
+#figure out how km^2
+#by km and then proportion column 
 
 ggplot(data = area_by_category) + geom_col(aes(x = category, y = area_km, fill = category)) + theme_minimal()
 
@@ -210,8 +220,49 @@ nice_table
 high_con_sf_count <- as.data.frame(high_con_sf) %>% 
   tally() %>% 
   mutate(area = (n * res(ca_raster)[1] * res(ca_raster)[2]))
-ca_count
 
 
+
+```
+## doing this again with projected high conflict risk regions (for year 2030)
+```{r}
+#reading in 2030 high conflict shp layer 
+high_con_sf_2030 <- vect(here(gdrive_data, "/AnalysisData/model_outputs/shapefiles/high_conflict/mod3sq_projected_highconf.shp"))
+
+
+#masking to high conflict areas
+
+masked_own_2030 <- mask(land_own_mask, high_con_sf_2030)
+
+#finding the area of each category from masked_own 
+area_by_category_2030 <- as.data.frame(masked_own_2030) %>% 
+  group_by(category) %>% 
+  tally() %>% 
+  mutate(area = (n * res(masked_own_2030)[1] * res(masked_own_2030)[2])) %>% 
+  select(-n) %>% 
+  mutate(area_km = area / 1000000) %>% 
+  select(-area) %>% 
+  mutate(land_total = sum(area_km)) %>% 
+  mutate(per_area = (area_km/land_total)*100) %>% 
+  select(-land_total) %>% 
+  select(-area_km)
+  
+
+
+nice_table_2030 <- area_by_category_2030 %>% 
+  kbl(col.names = c("Land Ownership Type", "Percent")) %>% 
+ kable_classic( html_font = "Times New Roman") %>% 
+  as_image()
+#row_spec to bold top two 
+#figure out how km^2
+#by km and then proportion column 
+
+ggplot(data = area_by_category) + geom_col(aes(x = category, y = area_km, fill = category)) + theme_minimal()
+
+ggplot(area_by_category, aes(x = "", y = area_km, fill = category, legend(title = "Land ownership type"))) +
+       geom_col()  +
+       scale_fill_brewer(palette = "Set3") +
+       labs(x="", y="Area (km^2)") 
+nice_table_2030
 ```
 
