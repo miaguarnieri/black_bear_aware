@@ -1,0 +1,242 @@
+---
+title: "Conflict Change Shapefiles"
+author: "Mia Guarnieri"
+date: "2023-03-01"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(here)
+library(terra)
+library(sf)
+
+#mia's file path
+gdrive_data <- "/Users/mia/Library/CloudStorage/GoogleDrive-mguarnieri@ucsb.edu/Shared drives/Black_Bear_Aware/gdrive_data"
+```
+
+#Test cutoffs on the projected conflict map
+
+```{r}
+proj_conf <- rast(here(gdrive_data, "/AnalysisData/model_outputs/projected_mod3_clim_map_squared.tif"))
+
+#60 percent
+
+conf_60perc <- proj_conf
+
+conf_60perc[conf_60perc > 0.6] <- 1
+conf_60perc[conf_60perc < 0.6] <- NA 
+
+poly_per60 <- as.polygons(conf_60perc, dissolve = TRUE)
+
+#70 percent
+
+conf_70perc <- proj_conf
+
+conf_70perc[conf_70perc > 0.7] <- 1
+conf_70perc[conf_70perc < 0.7] <- NA
+
+poly_per70 <- as.polygons(conf_70perc, dissolve = TRUE)
+
+#80 percent
+
+conf_80perc <- proj_conf
+
+conf_80perc[conf_80perc > 0.8] <- 1
+conf_80perc[conf_80perc < 0.8] <- NA
+
+poly_per80 <- as.polygons(conf_80perc, dissolve = TRUE)
+
+#90 percent
+
+conf_90perc <- proj_conf
+
+conf_90perc[conf_90perc > 0.9] <- 1
+conf_90perc[conf_90perc < 0.9] <- NA
+
+poly_per90 <- as.polygons(conf_90perc, dissolve = TRUE)
+
+plot(poly_per60)
+plot(poly_per70)
+plot(poly_per80)
+plot(poly_per90)
+
+```
+
+#Create high conflict layer and vectorize it
+
+```{r}
+#read in the rasters
+
+current_conf <- rast(here(gdrive_data, "/AnalysisData/model_outputs/mod3clim_map_squared.tif"))
+
+proj_conf <- rast(here(gdrive_data, "/AnalysisData/model_outputs/projected_mod3_clim_map_squared.tif"))
+
+
+#reassign to be high conflict only
+
+current_high <- current_conf #assign conflict raster to new object
+
+current_high[current_high > 0.7] <- 1 #70 percent and above = 1
+current_high[current_high < 0.7] <- NA #anything below 70 percent = NA
+
+
+proj_high <- proj_conf
+
+proj_high[proj_high > 0.7] <- 1 #70 percent and above = 1
+proj_high[proj_high < 0.7] <- NA #anything below 70 percent = NA
+
+#save high conflict rasters
+
+writeRaster(current_high, filename = here(gdrive_data, "/AnalysisData/model_outputs/mod3sq_current_highconf.tif"), filetype = "GTiff", overwrite = TRUE)
+
+writeRaster(proj_high, filename = here(gdrive_data, "/AnalysisData/model_outputs/mod3sq_projected_highconf.tif"), filetype = "GTiff", overwrite = TRUE)
+
+
+#vectorize it and then make it a shapefile
+
+current_high_pols <- as.polygons(current_high, dissolve = TRUE) %>% 
+  st_as_sf()
+
+projected_high_pols <- as.polygons(proj_high, dissolve = TRUE) %>% 
+  st_as_sf()
+
+st_write(current_high_pols, dsn = here(gdrive_data, "/AnalysisData/model_outputs/shapefiles/mod3sq_current_highconf.shp"))
+
+st_write(projected_high_pols, dsn = here(gdrive_data, "/AnalysisData/model_outputs/shapefiles/mod3sq_projected_highconf.shp"))
+
+```
+
+#Determine how much high conflict area is within each admin boundary
+
+```{r}
+#CDFW regions
+
+cdfw_regions <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/cdfw_regions_reproj/cdfw_regions.shp"))
+
+cdfw_regions_vect <- cdfw_regions %>% 
+  select(REGION, geometry) %>% 
+  vect()
+
+#CA counties
+
+ca_county <- read_sf(here(gdrive_data, "/InputData/InputData_Files/geoportal_ca_counties/cnty19_1.shp")) %>% 
+  st_transform(crs = crs(cdfw_regions))
+
+ca_county_vect <- ca_county %>% 
+  select(COUNTY_NAM, geometry) %>% 
+  vect()
+
+#high conflict polygons
+
+current_highconf <- read_sf(here(gdrive_data, "/AnalysisData/model_outputs/shapefiles/mod3sq_current_highconf.shp")) %>% 
+  st_cast("POLYGON") %>% 
+  mutate(area = st_area(.))
+
+projected_highconf <- read_sf(here(gdrive_data, "/AnalysisData/model_outputs/shapefiles/mod3sq_current_highconf.shp"))
+
+#high conflict rasters
+
+current_highconf_raster <- rast(here(gdrive_data, "/AnalysisData/model_outputs/mod3sq_current_highconf.tif"))
+
+projected_highconf_raster <- rast(here(gdrive_data, "/AnalysisData/model_outputs/mod3sq_projected_highconf.tif"))
+
+
+#find admin regions with largest area of high conflict
+
+current_regional_conf <- extract(current_highconf_raster, cdfw_regions_vect, na.rm = TRUE, fun = "sum")
+
+regional_summary_current <- current_regional_conf %>%
+  mutate(area = lyr1 * 52943.53) #multiply cell count by area per cell
+
+
+projected_regional_conf <- extract(projected_highconf_raster, cdfw_regions_vect, na.rm = TRUE, fun = "sum")
+
+regional_summary_projected <- projected_regional_conf %>% 
+  mutate(area = lyr1 * 52943.53)
+
+#find counties with the most area of high conflict
+
+#current day
+current_county_conf <- extract(current_highconf_raster, ca_county_vect, na.rm = TRUE, fun = "sum")
+
+county_summary_current <- current_county_conf %>%
+  mutate(area = lyr1 * 52943.53) #multiply cell count by area per cell
+
+colnames(county_summary_current) <- c("OBJECTID", "cells", "area")
+
+current_countysumm <- full_join(county_summary_current, ca_county, by = "OBJECTID")
+
+#projected
+projected_county_conf <- extract(projected_highconf_raster, ca_county_vect, na.rm = TRUE, fun = "sum")
+
+county_summary_projected <- projected_county_conf %>%
+  mutate(area = lyr1 * 52943.53) #multiply cell count by area per cell
+
+colnames(county_summary_projected) <- c("OBJECTID", "cells", "area")
+
+projected_countysumm <- full_join(county_summary_projected, ca_county, by = "OBJECTID")
+
+#export county summary shps
+st_write(current_countysumm, dsn = here(gdrive_data, "/AnalysisData/model_outputs/shapefiles/county_stats/current_county_highconf.shp"))
+
+st_write(projected_countysumm, dsn = here(gdrive_data, "/AnalysisData/model_outputs/shapefiles/county_stats/projected_county_highconf.shp"))
+
+```
+
+#Filter current day for only 0 values and projected for nonzero values
+
+```{r}
+#read in current raster and keep only the lowest decile
+
+current_conf <- rast(here(gdrive_data, "/AnalysisData/model_outputs/mod3clim_map_squared.tif"))
+
+decs_current <- global(current_conf, quantile, probs = seq(0, 1, 0.1), na.rm = TRUE)
+
+current_zeros <- current_conf #assign conflict raster to new object
+
+current_zeros[current_zeros > 0.01] <- NA #anything greater than 1 percent
+
+#read in projected raster and keep only top 50%
+
+proj_conf <- rast(here(gdrive_data, "/AnalysisData/model_outputs/projected_mod3_clim_map_squared.tif"))
+
+proj_nonzero <- proj_conf
+
+proj_nonzero[proj_nonzero < 0.5] <- NA #set anything lower than  50% to NA
+proj_nonzero[proj_nonzero > 0.5] <- 1 #and anything higher to 1 
+```
+
+#Mask and take the difference
+
+```{r}
+#CA counties
+
+ca_county <- read_sf(here(gdrive_data, "/InputData/InputData_Files/geoportal_ca_counties/cnty19_1.shp")) %>% 
+  st_transform(crs = crs(cdfw_regions))
+
+ca_county_vect <- ca_county %>% 
+  select(COUNTY_NAM, geometry) %>% 
+  vect()
+
+# mask it - keep only zeros that will be in the top 50
+
+masked_proj_nonzero <- mask(current_zeros, proj_nonzero)
+
+
+plot(proj_nonzero_change)
+
+#extract # of cells by county
+projected_county_nonzero_change <- extract(proj_nonzero_change, ca_county_vect, na.rm = TRUE, fun = "mean")
+
+colnames(projected_county_nonzero_change) <- c("OBJECTID", "avg_conf")
+
+projected_countysumm_nonzeros <- full_join(projected_county_nonzero_change, ca_county, by = "OBJECTID")
+
+#export county summary shps
+st_write(current_countysumm, dsn = here(gdrive_data, "/AnalysisData/model_outputs/shapefiles/county_stats/current_county_highconf.shp"))
+
+```
+
