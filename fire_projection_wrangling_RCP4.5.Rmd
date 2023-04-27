@@ -170,19 +170,19 @@ savemultirast(fire_pred_2029_reclassed)
 #Now we need to read back in the distance raster created in ArcGIS pro and mask these layers to match our CA extent again. Layers are already in the correct projection and resolution
 
 # read in the data 
-dist_proj_fire_2025_2026 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_proj_fire/dist_proj_fire_2025_2026.tif"))
+dist_proj_fire_2025_2026 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_proj_fire4.5/dist_proj_fire4.5_2025_2026.tif"))
 
-dist_proj_fire_2027_2028 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_proj_fire/dist_proj_fire_2027_2028.tif"))
+dist_proj_fire_2027_2028 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_proj_fire4.5/dist_proj_fire4.5_2027_2028.tif"))
 
-dist_proj_fire_2029 <-rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_proj_fire/dist_proj_fire_2029.tif"))
+dist_proj_fire_2029 <-rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_proj_fire4.5/dist_proj_fire4.5_2029.tif"))
 
 # Now we need to mask these layers to just the CA extent 
 
-dist_proj_fire_2025_2026_ca <- mask(dist_proj_fire_2025_2026, ca_raster)
+dist_proj_fire_2025_2026_ca4.5 <- mask(dist_proj_fire_2025_2026, ca_raster)
 
-dist_proj_fire_2027_2028_ca <- mask(dist_proj_fire_2027_2028, ca_raster)
+dist_proj_fire_2027_2028_ca4.5 <- mask(dist_proj_fire_2027_2028, ca_raster)
 
-dist_proj_fire_2029_ca <- mask(dist_proj_fire_2029, ca_raster)
+dist_proj_fire_2029_ca4.5 <- mask(dist_proj_fire_2029, ca_raster)
 
 ```
 #finally, let's save these files to the drive to be referenced later 
@@ -194,15 +194,15 @@ saverast <- function(x){
   
   #write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
   
-  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/dist_proj_fire", name), filetype = "GTiff", overwrite = TRUE)
+  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/dist_proj_fire4.5", name), filetype = "GTiff", overwrite = TRUE)
   
 }
 
-saverast(dist_proj_fire_2025_2026_ca)
+saverast(dist_proj_fire_2025_2026_ca4.5)
 
-saverast(dist_proj_fire_2027_2028_ca)
+saverast(dist_proj_fire_2027_2028_ca4.5)
 
-saverast(dist_proj_fire_2029_ca)
+saverast(dist_proj_fire_2029_ca4.5)
 
 
 
