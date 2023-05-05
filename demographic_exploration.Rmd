@@ -23,10 +23,10 @@ library(terra)
 #gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #mia's file path
-#gdrive_data <- "/Users/mia/Library/CloudStorage/GoogleDrive-mguarnieri@ucsb.edu/Shared drives/Black_Bear_Aware/gdrive_data"
+gdrive_data <- "/Users/mia/Library/CloudStorage/GoogleDrive-mguarnieri@ucsb.edu/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #sam's file path
-gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
+#gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 
 ```
 
@@ -100,7 +100,7 @@ demographic_stack <- c(ca_amind_alone_proj, ca_amind_combo_proj, ca_hisp_proj, c
 ```{r}
 #read in model data 
 
-high_conflict <- rast(here(gdrive_data, "/AnalysisData/model_outputs/mod3clim_map_squared.tif"))
+high_conflict <- rast(here(gdrive_data, "/AnalysisData/model_outputs/mod3sq_current_highconf.tif"))
 
 buffer_conflict <- vect(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/conflict_buffered_refined/conflict_buffered_refined.shp"))
 
@@ -264,5 +264,61 @@ mean_poverty_no_reporting <- mean(poverty_no_reporting_data_frame$svi_2018_tract
 ```
 ```{r}
 t_test_poverty <- t.test(poverty_reporting_data_frame$svi_2018_tract_overall_nad83,poverty_no_reporting_data_frame$svi_2018_tract_overall_nad83)
+```
+
+# Linguistic Data Analysis
+
+Create reporting and non-reporting rasters
+```{r}
+#high conflict binary raster (modeled conflict probability ≥ 0.7)
+high_conflict <- rast(here(gdrive_data, "/AnalysisData/model_outputs/mod3sq_current_highconf.tif"))
+
+#conflict reports buffered by 5km
+buffered_confpoints <- vect(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/conflict_buffered_refined/conflict_buffered_refined.shp"))
+
+#reporting areas - within buffers
+high_conflict_reporting <- mask(high_conflict, buffered_confpoints)
+
+#non-reporting areas - outside of buffers
+high_conflict_no_reporting <- mask(high_conflict, buffered_confpoints, inverse=TRUE)
+
+```
+
+Read in linguistic isolation data
+```{r}
+#load in the data and select for linguistic isolation (Percent limited English speaking households)
+ces <- read_sf(here(gdrive_data, "/InputData/InputData_Files/calenviroscreen40shpf2021shp/CES4 Final Shapefile.shp")) %>% 
+  select(Ling_Isol) %>% 
+  naniar::replace_with_na(replace = list(Ling_Isol = -999))
+
+#turn into a spatvector
+lingisol <- vect(ces)
+
+#rasterize using the conflict raster
+lingisol_proj <- rasterize(lingisol, high_conflict, field = "Ling_Isol")
+```
+
+Mask the linguistic isolation data by these rasters and create data frames
+```{r}
+#isolation in reporting zones
+isol_reporting <- mask(lingisol_proj, high_conflict_reporting)
+
+isol_reporting_df <- as.data.frame(isol_reporting)
+
+#isolation in non-reporting zones
+isol_nonreporting <- mask(lingisol_proj, high_conflict_no_reporting)
+
+isol_nonreporting_df <- as.data.frame(isol_nonreporting)
+```
+
+Take the mean of each category and run a t-test on it
+```{r}
+#mean isolation in reporting zones
+mean_isol_reporting <- mean(isol_reporting_df$Ling_Isol) #2.007024
+
+mean_isol_nonreporting <- mean(isol_nonreporting_df$Ling_Isol) #2.104348
+
+#t test of these means
+t_test_lingisol <- t.test(isol_reporting_df$Ling_Isol, isol_nonreporting_df$Ling_Isol) #not statistically significant; p val 0.511796
 ```
 
