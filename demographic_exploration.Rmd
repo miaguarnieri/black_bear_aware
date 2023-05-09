@@ -100,7 +100,7 @@ demographic_stack <- c(ca_amind_alone_proj, ca_amind_combo_proj, ca_hisp_proj, c
 ```{r}
 #read in model data 
 
-high_conflict <- rast(here(gdrive_data, "/AnalysisData/model_outputs/mod3clim_map_squared.tif"))
+high_conflict <- rast(here(gdrive_data, "/AnalysisData/model_outputs/mod3sq_current_highconf.tif"))
 
 buffer_conflict <- vect(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/conflict_buffered_refined/conflict_buffered_refined.shp"))
 
@@ -139,7 +139,7 @@ reporting_df_filter<- reporting_data_frame %>% select(CAPOP_2020_100m_HISP,
                                                       CAPOP_2020_100m_NHASIAN,
                                                       CAPOP_2020_100m_NHHIPI,
                                                       CAPOP_2020_100m_NHWHITE,
-                                                      CAPOP_2020_100m_NHOTHERMULTI)
+                                                      CAPOP_2020_100m_OTHERMULTI)
 
 no_reporting_df_filter <- no_reporting_data_frame %>% select(CAPOP_2020_100m_HISP,
                                                       CAPOP_2020_100m_NHBLACK,
@@ -147,7 +147,7 @@ no_reporting_df_filter <- no_reporting_data_frame %>% select(CAPOP_2020_100m_HIS
                                                       CAPOP_2020_100m_NHASIAN,
                                                       CAPOP_2020_100m_NHHIPI,
                                                       CAPOP_2020_100m_NHWHITE,
-                                                      CAPOP_2020_100m_NHOTHERMULTI)
+                                                      CAPOP_2020_100m_OTHERMULTI)
 
 ```
 
@@ -169,8 +169,11 @@ t_testnhwhite <- t.test(reporting_df_filter$CAPOP_2020_100m_NHWHITE,no_reporting
 ```{r}
 hisp_reporting_mean <- mean(reporting_df_filter$CAPOP_2020_100m_HISP)
 hisp_no_reporting_mean <- mean(no_reporting_df_filter$CAPOP_2020_100m_HISP)
-#hisp_reporting_mean = 3.368873
-#hisp_no_reporting_mean = 6.021271
+#hisp_reporting_mean = 1.936476
+#hisp_no_reporting_mean = 1.63793
+
+hisp_reporting_mean
+hisp_no_reporting_mean 
 
 ```
 
@@ -178,41 +181,55 @@ hisp_no_reporting_mean <- mean(no_reporting_df_filter$CAPOP_2020_100m_HISP)
 nhblack_reporting_mean <- mean(reporting_df_filter$CAPOP_2020_100m_NHBLACK)
 nhblack_no_reporting_mean <- mean(no_reporting_df_filter$CAPOP_2020_100m_NHBLACK)
 
-#nhblack_reporting_mean = 0.3998586
-#nhblack_no_reporting_mean =  0.8407307
+#nhblack_reporting_mean = 0.06228506
+#nhblack_no_reporting_mean =  0.1616677
+
+nhblack_reporting_mean
+nhblack_no_reporting_mean
 ```
 
 ```{r}
 amind_combo_reporting_mean <- mean(reporting_df_filter$CAPOP_2020_100m_AMIND_COMBO)
 amind_combo_no_reporting_mean <- mean(no_reporting_df_filter$CAPOP_2020_100m_AMIND_COMBO)
 
-#amind_combo_reporting_mean = 0.4012271
-#amind_combo_no_reporting_mean = 0.5081011
+#amind_combo_reporting_mean = 0.3629799
+#amind_combo_no_reporting_mean = 0.260228
+
+amind_combo_reporting_mean
+amind_combo_no_reporting_mean
 ```
 
 ```{r}
 nhasian_reporting_mean <- mean(reporting_df_filter$CAPOP_2020_100m_NHASIAN)
 nhasian_no_reporting_mean <- mean(no_reporting_df_filter$CAPOP_2020_100m_NHASIAN)
 
-#nhasian_reporting_mean = 1.260077
-#nhasian_no_reporting_mean = 2.320014
+#nhasian_reporting_mean = 0.187453
+#nhasian_no_reporting_mean = 0.2852263
+
+nhasian_reporting_mean 
+nhasian_no_reporting_mean
 ```
 
 ```{r}
 nhhipi_reporting_mean <- mean(reporting_df_filter$CAPOP_2020_100m_NHHIPI)
 nhhipi_no_reporting_mean <- mean(no_reporting_df_filter$CAPOP_2020_100m_NHHIPI)
 
-#nhhipi_reporting_mean  = 0.02249208
-#nhhipi_no_reporting_mean = 0.05605196
+#nhhipi_reporting_mean  =  0.01253714
+#nhhipi_no_reporting_mean = 0.01362763
 
+nhhipi_reporting_mean
+nhhipi_no_reporting_mean
 ```
 
 ```{r}
 nhwhite_reporting_mean <- mean(reporting_df_filter$CAPOP_2020_100m_NHWHITE)
 nhwhite_no_reporting_mean <- mean(no_reporting_df_filter$CAPOP_2020_100m_NHWHITE)
 
-#nhwhite_reporting_mean = 4.724358 
-#nhwhite_no_reporting_mean = 4.624486
+#nhwhite_reporting_mean = 5.844748
+#nhwhite_no_reporting_mean =4.106572
+
+nhwhite_reporting_mean
+nhwhite_no_reporting_mean
 
 ```
 # Poverty Reporting 
@@ -261,6 +278,8 @@ mean_poverty_reporting <- mean(poverty_reporting_data_frame$svi_2018_tract_overa
 mean_poverty_no_reporting <- mean(poverty_no_reporting_data_frame$svi_2018_tract_overall_nad83)
 #mean_poverty_reporting = 0.531186
 #mean_poverty_no_reporting = 0.6585639
+mean_poverty_reporting
+mean_poverty_no_reporting
 ```
 ```{r}
 t_test_poverty <- t.test(poverty_reporting_data_frame$svi_2018_tract_overall_nad83,poverty_no_reporting_data_frame$svi_2018_tract_overall_nad83)
