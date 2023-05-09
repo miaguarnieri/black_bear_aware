@@ -255,4 +255,39 @@ colnames(zonal_statistic_msa) = c("OBJECTID", "Conflict_Risk")
 ca_msa_zonal <- full_join(ca_msa_crop, zonal_statistic_msa, by = "OBJECTID")
 ```
 
+# Stats by census tract
+
+```{r}
+#read in the data - census tract and conflict rasters
+current_conflict <- rast(here(gdrive_data, "/AnalysisData/model_outputs/mod3clim_map_squared.tif"))
+
+projected_conflict <- rast(here(gdrive_data, "/AnalysisData/model_outputs/projected_mod3_clim_map_squared.tif"))
+
+ct <- read_sf(here(gdrive_data, "/InputData/InputData_Files/2022_TIGER_censustract/tl_2022_06_tract.shp")) %>% 
+  mutate(ID = row_number())
+
+ct_vect <- vect(ct) %>% 
+  project(current_conflict)
+
+#extract conflict value by census tract and rename columns for merging
+ct_confrisk_current <- extract(current_conflict, ct_vect, fun = "mean", na.rm = TRUE)
+
+colnames(ct_confrisk_current) = c("ID", "mean_confrisk")
+
+ct_confrisk_projected <- extract(projected_conflict, ct_vect, fun = "mean", na.rm = TRUE)
+
+colnames(ct_confrisk_projected) = c("ID", "mean_confrisk")
+
+#merge back in with the census tract file
+ct_confrisk_current_sf <- full_join(ct, ct_confrisk_current, by = "ID") %>% 
+  select(mean_confrisk, geometry)
+
+ct_confrisk_projected_sf <- full_join(ct, ct_confrisk_projected, by = "ID") %>% 
+  select(mean_confrisk, geometry)
+
+#save the shapefile
+st_write(ct_confrisk_current_sf, dsn = here(gdrive_data, "/AnalysisData/zonal_stats/census_tract/censustract_current_mean_confrisk.shp"))
+
+st_write(ct_confrisk_projected_sf, dsn = here(gdrive_data, "/AnalysisData/zonal_stats/census_tract/censustract_projected_mean_confrisk.shp"))
+```
 
