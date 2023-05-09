@@ -22,6 +22,25 @@ gdrive_data <- "/Users/mia/Library/CloudStorage/GoogleDrive-mguarnieri@ucsb.edu/
 ```{r}
 proj_conf <- rast(here(gdrive_data, "/AnalysisData/model_outputs/projected_mod3_clim_map_squared.tif"))
 
+#10 percent
+
+conf_10perc <- proj_conf
+
+conf_10perc[conf_10perc > 0.1] <- 1
+conf_10perc[conf_10perc < 0.1] <- NA 
+
+poly_per10 <- as.polygons(conf_10perc, dissolve = TRUE)
+
+
+#50 percent
+
+conf_50perc <- proj_conf
+
+conf_50perc[conf_50perc > 0.5] <- 1
+conf_50perc[conf_50perc < 0.5] <- NA 
+
+poly_per50 <- as.polygons(conf_50perc, dissolve = TRUE)
+
 #60 percent
 
 conf_60perc <- proj_conf
