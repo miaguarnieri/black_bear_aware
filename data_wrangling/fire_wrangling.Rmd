@@ -70,14 +70,17 @@ ca_fire_2019 <- rast(here(gdrive_data, "/InputData/InputData_Files/fire_intensit
 
 ca_fire_2020 <- rast(here(gdrive_data, "/InputData/InputData_Files/fire_intensity_CA_mtbs/2020_fire_intensity_CA_mtbs/mtbs_CA_2020.tif"))
 
+fire_list <- list()
 ```
-
+# have a list object
 
 #Getting layers in correct extent, resolution and projection
 
 ```{r}
 #reproject to the same crs (NAD 83, CA Albers (2011))
 # method = near in order to preserve categorical data
+
+fire_list_albers <- lapply(fire_list, terra::project(y = ca_raster, method = "near"))
 
 ca_fire_2011_albers <- terra::project(ca_fire_2011, ca_raster, method = "near")
 
