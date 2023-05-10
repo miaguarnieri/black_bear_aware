@@ -51,7 +51,6 @@ ggplot(conflict) +
 ```
 
 
-
 #Base Model
 
 ```{r}
@@ -156,8 +155,6 @@ top_con[top_con >= 0.7] <- top_con
 plot(top_con)
 
 ```
-
-
 
 
 #Data vis with squared climate model
@@ -707,4 +704,3 @@ model<- load(here("models", "sq_mod3climate.rds")) #you have to name the object 
 mep(sq_mod3climate, which = "popdens", col.points = "#c3c2b1", pch = 1, n = 100, family = "Times New Roman")
 
 ```
-
