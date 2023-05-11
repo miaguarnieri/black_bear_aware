@@ -17,10 +17,15 @@ library(tmap)
 library(beepr)
 library(ggplot2)
 library(lubridate)
-#mia and claire's file path
-gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+
+#claire's file path
+gdrive_data <- "/Users/clairemeuter/Library/CloudStorage/GoogleDrive-clairemeuter@ucsb.edu/Shared drives/Black_Bear_Aware/gdrive_data"
 
 ```
+
+## Introduction:
+# In this code, we explore conflict data we recieved from the California Department of Fish and Wildlife's on human black bear conflict across California, from 2016 to 2022.
+#Due to privacy concerns, we cannot share conflict data with general public, but the code we used to wrangle and explore the data is availible below. 
 
 ## Read in Conflict data 
 ```{r}
@@ -30,7 +35,7 @@ conflict <- read_csv(here(gdrive_data, "/IntermediateData/IntermediateData_Files
 ```{r}
 #filter our erronous points
 conflict <- conflict %>% 
-  filter(wir_id != "WIR-2016-001081",
+  filter(wir_id != "WIR-2016-001081", #these WIR id numbers were incorrectly filed as bear conflict, or had incorrect coordinates 
          wir_id != "WIR-2017-002420")
 #keep only what we need
 conflict_refined <- conflict %>% 
@@ -50,13 +55,16 @@ conflict_refined <- conflict_refined %>%
 
 
 ```{r}
+# basic code exploring counts of conflict by year 
 conflict_refined %>% count(type)
+# basic code exploring counts of conflict by type of conflict 
 conflict_refined %>% count(year)
 ```
 
 
 
 ```{r}
+#code for graph showing counts of conflict by type and year 
 ggplot(conflict_refined, aes(x = type)) +geom_histogram(stat = "count", aes(fill=type)) + facet_grid(cols = vars(year))+
   theme_minimal() +
   labs(x = "Type of Interaction",
