@@ -20,14 +20,9 @@ library(webshot)
 gdrive_data <- "/Users/clairemeuter/Library/CloudStorage/GoogleDrive-clairemeuter@ucsb.edu/Shared drives/Black_Bear_Aware/gdrive_data"
 ```
 
-## **Introduction:** Here, we explore the relationship between ownership of land and locations of human-black bear conflict in across California. 
+## **Introduction:** Here, we explore the relationship between land ownership and locations of human-black bear conflict in across California. 
 
 ## Data wrangling
-My data wrangling to-do list:
-- Read in my .gdl (geodatabase)
-- explore maps
-- Add shp files for private land (this source leaves all private land unlabeled, with areas without an ownership feature are ASSUMED to be private (but not included in the dataset as such)).
-- intersect my maps 
 
 Reading in land ownership .gdl
 ```{r}
