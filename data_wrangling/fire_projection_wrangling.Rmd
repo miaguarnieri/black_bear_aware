@@ -1,5 +1,5 @@
 ---
-title: "fire_projection_wrangling_RCP4.5"
+title: "fire_projection_wrangling"
 author: "Claire Meuter"
 date: "2023-04-26"
 output: html_document
@@ -28,9 +28,20 @@ These data layers are sourced from Isaac Park's work on modeling fire likelihood
 We processed two sets of fire projections- one for a climate scenario of RCP 4.5 and one for a climate scenario at an RCP 8.5. 
 See our team's Dryad page for further information on the source data.  
 
+This .rmd resulted in the creation of 6 distance rasters: 
+- Distance to projected fire (under RCP 4.5) from 2025 to 2026
+- Distance to projected fire (under RCP 4.5) from 2027 to 2028
+- Distance to projected fire (under RCP 4.5) from 2029
+- Distance to projected fire (under RCP 8.5) from 2025 to 2026
+- Distance to projected fire (under RCP 8.5) from 2027 to 2028
+- Distance to projected fire (under RCP 8.5) from 2029
+
 ## Data wrangling for RCP 4.5 
 ```{r}
 # CA Raster example 
+
+#reading in ca_raster, a raster formatted to the resolution, crs, and spatial extent we plan to run our model over. 
+
 ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
 
 #check the coordinate reference system 
