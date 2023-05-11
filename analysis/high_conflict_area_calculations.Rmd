@@ -127,33 +127,26 @@ st_write(projected_high_pols, dsn = here(gdrive_data, "/AnalysisData/model_outpu
 
 #Determine how much high conflict area is within each administrative boundary
 
+First, read in the conflict rasters (they are used for all analyses)
+
 ```{r}
-
-#read in CDFW regions
-
-#read in the CDFW regions shapefile
-cdfw_regions <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/cdfw_regions_reproj/cdfw_regions.shp"))
-
-cdfw_regions_vect <- cdfw_regions %>%
-  select(REGION, geometry) %>% #keep only the region names and geometries
-  vect() #convert to a spatvector for analysis
-
-#read in CA counties
-
-#read in the shapefile
-ca_county <- read_sf(here(gdrive_data, "/InputData/InputData_Files/geoportal_ca_counties/cnty19_1.shp")) %>% 
-  st_transform(crs = crs(cdfw_regions)) #match the crs to that of the regions shapefile
-
-ca_county_vect <- ca_county %>% 
-  select(COUNTY_NAM, geometry) %>% #keep only county names and geometries
-  vect() #convert to a spatvector
-
 #read in high conflict rasters (you saved these earlier)
 
 current_highconf_raster <- rast(here(gdrive_data, "/AnalysisData/model_outputs/mod3sq_current_highconf.tif"))
 
 projected_highconf_raster <- rast(here(gdrive_data, "/AnalysisData/model_outputs/mod3sq_projected_highconf.tif"))
+```
 
+## California Department of Fish and Wildlife regions
+
+```{r}
+#read in the CDFW regions shapefile
+cdfw_regions <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/cdfw_regions_reproj/cdfw_regions.shp"))
+
+#select for only regions and geometry and convert to a spatvector object
+cdfw_regions_vect <- cdfw_regions %>%
+  select(REGION, geometry) %>% #keep only the region names and geometries
+  vect() #convert to a spatvector for analysis
 
 #find CDFW administrative regions with largest area of high conflict
 
@@ -164,11 +157,23 @@ current_regional_conf <- extract(current_highconf_raster, cdfw_regions_vect, na.
 regional_summary_current <- current_regional_conf %>%
   mutate(area = lyr1 * 52943.53)
 
-#repeat these steps for the projected map
+#repeat these steps for the projected conflict risk raster
 projected_regional_conf <- extract(projected_highconf_raster, cdfw_regions_vect, na.rm = TRUE, fun = "sum")
 
 regional_summary_projected <- projected_regional_conf %>% 
   mutate(area = lyr1 * 52943.53)
+```
+
+## California counties
+
+```{r}
+#read in the CA counties shapefile
+ca_county <- read_sf(here(gdrive_data, "/InputData/InputData_Files/geoportal_ca_counties/cnty19_1.shp")) %>% 
+  st_transform(crs = crs(cdfw_regions)) #match the crs to that of the regions shapefile
+
+ca_county_vect <- ca_county %>% 
+  select(COUNTY_NAM, geometry) %>% #keep only county names and geometries
+  vect() #convert to a spatvector
 
 #find counties with the most area of high conflict
 
@@ -178,13 +183,16 @@ current_county_conf <- extract(current_highconf_raster, ca_county_vect, na.rm = 
 county_summary_current <- current_county_conf %>%
   mutate(area = lyr1 * 52943.53) #multiply pixel count by area per cell
 
-#NEW STEP - rename the columns in the extracted data frame to have an "OBJECTID" column for merging with county shapefile; only necessary if you plan to map your results
+
+# extra steps below are done if you would like to work with this information geospatially (in a shapefile)
+
+#rename the columns in the extracted data frame to have an "OBJECTID" column for merging with county shapefile; only necessary if you plan to map your results
 colnames(county_summary_current) <- c("OBJECTID", "cells", "area")
 
 #join the data frame to the county shapefile to have both geometry and area of high conflict in one file
 current_countysumm <- full_join(county_summary_current, ca_county, by = "OBJECTID")
 
-#projected
+#repeat the steps above for the projected conflict risk raster
 projected_county_conf <- extract(projected_highconf_raster, ca_county_vect, na.rm = TRUE, fun = "sum")
 
 county_summary_projected <- projected_county_conf %>%
@@ -194,12 +202,13 @@ colnames(county_summary_projected) <- c("OBJECTID", "cells", "area") #rename col
 
 projected_countysumm <- full_join(county_summary_projected, ca_county, by = "OBJECTID") #merge with shapefile
 
+
 #save county summary shps that you created with the full_join function
 st_write(current_countysumm, dsn = here(gdrive_data, "/AnalysisData/model_outputs/shapefiles/county_stats/current_county_highconf.shp"))
 
 st_write(projected_countysumm, dsn = here(gdrive_data, "/AnalysisData/model_outputs/shapefiles/county_stats/projected_county_highconf.shp"))
-
 ```
+
 
 #Filter current day for only 0 values and projected for nonzero values - THIS SECTION COMING OUT FOR PUBLIC-FACING FILES BUT KEPT IN ORIGINAL REPO
 
