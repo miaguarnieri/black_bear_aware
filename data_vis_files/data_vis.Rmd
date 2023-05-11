@@ -39,28 +39,6 @@ gdrive_data <- "/Users/mia/Library/CloudStorage/GoogleDrive-mguarnieri@ucsb.edu/
 
 ```
 
-#Conflict data vis - THIS SECTION COMING OUT FOR PUBLIC-FACING FILES BUT KEPT IN ORIGINAL REPO
-
-```{r}
-conflict <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_points/conflict_points.shp")) %>% 
-  separate(incdnt_d, into = c("inc_date", "inc_time"), sep = " ") %>% 
-  separate(inc_date, into = c("month", "day", "year"), sep = "/") %>% 
-  mutate(year = as.character.Date(year),
-         "type" = cnfrmd_,
-         "county" = cnty_nm,
-         "conflict" = 1) %>% 
-  filter(year != 2022)
-
-
-ggplot(conflict) +
-  geom_histogram(aes(x = year), stat = "count", fill = "#89a676") +
-  theme_minimal() +
-  labs(x = "Year",
-       y = "Number of Reported Conflicts")
-
-```
-
-
 # Creating model hotspot maps
 
 ## Present day
