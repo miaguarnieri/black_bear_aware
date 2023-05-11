@@ -1,0 +1,71 @@
+---
+title: "Manuscript Code"
+author: "Mia Guarnieri"
+date: "2023-05-11"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+#attach packages
+library(tidyverse)
+library(here)
+library(sf)
+library(tmap)
+library(lubridate)
+library(ResourceSelection)
+library(rmapshaper)
+library(terra)
+
+#mia's file path
+gdrive_data <- "/Users/mia/Library/CloudStorage/GoogleDrive-mguarnieri@ucsb.edu/Shared drives/Black_Bear_Aware/gdrive_data"
+```
+
+# Total high conflict area current vs projected
+
+```{r}
+#read in conflict rasters
+
+current_highconf_raster <- rast(here(gdrive_data, "/AnalysisData/model_outputs/mod3sq_current_highconf.tif"))
+
+projected_highconf_raster <- rast(here(gdrive_data, "/AnalysisData/model_outputs/mod3sq_projected_highconf.tif"))
+
+#extract the sum of the pixel values within the raster - since pixels have a value of 1 each, this will give a count of the pixels
+total_current_hc <- values(current_highconf_raster, na.rm = TRUE, dataframe = TRUE)
+
+total_projected_hc <- values(projected_highconf_raster, na.rm = TRUE, dataframe = TRUE)
+
+#multiply # of non-NA pixels by the mean cell size (area) of the raster to get total area
+current_hc_area <- sum(total_current_hc$lyr1) * mean(values(cellSize(current_highconf_raster), na.rm=TRUE))
+
+projected_hc_area <- sum(total_projected_hc$lyr1) * mean(values(cellSize(projected_highconf_raster), na.rm=TRUE))
+
+#take the fraction to see how much high conflict area increases by
+inc_fract <- projected_hc_area/current_hc_area
+
+#percent increase
+inc_perc <- ((projected_hc_area - current_hc_area)/current_hc_area) * 100
+
+#4.21 times (or 321%) more area of high conflict risk in projected than current predictions
+```
+
+# Just drought vs just fire
+
+Load the data
+
+```{r}
+climate_model_data <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/1_31_2023/climate_model_data_allyears.csv")) %>% 
+  drop_na()
+```
+
+Create the models
+
+```{r}
+#drought only
+sq_mod3drought <- rspf(conflict ~ dem + lc + forest_dist + popdens + I(popdens^2) + rec_dist + streams_dist + TRI + urban_dist + drought, family = "binomial", m = 0, B = 1000, data = sq_model_data)
+
+#fire only
+sq_mod3fire <- rspf(conflict ~ dem + lc + forest_dist + popdens + I(popdens^2) + rec_dist + streams_dist + TRI + urban_dist + dist_fire_1yr + dist_fire_23yrs + dist_fire_45yrs, family = "binomial", m = 0, B = 1000, data = sq_model_data)
+```
+
