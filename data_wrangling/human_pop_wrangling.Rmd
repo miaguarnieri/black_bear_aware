@@ -31,7 +31,7 @@ gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
 # Purpose of this .rmd 
 The purpose of this .rmd is to share the code our team used to wrangle human population density data to be ready for use in our model. 
-This .rmd resulted in the creation of 5 human population density rasters:
+This .rmd resulted in the creation of 6 human population density rasters:
 - human population density 2016
 - human population density 2017
 - human population density 2018
