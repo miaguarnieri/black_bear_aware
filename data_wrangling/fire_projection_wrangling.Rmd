@@ -1,0 +1,402 @@
+---
+title: "fire_projection_wrangling_RCP4.5"
+author: "Claire Meuter"
+date: "2023-04-26"
+output: html_document
+---
+
+# Setup and Packages
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(here)
+library(terra)
+library(sf)
+library(tmap)
+library(beepr)
+library(rgeos)
+library(rmapshaper)
+
+#claire's file path
+gdrive_data <- "/Users/clairemeuter/Library/CloudStorage/GoogleDrive-clairemeuter@ucsb.edu/Shared drives/Black_Bear_Aware/gdrive_data"
+
+```
+# Purpose: 
+The purpose of this .rmd is to create distance to fire layers for use in projecting our model on the year 2030. 
+These data layers are sourced from Isaac Park's work on modeling fire likelihood across California from 2024  to 2029.  https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0254723#sec015
+We processed two sets of fire projections- one for a climate scenario of RCP 4.5 and one for a climate scenario at an RCP 8.5. 
+See our team's Dryad page for further information on the source data.  
+
+## Data wrangling for RCP 4.5 
+```{r}
+# CA Raster example 
+ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
+
+#check the coordinate reference system 
+crs(ca_raster)
+```
+Fire layers from Isaac Park from his publication https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0254723#sec015
+```{r}
+#read in fire layers 
+
+#2024 to 2029 sequence 
+fire_pred4_2024 <- rast(here(gdrive_data, "/InputData/InputData_Files/rcp4.5_AnnualFireProjections_Isaac/PredRisk_2024_2024LogGam_Class.tif"))
+
+fire_pred4_2025 <- rast(here(gdrive_data, "/InputData/InputData_Files/rcp4.5_AnnualFireProjections_Isaac/PredRisk_2025_2025LogGam_Class.tif"))
+
+fire_pred4_2026 <- rast(here(gdrive_data, "/InputData/InputData_Files/rcp4.5_AnnualFireProjections_Isaac/PredRisk_2026_2026LogGam_Class.tif"))
+
+fire_pred4_2027 <- rast(here(gdrive_data, "/InputData/InputData_Files/rcp4.5_AnnualFireProjections_Isaac/PredRisk_2027_2027LogGam_Class.tif"))
+
+fire_pred4_2028 <- rast(here(gdrive_data, "/InputData/InputData_Files/rcp4.5_AnnualFireProjections_Isaac/PredRisk_2028_2028LogGam_Class.tif"))
+
+fire_pred4_2029 <- rast(here(gdrive_data, "/InputData/InputData_Files/rcp4.5_AnnualFireProjections_Isaac/PredRisk_2029_2029LogGam_Class.tif"))
+
+```
+
+### Getting 4.5 layers in correct extent, resolution and projection
+```{r}
+#reproject to the same crs (NAD 83, CA Albers (2011))
+
+fire_pred4_2024_albers <- terra::project(fire_pred4_2024, ca_raster)
+
+fire_pred4_2025_albers <- terra::project(fire_pred4_2025, ca_raster)
+
+fire_pred4_2026_albers <- terra::project(fire_pred4_2026, ca_raster)
+
+fire_pred4_2027_albers <- terra::project(fire_pred4_2027, ca_raster)
+
+fire_pred4_2028_albers <- terra::project(fire_pred4_2028, ca_raster)
+
+fire_pred4_2029_albers <- terra::project(fire_pred4_2029, ca_raster)
+
+```
+
+#### Cropping the extents to our CA raster 
+
+```{r}
+#cropping to spatial extent of CA raster
+
+fire_pred4_2024_mask <- mask(fire_pred4_2024_albers, ca_raster)
+
+fire_pred4_2025_mask <- mask(fire_pred4_2025_albers, ca_raster)
+
+fire_pred4_2026_mask <- mask(fire_pred4_2026_albers, ca_raster)
+
+fire_pred4_2027_mask <- mask(fire_pred4_2027_albers, ca_raster)
+
+fire_pred4_2028_mask <- mask(fire_pred4_2028_albers, ca_raster)
+
+fire_pred4_2029_mask <- mask(fire_pred4_2029_albers, ca_raster)
+```
+
+### Reclassifying fire projection rasters for RCP 4.5
+Now I need to reclassify to only keep raster values above .03 (small amount of projected fire likelihood, as a proxy for burn scars) I'm calling this high probability of fire. (this may change if there is better justification in the literature). This is our proxy for med/high intensity fires/burn scars that we selected for in our model. 
+
+```{r}
+
+#list out the from, to values in an object
+m <- c(0, 0.03, NA, #values lower than 0.03 to 0
+       0.03, 5, 1) #values greater than 0.03 to 1
+       
+#turn those values into a matrix
+mat_fire <- matrix(m, ncol = 3, byrow = TRUE) 
+
+fire_pred4_2024_reclassed <- classify(fire_pred4_2024_mask, mat_fire,include.lowest=TRUE)
+fire_pred4_2025_reclassed <- classify(fire_pred4_2025_mask, mat_fire,include.lowest=TRUE)
+fire_pred4_2026_reclassed <- classify(fire_pred4_2026_mask, mat_fire,include.lowest=TRUE)
+fire_pred4_2027_reclassed <- classify(fire_pred4_2027_mask, mat_fire,include.lowest=TRUE)
+fire_pred4_2028_reclassed <- classify(fire_pred4_2028_mask, mat_fire,include.lowest=TRUE)
+fire_pred4_2029_reclassed <- classify(fire_pred4_2029_mask, mat_fire,include.lowest=TRUE)
+# map to see what it looks like 
+#tm_shape(fire_pred4_2024_reclassed) +
+ # tm_raster() +
+  #tmap_mode("view")
+```
+
+
+### Merge layers
+Here I merge year layers to match our variable descriptions for burn scars, which are: 4 to 5 years ago, 2 to 3 years ago, and one year ago. 
+```{r}
+#4-5 year: combined 2025-2026
+
+fire_pred4_2025_reclassed
+
+fire_pred4_2026_reclassed
+
+#merge those layers
+
+fire_2025_2026 <- merge(fire_pred4_2025_reclassed, fire_pred4_2026_reclassed)
+
+#tm_shape(fire_2025_2026) + 
+  #tm_raster() + 
+ # tmap_mode("view")
+
+#2-3 year: combined 2027-2028
+
+fire_pred4_2027_reclassed
+
+fire_pred4_2028_reclassed
+
+#merge those layers
+
+fire_2027_2028 <- merge(fire_pred4_2027_reclassed, fire_pred4_2028_reclassed)
+
+#tm_shape(fire_pred4_2029_reclassed) + 
+#tm_raster() + 
+#tmap_mode("view")
+
+#save the layers
+
+#function for saving multi-year rasters
+savemultirast <- function(x){
+  
+  name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+  #write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/proj_fire4.5", name), filetype = "GTiff", overwrite = TRUE)
+  
+}
+
+#save the data using the function 
+savemultirast(fire_2025_2026)
+
+savemultirast(fire_2027_2028)
+
+savemultirast(fire_pred4_2029_reclassed)
+
+
+```
+
+
+### Distance to Fire RCP 4.5  Arc Layer
+Due to the size of our rasters, using R to create distance layers was not feasible, and instead our group used ArcGIS to create these distance layers. We then reformatted these layers and saved them to our folder "model_ready" indicating they were ready for use in our final model code
+
+```{r}
+#Now we need to read back in the distance raster created in ArcGIS pro and mask these layers to match our CA extent again. Layers are already in the correct projection and resolution
+
+# read in the data 
+dist_proj_fire_2025_2026 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_proj_fire4.5/dist_proj_fire4.5_2025_2026.tif"))
+
+dist_proj_fire_2027_2028 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_proj_fire4.5/dist_proj_fire4.5_2027_2028.tif"))
+
+dist_proj_fire_2029 <-rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_proj_fire4.5/dist_proj_fire4.5_2029.tif"))
+
+# Now we need to mask these layers to just the CA extent 
+
+dist_proj_fire_2025_2026_ca4.5 <- mask(dist_proj_fire_2025_2026, ca_raster)
+
+dist_proj_fire_2027_2028_ca4.5 <- mask(dist_proj_fire_2027_2028, ca_raster)
+
+dist_proj_fire_2029_ca4.5 <- mask(dist_proj_fire_2029, ca_raster)
+
+```
+### Save clipped fire projection DISTANCE rasters to the data drive for use in model and easy access for RCP 4.5 
+```{r}
+#write a function to make things easier
+saverast <- function(x){
+  
+  name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+  #write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/dist_proj_fire/dist_proj_fire4.5", name), filetype = "GTiff", overwrite = TRUE)
+  
+}
+
+saverast(dist_proj_fire_2025_2026_ca4.5)
+
+saverast(dist_proj_fire_2027_2028_ca4.5)
+
+saverast(dist_proj_fire_2029_ca4.5)
+
+
+
+```
+
+
+## Data Wrangling for RCP 8.5 
+
+```{r}
+#read in fire layers 
+
+#2024 to 2029 sequence 
+fire_pred8_2024 <- rast(here(gdrive_data, "/InputData/InputData_Files/01_31_23_AnnualFireProjections_Isaac/PredRisk_2024_2024LogGam_Class.tif"))
+
+fire_pred8_2025 <- rast(here(gdrive_data, "/InputData/InputData_Files/01_31_23_AnnualFireProjections_Isaac/PredRisk_2025_2025LogGam_Class.tif"))
+
+fire_pred8_2026 <- rast(here(gdrive_data, "/InputData/InputData_Files/01_31_23_AnnualFireProjections_Isaac/PredRisk_2026_2026LogGam_Class.tif"))
+
+fire_pred8_2027 <- rast(here(gdrive_data, "/InputData/InputData_Files/01_31_23_AnnualFireProjections_Isaac/PredRisk_2027_2027LogGam_Class.tif"))
+
+fire_pred8_2028 <- rast(here(gdrive_data, "/InputData/InputData_Files/01_31_23_AnnualFireProjections_Isaac/PredRisk_2028_2028LogGam_Class.tif"))
+
+fire_pred8_2029 <- rast(here(gdrive_data, "/InputData/InputData_Files/01_31_23_AnnualFireProjections_Isaac/PredRisk_2029_2029LogGam_Class.tif"))
+
+```
+
+### Getting 8.5 layers in correct extent, resolution and projection
+```{r}
+#reproject to the same crs (NAD 83, CA Albers (2011))
+
+fire_pred8_2024_albers <- terra::project(fire_pred8_2024, ca_raster)
+
+fire_pred8_2025_albers <- terra::project(fire_pred8_2025, ca_raster)
+
+fire_pred8_2026_albers <- terra::project(fire_pred8_2026, ca_raster)
+
+fire_pred8_2027_albers <- terra::project(fire_pred8_2027, ca_raster)
+
+fire_pred8_2028_albers <- terra::project(fire_pred8_2028, ca_raster)
+
+fire_pred8_2029_albers <- terra::project(fire_pred8_2029, ca_raster)
+
+```
+
+#### Cropping the extent to our CA raster 
+
+```{r}
+#cropping to spatial extent of CA raster
+
+fire_pred8_2024_mask <- mask(fire_pred8_2024_albers, ca_raster)
+
+fire_pred8_2025_mask <- mask(fire_pred8_2025_albers, ca_raster)
+
+fire_pred8_2026_mask <- mask(fire_pred8_2026_albers, ca_raster)
+
+fire_pred8_2027_mask <- mask(fire_pred8_2027_albers, ca_raster)
+
+fire_pred8_2028_mask <- mask(fire_pred8_2028_albers, ca_raster)
+
+fire_pred8_2029_mask <- mask(fire_pred8_2029_albers, ca_raster)
+```
+
+### Reclassifying fire projection rasters for RCP 8.5
+Now I need to reclassify to only keep raster values above .03 (small amount of projected fire likelihood, as a proxy for burn scars) I'm calling this high probability of fire. (this may change if there is better justification in the literature). This is our proxy for med/high intensity fires/burn scars that we selected for in our model. 
+
+```{r}
+
+
+#list out the from, to values in an object
+m <- c(0, 0.03, NA, #values lower than 0.9 to 0
+       0.03, 5, 1) #values greater than 0.9 to 1
+       
+#turn those values into a matrix
+mat_fire <- matrix(m, ncol = 3, byrow = TRUE) 
+
+fire_pred8_2024_reclassed <- classify(fire_pred8_2024_mask, mat_fire,include.lowest=TRUE)
+fire_pred8_2025_reclassed <- classify(fire_pred8_2025_mask, mat_fire,include.lowest=TRUE)
+fire_pred8_2026_reclassed <- classify(fire_pred8_2026_mask, mat_fire,include.lowest=TRUE)
+fire_pred8_2027_reclassed <- classify(fire_pred8_2027_mask, mat_fire,include.lowest=TRUE)
+fire_pred8_2028_reclassed <- classify(fire_pred8_2028_mask, mat_fire,include.lowest=TRUE)
+fire_pred8_2029_reclassed <- classify(fire_pred8_2029_mask, mat_fire,include.lowest=TRUE)
+# map to see what it looks like 
+#tm_shape(fire_pred8_2024_reclassed) +
+ # tm_raster() +
+  #tmap_mode("view")
+```
+
+
+### Merge layers
+Here I merge year layers to match our variable descriptions for burn scars, which are: 4 to 5 years ago, 2 to 3 years ago, and one year ago. 
+
+```{r}
+#4-5 year: combined 2025-2026
+
+fire_pred8_2025_reclassed
+
+fire_pred8_2026_reclassed
+
+#merge those layers
+
+fire8_2025_2026 <- merge(fire_pred8_2025_reclassed, fire_pred8_2026_reclassed)
+
+#tm_shape(fire_2025_2026) + 
+  #tm_raster() + 
+ # tmap_mode("view")
+
+#2-3 year: combined 2027-2028
+
+fire_pred8_2027_reclassed
+
+fire_pred8_2028_reclassed
+
+#merge those layers
+
+fire8_2027_2028 <- merge(fire_pred8_2027_reclassed, fire_pred8_2028_reclassed)
+
+#tm_shape(fire_pred8_2029_reclassed) + 
+#tm_raster() + 
+#tmap_mode("view")
+
+#save the layers
+
+#function for saving multi-year rasters
+savemultirast <- function(x){
+  
+  name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+  #write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/proj_fire8.5", name), filetype = "GTiff", overwrite = TRUE)
+  
+}
+
+#save the data using the function 
+savemultirast(fire8_2025_2026)
+
+savemultirast(fire8_2027_2028)
+
+savemultirast(fire_pred8_2029_reclassed)
+
+
+```
+
+### Distance to Fire RCP 8.5  Arc Layer
+Due to the size of our rasters, using R to create distance layers was not feasible, and instead our group used ArcGIS to create these distance layers. We then reformatted these layers and saved them to our folder "model_ready" indicating they were ready for use in our final model code
+
+```{r}
+#Now we need to read back in the distance raster created in ArcGIS pro and mask these layers to match our CA extent again. Layers are already in the correct projection and resolution
+
+# read in the data 
+dist_proj_fire_2025_2026 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_proj_fire/dist_proj_fire_2025_2026.tif"))
+
+dist_proj_fire_2027_2028 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_proj_fire/dist_proj_fire_2027_2028.tif"))
+
+dist_proj_fire_2029 <-rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_proj_fire/dist_proj_fire_2029.tif"))
+
+# Now we need to mask these layers to just the CA extent 
+
+dist_proj_fire8_2025_2026_ca <- mask(dist_proj_fire_2025_2026, ca_raster)
+
+dist_proj_fire8_2027_2028_ca <- mask(dist_proj_fire_2027_2028, ca_raster)
+
+dist_proj_fire8_2029_ca <- mask(dist_proj_fire_2029, ca_raster)
+
+```
+### Save clipped fire projection DISTANCE rasters to the data drive for use in model and easy access for RCP 8.5 
+
+```{r}
+#write a function to make things easier
+saverast <- function(x){
+  
+  name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+  #write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/dist_proj_fire/dist_proj_fire8.5", name), filetype = "GTiff", overwrite = TRUE)
+  
+}
+
+saverast(dist_proj_fire8_2025_2026_ca)
+
+saverast(dist_proj_fire8_2027_2028_ca)
+
+saverast(dist_proj_fire8_2029_ca)
+
+
+
+```
+
