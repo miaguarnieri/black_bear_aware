@@ -30,19 +30,29 @@ gdrive_data <- "/Users/mia/Library/CloudStorage/GoogleDrive-mguarnieri@ucsb.edu/
 
 ```
 
-# exploring high conflict points where nonreporting is occurring and understanding the demographics of the areas
+# Summary 
+This rmd includes the code for a comparative statistical analysis between the demograhics of upotential underepoting regions and reported regions of high conflict. Underreported regions are defined as areas of high conflict, but no reporting. The demographic factors tested in this analysis include ethnic/racial identity, social vulnerability index, and english proficiency. 
+
+
+# Exploring high conflict points where nonreporting is occurring and understanding the demographics of the areas
+
+#Read in the model data 
 ```{r}
 #loading in data
+#model 3 raster - raster of high conflict
 mod3_rast <- rast(here(gdrive_data, "/AnalysisData/model_outputs/projected_mod3_clim_map_squared.tif"))
 
+#raster of california
 ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
 
-county_demographics <- vect(here(gdrive_data, "/IntermediateData/IntermediateData_Files/census_demographics/MSSA_Detail.shp"))
+#county_demographics <- vect(here(gdrive_data, "/IntermediateData/IntermediateData_Files/census_demographics/MSSA_Detail.shp"))
 
 ```
 
+#Read in the demograhic data - Data was foreked from a github repository by njdepsky. source: https://github.com/njdepsky/CA-POP which derived high resoulion grided estimates from the 2020 census. This paper by Depsky et al. can be found here: https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0270746 
 
 ```{r}
+
 ca_amind_alone <- rast(here(gdrive_data,"/InputData/InputData_Files/demographics_data_2020/CAPOP_2020_100m_AMIND_ALONE.tif/CAPOP_2020_100m_AMIND_ALONE.tif"))
 
 ca_amind_combo <- rast(here(gdrive_data,"/InputData/InputData_Files/demographics_data_2020/CAPOP_2020_100m_AMIND_COMBO.tif/CAPOP_2020_100m_AMIND_COMBO.tif"))
@@ -344,4 +354,3 @@ ces <- read_sf(here(gdrive_data, "/InputData/InputData_Files/calenviroscreen40sh
   select(Ling_Isol) %>% 
   naniar::replace_with_na(replace = list(Ling_Isol = -999))
 ```
-
