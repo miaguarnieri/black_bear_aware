@@ -5,8 +5,16 @@ date: "2023-01-30"
 output: html_document
 ---
 
+#Summary
+
+This Rmd contains the instructions and code for calculating the mean Palmer Drought Severity Index (PDSI) value from weekly data taken from US Drought Monitor. We analysed data from 2016 to 2021 here. Prior to using this analysis technique, all shapefiles for a given year were moved into one folder (one folder for 2016 shapefiles, one folder for 2017 shapefiles, etc).
+
+# Load in necessary packages (and file path)
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+#reading in the required packages
 
 library(tidyverse)
 library(here)
@@ -15,82 +23,65 @@ library(sf)
 library(tmap)
 library(rgdal)
 
-#mia's file path
+#setting up a file path - useful if your data is being read in from a Google Drive, your desktop, or somewhere other than your designated working directory
 gdrive_data <- "/Users/mia/Library/CloudStorage/GoogleDrive-mguarnieri@ucsb.edu/Shared drives/Black_Bear_Aware/gdrive_data"
-
-#sam's file path
-#gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
-```
-
-#Exploring single sf file to test
-
-```{r}
-caraster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
-
-drought16 <- read_sf(here(gdrive_data, "/InputData/InputData_Files/Drought/us_drought_monitor/2016/USDM_20161227.shp")) 
-
-#%>% 
- # select(DM)
-
-d16vect <- vect(drought16) %>% 
- terra::project(., caraster)
-
-d16rast <- rasterize(d16vect, caraster, field = "DM")
-
-d16rast_ca <- mask(d16rast, caraster)
-
-plot(d16rast_ca)
-
 ```
 
 
-##2016
+# Drought data wrangling for 2016
 
 ```{r}
-#create a list of the shapefile names
+#create a list of the shapefile names within the folder
 d16_list <- list.files(path = here(gdrive_data, "/InputData/InputData_Files/Drought/USDM_shapefiles/2016_USDM_M"), pattern = '.shp')
 
-#read each file in that list, convert it to a raster, and save it to intermediate data
+#For each file in that list, convert it to a raster and save it to an intermediate data folder
 for (i in d16_list) {
-  
+
+#load in already formatted raster for a rasterization template   
 caraster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
-  
+
+#read in the drought data shapefile  
 drought <- read_sf(here(gdrive_data, "/InputData/InputData_Files/Drought/USDM_shapefiles/2016_USDM_M", i))
-  
+
+#turn that file into a spatvector  
 drought_vect <- vect(drought) %>% 
   terra::project(., caraster)
-  
+
+#rasterize the spatvector using the caraster as a template, designate which field to rasterize (PDSI)  
 drought_rast <- rasterize(drought_vect, caraster, field = "DM")
-  
+
+#crop the data to be only within the extent of the caraster file (the state of California)  
 drought_rast_ca <- mask(drought_rast, caraster)
-  
-name <- paste0(i, ".tif") #the name of the file will be the same as the input file, plus '.tif' at the end
-  
+
+#the name of the file will be the same as the input file, plus '.tif' at the end
+name <- paste0(i, ".tif") 
+
+#save the raster to the designated folder  
   writeRaster(drought_rast_ca, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/drought_rasters/UDM_2016", name), filetype = "GTiff", overwrite = TRUE)
   
 }
 
-#create a list of raster names
+#create a list of raster file names from within the folder designated inside of the for loop
 d16_rast_list <- list.files(path = here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/drought_rasters/UDM_2016"))
 
-#stack up all raster files and take the mean
+#stack all those raster files
 stack16 <- c(rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/drought_rasters/UDM_2016/", d16_rast_list)))
 
+#create a new raster with the mean of all of those raster files
 mean_16 <- terra::mean(stack16, na.rm = TRUE)
 
-#save the mean raster
+#save the mean raster - this is the annual mean PDSI value within each pixel
 writeRaster(mean_16, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/drought_rasters/UDM_2016/mean_drought_16.tif"), filetype = "GTiff", overwrite = TRUE)
   
 ```
 
-##2017
+# Drought data wrangling for 2017
 
 ```{r}
-
 #create a list of the shapefile names
 d17_list <- list.files(path = here(gdrive_data, "/InputData/InputData_Files/Drought/USDM_shapefiles/2017_USDM_M"), pattern = '.shp')
 
-#read each file in that list, convert it to a raster, and save it to intermediate data
+#read each file in that list, convert it to a raster, and save it to an intermediate data folder (same process as above)
 for (i in d17_list) {
   
 caraster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
@@ -110,12 +101,13 @@ name <- paste0(i, ".tif") #the name of the file will be the same as the input fi
   
 }
 
-#create a list of raster names
+#create a list of raster names within the folder
 d17_rast_list <- list.files(path = here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/drought_rasters/UDM_2017"))
 
-#stack up all raster files and take the mean
+#stack all those raster files
 stack17 <- c(rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/drought_rasters/UDM_2017/", d17_rast_list)))
 
+#create a new raster with annual mean PSDI values
 mean_17 <- terra::mean(stack17, na.rm = TRUE)
 
 #save the mean raster
@@ -123,14 +115,13 @@ writeRaster(mean_17, filename = here(gdrive_data, "/IntermediateData/Intermediat
 
 ```
 
-## 2018
+# Drought data wrangling for 2018
 
 ```{r}
-
 #create a list of the shapefile names
 d18_list <- list.files(path = here(gdrive_data, "/InputData/InputData_Files/Drought/USDM_shapefiles/2018_USDM_M"), pattern = '.shp')
 
-#read each file in that list, convert it to a raster, and save it to intermediate data
+#read each file in that list, convert it to a raster, and save it to an intermediate data folder (same process as above)
 for (i in d18_list) {
   
 caraster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
@@ -150,25 +141,26 @@ name <- paste0(i, ".tif") #the name of the file will be the same as the input fi
   
 }
 
-#create a list of raster names
+#create a list of raster names within the folder
 d18_rast_list <- list.files(path = here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/drought_rasters/UDM_2018"))
 
-#stack up all raster files and take the mean
+#stack all those raster files
 stack18 <- c(rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/drought_rasters/UDM_2018/", d18_rast_list)))
 
+#create a new raster with annual mean PSDI values
 mean_18 <- terra::mean(stack18, na.rm = TRUE)
 
 #save the mean raster
 writeRaster(mean_18, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/drought_rasters/UDM_2018/mean_drought_18.tif"), filetype = "GTiff", overwrite = TRUE)
 ```
 
-#2019
+# Drought data wrangling for 2019
 
 ```{r}
 #create a list of the shapefile names
 d19_list <- list.files(path = here(gdrive_data, "/InputData/InputData_Files/Drought/USDM_shapefiles/2019_USDM_M"), pattern = '.shp')
 
-#read each file in that list, convert it to a raster, and save it to intermediate data
+#read each file in that list, convert it to a raster, and save it to an intermediate data folder (same process as above)
 for (i in d19_list) {
   
 caraster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
@@ -188,25 +180,26 @@ name <- paste0(i, ".tif") #the name of the file will be the same as the input fi
   
 }
 
-#create a list of raster names
+#create a list of raster names within the folder
 d19_rast_list <- list.files(path = here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/drought_rasters/UDM_2019"))
 
-#stack up all raster files and take the mean
+#stack all those raster files
 stack19 <- c(rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/drought_rasters/UDM_2019/", d19_rast_list)))
 
+#create a new raster with annual mean PSDI values
 mean_19 <- terra::mean(stack19, na.rm = TRUE)
 
 #save the mean raster
 writeRaster(mean_19, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/drought_rasters/UDM_2019/mean_drought_19.tif"), filetype = "GTiff", overwrite = TRUE)
 ```
 
-# 2020
+# Drought data wrangling for 2020
 
 ```{r}
 #create a list of the shapefile names
 d20_list <- list.files(path = here(gdrive_data, "/InputData/InputData_Files/Drought/USDM_shapefiles/2020_USDM_M"), pattern = '.shp')
 
-#read each file in that list, convert it to a raster, and save it to intermediate data
+#read each file in that list, convert it to a raster, and save it to an intermediate data folder (same process as above)
 for (i in d20_list) {
   
 caraster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
@@ -226,12 +219,13 @@ name <- paste0(i, ".tif") #the name of the file will be the same as the input fi
   
 }
 
-#create a list of raster names
+#create a list of raster names within the folder
 d20_rast_list <- list.files(path = here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/drought_rasters/UDM_2020"))
 
-#stack up all raster files and take the mean
+#stack all those raster files
 stack20 <- c(rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/drought_rasters/UDM_2020/", d20_rast_list)))
 
+#create a new raster with annual mean PSDI values
 mean_20 <- terra::mean(stack20, na.rm = TRUE)
 
 #save the mean raster
@@ -239,14 +233,13 @@ writeRaster(mean_20, filename = here(gdrive_data, "/IntermediateData/Intermediat
 
 ```
 
-# 2021
+# Drought data wrangling for 2021
 
 ```{r}
-
 #create a list of the shapefile names
 d21_list <- list.files(path = here(gdrive_data, "/InputData/InputData_Files/Drought/USDM_shapefiles/2021_USDM_M"), pattern = '.shp')
 
-#read each file in that list, convert it to a raster, and save it to intermediate data
+#read each file in that list, convert it to a raster, and save it to an intermediate data folder (same process as above)
 for (i in d21_list) {
   
 caraster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
@@ -266,12 +259,13 @@ name <- paste0(i, ".tif") #the name of the file will be the same as the input fi
   
 }
 
-#create a list of raster names
+#create a list of raster names within the folder
 d21_rast_list <- list.files(path = here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/drought_rasters/UDM_2021"))
 
-#stack up all raster files and take the mean
+#stack all those raster files
 stack21 <- c(rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/drought_rasters/UDM_2021/", d21_rast_list)))
 
+#create a new raster with annual mean PSDI values
 mean_21 <- terra::mean(stack21, na.rm = TRUE)
 
 #save the mean raster

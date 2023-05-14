@@ -5,6 +5,8 @@ date: "2023-01-27"
 output: html_document
 ---
 
+Drought Projections uses data sourced from CalAdapt in the form of Precipitation values and Potential Evaporation. These values are then cropped to the state of California, and masked to the extent of our general California Raster in order to keep resolution and extent the same across the project (230 meters x 230 meters). The Coordinate Reference System (CRS) is coded below as well for a visualization of what we are using. Once cropped and masked, the values are combined into one dataset and loaded into the Palmer Drought Severity Index function (pdsi) where the function gives values of drought severity based on these values and other constants such as available water content (awc), etc. These outputs are then combined once again with the previous dataset in order to maintain x and y values, so then it can be rasterized for a visual output. This is then cropped and masked and saved as a tif file for our model to use. 
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 #attach packages
