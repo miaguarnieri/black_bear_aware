@@ -52,31 +52,42 @@ ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CA
 #Read in the demograhic data - Data was foreked from a github repository by njdepsky. source: https://github.com/njdepsky/CA-POP which derived high resoulion grided estimates from the 2020 census. This paper by Depsky et al. can be found here: https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0270746 
 
 ```{r}
-
+#American Indian and Alaska Native alone (Hispanic/Latino and Not-Hispanic/Latino)
 ca_amind_alone <- rast(here(gdrive_data,"/InputData/InputData_Files/demographics_data_2020/CAPOP_2020_100m_AMIND_ALONE.tif/CAPOP_2020_100m_AMIND_ALONE.tif"))
 
+#American Indian and Alaska Native alone or in any combination of multiple races (Hispanic/Latino and Not-Hispanic/Latino)
 ca_amind_combo <- rast(here(gdrive_data,"/InputData/InputData_Files/demographics_data_2020/CAPOP_2020_100m_AMIND_COMBO.tif/CAPOP_2020_100m_AMIND_COMBO.tif"))
 
+#Hispanic or Latino
 ca_hisp <- rast(here(gdrive_data,"/InputData/InputData_Files/demographics_data_2020/CAPOP_2020_100m_HISP.tif/CAPOP_2020_100m_HISP.tif"))
 
+#Not-Hispanic or Latino, Black or African American alone
 ca_black <- rast(here(gdrive_data,"/InputData/InputData_Files/demographics_data_2020/CAPOP_2020_100m_NHBLACK.tif/CAPOP_2020_100m_NHBLACK.tif"))
 
+#minors
 ca_minors <- rast(here(gdrive_data,"/InputData/InputData_Files/demographics_data_2020/CAPOP_2020_100m_MINORS.tif/CAPOP_2020_100m_MINORS.tif"))
 
+#Not-Hispanic or Latino, American Indian and Alaska Native alone 
 ca_nhamind <- rast(here(gdrive_data, "/InputData/InputData_Files/demographics_data_2020/CAPOP_2020_100m_NHAMIND.tif/CAPOP_2020_100m_NHAMIND.tif"))
 
+#Not-Hispanic or Latino, Asian alone
 ca_nhasian <- rast(here(gdrive_data,"/InputData/InputData_Files/demographics_data_2020/CAPOP_2020_100m_NHASIAN.tif/CAPOP_2020_100m_NHASIAN.tif"))
 
+#Not-Hispanic or Latino, Native Hawaiian and Other Pacific Islander alone 
 ca_nhhipi <- rast(here(gdrive_data,"/InputData/InputData_Files/demographics_data_2020/CAPOP_2020_100m_NHHIPI.tif/CAPOP_2020_100m_NHHIPI.tif"))
 
+#Not-Hispanic or Latino, Some Other Race alone and Not-Hispanic or Latino, Population of two or more races
 ca_nhothermulti <- rast(here(gdrive_data,"/InputData/InputData_Files/demographics_data_2020/CAPOP_2020_100m_NHOTHERMULTI.tif/CAPOP_2020_100m_OTHERMULTI.tif"))
 
+#Not-Hispanic or Latino, White alone
 ca_nhwhite <- rast(here(gdrive_data, "/InputData/InputData_Files/demographics_data_2020/CAPOP_2020_100m_NHWHITE.tif/CAPOP_2020_100m_NHWHITE.tif"))
 
+#Total 
 ca_total <- rast(here(gdrive_data,"/InputData/InputData_Files/demographics_data_2020/CAPOP_2020_100m_TOTAL.tif/CAPOP_2020_100m_TOTAL.tif"))
 
 ```
 
+# Project them into the correct geogrphic reference 
 
 ```{r}
 ca_amind_alone_proj <- project(ca_amind_alone,"epsg:6414")
