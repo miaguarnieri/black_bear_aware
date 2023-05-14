@@ -4,6 +4,12 @@ author: "Chase Tarr"
 date: "10/31/2022"
 output: html_document
 ---
+# Purpose of this .rmd 
+This rmd contains the code we used to create our climate model, which was the model we created including climate variables (fire and drought). 
+
+Data was processed by year, data frames were generated for each year by conflict points and randomly generated non-conflict points, and then recombined into one final data frame. The final model was then ran utilizing this final data frame that combined all years. We ran a final climate model that had the best AIC and where we squared population density and road density. 
+
+Hagani, J. S., Kross, S. M., Clark, M., Wynn-Grant, R., & Blair, M. (2021). “Mapping and modeling human-black bear interactions in the Catskills region of New York using resource selection probability functions.” PLOS ONE, 16(9), e0257716. https://doi.org/10.1371/JOURNAL.PONE.0257716
 
 ##Setup and packages
 

@@ -10,8 +10,6 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 #attach packages
-#note - Loading all of the ones Jason used, I don't think we will need all of them 
-
 library(tidyverse)
 library(here)
 library(terra)
@@ -27,35 +25,41 @@ gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 #gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 ```
 
-#Data Wrangling Prior to Coding
+# Purpose of this .rmd
+The purpose of this .rmd is to share the code our team used to wrangle spatial data in order to createe distance layers for our model. 
+This .rmd resulted in the creation of 5 distance rasters: 
+- Distance to streams
+- Distance to roads
+- Distance to urban areas
+- Distance to recreational areas
+- Distance to forest cover 
 
-*Data Sources*: Please see ReadMe file for metadata and citations.
-*Reference Paper*: Insert hagani citation here
 
-#Load in existing data layers
-
-##California raster
-
-Insert info about CA raster layer here
-
+## Reading in California raster
 ```{r}
+
+#reading in ca_raster, a raster formatted to the resolution, crs, and spatial extent we plan to run our model over. 
 
 ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
 
 #check the coordinate reference system 
 crs(ca_raster)
 
-#plot CA raster to confirm
+#plot CA raster to confirm spatial layout 
 tm_shape(ca_raster) +
   tm_raster() +
   tmap_mode("view")
+
+#checking that I've read in the correct resolution raster
 
 res(ca_raster)
 
 ```
 
-#Streams Layer 
+#Streams Layer Data Wrangling
 ```{r}
+#here I match the streams layer extent, res, and crs to the ca_raster, and convert to a raster. 
+
 streams_2017 <- vect(here(gdrive_data, "/InputData/InputData_Files/2017_Streams_CDFW/California_Streams.shp"))
 
 #ca_extent <- ext(ca_raster)
@@ -70,9 +74,77 @@ streams_2017_raster <- rasterize(streams_2017_mask, ca_raster)
 ```
 
 
-#Roads Layer 
+###Save streams vector to Gdrive
+```{r}
+savevect <- function(x){
+  
+  name <- paste0(deparse(substitute(x)), ".shp") #the name of the file will be the same as the input object, plus '.hp' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a shapefile
+  
+  writeVector(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/stream_shapefile", name), filetype = "ESRI Shapefile", overwrite=TRUE)
+}
+
+#save the file
+savevect(streams_2017_mask)
+```
+
+
+###Save streams raster to Google Drive
+```{r}
+saverast <- function(x){
+  
+  name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/stream_rasters", name), filetype = "GTiff", overwrite=TRUE)
+}
+
+saverast(streams_2017_raster)
+
+```
+
+### Distance to Streams Arc Layer
+Due to the size of our rasters, using R to create distance layers was not feasible, and instead our group used ArcGIS to create these distance layers. We then reformatted these layers and saved them to our folder "model_ready" indicating they were ready for use in our final model code
+```{r}
+#read in eucledian distance layer from ARC
+dist_to_stream_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_stream/dist_to_streams_raster.tif"))
+
+#Resample to fix error
+dist_stream_mask = resample(dist_to_stream_raster, ca_raster)
+
+#crop to CA 
+stream17_ca_distance <- mask(dist_stream_mask, ca_raster)
+
+tm_shape(stream17_ca_distance) +
+  tm_raster() +
+  tmap_mode("view")
+
+```
+###Save clipped streams DISTANCE rasters to the data drive for use in model and easy access
+
+**ONLY RUN THIS ONE TIME; IT WILL NOT RUN ONCE THE FILES ARE SAVED**
 
 ```{r}
+saverast <- function(x){
+  
+  name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
+  
+#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
+  
+  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_stream/model_ready", name), filetype = "GTiff", overwrite=TRUE)
+}
+
+saverast(stream17_ca_distance)
+
+```
+#### Stream data is now ready for use in model 
+
+#Roads Layer Data Wrangling 
+
+```{r}
+#here I match the roads layer extent, res, and crs to the ca_raster and convert to a raster. 
 roads_2015 <- vect(here(gdrive_data, "/InputData/InputData_Files/2015_roads_TIGER/tl_2015_06_prisecroads.shp"))
 
 roads_2015_calbers <- project(roads_2015, ca_raster)
@@ -84,16 +156,7 @@ roads_2015_raster <- rasterize(roads_2015_mask, ca_raster)
 ```
 
 
-
-#Create remaining data layers
-
-```{r}
-
-```
-
-
-##Distance to road
-
+### Saving roads layer as a vector 
 ```{r}
 savevect <- function(x){
   
@@ -108,7 +171,8 @@ savevect <- function(x){
 savevect(roads_2015_mask)
 
 ```
-
+ 
+### Saving roads layers as a raster 
 ```{r}
 saverast <- function(x){
   
@@ -122,7 +186,8 @@ saverast <- function(x){
 saverast(roads_2015_raster)
 ```
 
-##Distance to Roads Arc Layer
+### Distance to Roads Arc Layer
+Due to the size of our rasters, using R to create distance layers was not feasible, and instead our group used ArcGIS to create these distance layers. We then reformatted these layers and saved them to our folder "model_ready" indicating they were ready for use in our final model code
 ```{r}
 #read in eucledian distance layer from ARC
 dist_to_roads_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_road/dist_to_road_raster.tif"))
@@ -138,7 +203,7 @@ tm_shape(roads15_ca_distance) +
   tmap_mode("view")
 
 ```
-##Save clipped roads DISTANCE rasters to the data drive for use in model and easy access
+### Save clipped roads DISTANCE rasters to the data drive for use in model and easy access
 
 **ONLY RUN THIS ONE TIME; IT WILL NOT RUN ONCE THE FILES ARE SAVED**
 
@@ -156,78 +221,15 @@ saverast(roads15_ca_distance)
 
 ```
 
-
-##Distance to streams
-###Save vector to Gdrive
-```{r}
-savevect <- function(x){
-  
-  name <- paste0(deparse(substitute(x)), ".shp") #the name of the file will be the same as the input object, plus '.hp' at the end
-  
-#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a shapefile
-  
-  writeVector(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/stream_shapefile", name), filetype = "ESRI Shapefile", overwrite=TRUE)
-}
-
-#save the file
-savevect(streams_2017_mask)
-```
+#### The roads layer is now ready for use in our model 
 
 
-##Save raster to Google Drive
-```{r}
-saverast <- function(x){
-  
-  name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
-  
-#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
-  
-  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/stream_rasters", name), filetype = "GTiff", overwrite=TRUE)
-}
-
-saverast(streams_2017_raster)
-
-```
-
-##Distance to Streams Arc Layer
-```{r}
-#read in eucledian distance layer from ARC
-dist_to_stream_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_stream/dist_to_streams_raster.tif"))
-
-#Resample to fix error
-dist_stream_mask = resample(dist_to_stream_raster, ca_raster)
-
-#crop to CA 
-stream17_ca_distance <- mask(dist_stream_mask, ca_raster)
-
-tm_shape(stream17_ca_distance) +
-  tm_raster() +
-  tmap_mode("view")
-
-```
-##Save clipped streams DISTANCE rasters to the data drive for use in model and easy access
-
-**ONLY RUN THIS ONE TIME; IT WILL NOT RUN ONCE THE FILES ARE SAVED**
-
-```{r}
-saverast <- function(x){
-  
-  name <- paste0(deparse(substitute(x)), ".tif") #the name of the file will be the same as the input object, plus '.tif' at the end
-  
-#write the raster into the correct folder in drive (the path will need to be updated for other files) and save it as a geotiff
-  
-  writeRaster(x, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_stream/model_ready", name), filetype = "GTiff", overwrite=TRUE)
-}
-
-saverast(stream17_ca_distance)
-
-```
-##Distance to urban areas
+## Distance to urban areas layer data wrangling 
 
 ```{r}
 #creation of binary urban area rasters from NLCD data (urban = 1, all other cover = NA)
 
-#read in land cover rasters - we will convert these to hold only developed areas
+#read in land cover rasters - we will convert these to hold only developed areas (ie, urban areas)
 
 lc13 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc13_reclassed.tif"))
 
@@ -281,7 +283,7 @@ catdat <- data.frame(id = index, category = cats)
 
 reclassify <- function(x){
   
-  x_reclassed <- classify(x, mat) #reclassify using the matrix above, set all non-forest values to NA
+  x_reclassed <- classify(x, mat) #reclassify using the matrix above, set all non-urban values to NA
   
   levels(x_reclassed) <- catdat #then reassign levels (labels) using the dataframe above
   
@@ -296,24 +298,9 @@ ua16 <- reclassify(lc16)
 
 ua19 <- reclassify(lc19)
 
-#these are outside our time frame
-
-#ua01 <- reclassify(lc01)
-
-#ua04 <- reclassify(lc04)
-
-#ua06 <- reclassify(lc06)
-
-#ua08 <- reclassify(lc08)
-
-#ua11 <- reclassify(lc11)
-
-
-
 ```
 
-##Save reclassified, reprojected, and clipped urban rasters to the data drive for use in ArcGIS
-
+### Save reclassified, reprojected, and clipped urban rasters to the data drive for use in ArcGIS
 
 **ONLY RUN THIS ONE TIME; IT WILL NOT RUN ONCE THE FILES ARE SAVED**
 
@@ -345,11 +332,11 @@ saverast(ua19)
 
 #saverast(ua11)
 
-#these saved raster layers were processed in ArcGIS Pro using the Euclidean distance tool 
+#these saved raster layers were ten processed in ArcGIS Pro using the Euclidean distance tool 
 ```
 
-
-## reading urban distance rasters and masking them to CA
+### Distance Urban Areas Arc Layer
+Due to the size of our rasters, using R to create distance layers was not feasible, and instead our group used ArcGIS to create these distance layers. We then reformatted these layers and saved them to our folder "model_ready" indicating they were ready for use in our final model code
 ```{r}
 #Now we need to read back in the distance raster created in ArcGIS pro and mask these layers to match our CA extent again. Layers are already in the correct projection and resolution
 
@@ -367,9 +354,8 @@ ua16_ca_distance <- mask(dist_ua16, ca_raster)
 ua13_ca_distance <- mask(dist_ua13, ca_raster)
 
 #now we will save them back to the google drive to be referenced later 
-
 ```
-##Save clipped urban DISTANCE rasters to the data drive for use in model and easy access
+### Save clipped urban DISTANCE rasters to the data drive for use in model and easy access
 
 
 **ONLY RUN THIS ONE TIME; IT WILL NOT RUN ONCE THE FILES ARE SAVED**
@@ -395,9 +381,10 @@ saverast(ua13_ca_distance)
 
 
 
-##Distance to recreational areas
+### Distance to recreational areas data wrangling
+Here we combined several data sources to get a complete raster of recreation areas across California. We utilized maps of: park entry points, parking points, campgrounds, picnic grounds, structures, buildings, recreational routes, and park boundaries. We wrangled these layers into the same resolution, extent, and crs and then merged them into one final recreational area raster. 
 
-###Park Entry Points
+#### Park Entry Points wrangling
 ```{r}
 rec_areas_PEP <- vect(here(gdrive_data, "/InputData/InputData_Files/recreational_areas/parkentrypoints/ParkEntryPoints.shp"))
 
@@ -409,9 +396,7 @@ rec_areas_PEP_raster <- rasterize(rec_areas_PEP_mask, ca_raster)
 
 ```
 
-
-
-###Parking Points
+#### Parking Points wrangling
 ```{r}
 rec_areas_parking <- vect(here(gdrive_data, "/InputData/InputData_Files/recreational_areas/parkingpoints/ParkingPoints.shp"))
 
@@ -424,8 +409,7 @@ rec_areas_parking_raster <- rasterize(rec_areas_parking_mask, ca_raster)
 
 ```
 
-
-###Campgrounds
+#### Campgrounds wrangling
 ```{r}
 rec_areas_camp <- vect(here(gdrive_data, "/InputData/InputData_Files/recreational_areas/campgrounds/Campgrounds.shp"))
 
@@ -436,7 +420,7 @@ rec_areas_camp_mask <- crop(rec_areas_camp_calbers, ca_raster)
 rec_areas_camp_raster <- rasterize(rec_areas_camp_mask, ca_raster)
 ```
 
-###Picnic Grounds
+#### Picnic Grounds wrangling
 ```{r}
 rec_areas_picnic <- vect(here(gdrive_data, "/InputData/InputData_Files/recreational_areas/picnicgrounds/PicnicGrounds.shp"))
 
@@ -447,7 +431,7 @@ rec_areas_picnic_mask <- crop(rec_areas_picnic_calbers, ca_raster)
 rec_areas_picnic_raster <- rasterize(rec_areas_picnic_mask, ca_raster)
 ```
 
-###Structures
+#### Structures wrangling
 ```{r}
 rec_areas_structures <- vect(here(gdrive_data, "/InputData/InputData_Files/recreational_areas/structures/Structures.shp"))
 
@@ -458,7 +442,7 @@ rec_areas_structures_mask <- crop(rec_areas_structures_calbers, ca_raster)
 rec_areas_structures_raster <- rasterize(rec_areas_structures_mask, ca_raster)
 ```
 
-###Buildings
+#### Buildings wrangling
 ```{r}
 rec_areas_buildings <- vect(here(gdrive_data, "/InputData/InputData_Files/recreational_areas/buildings/Buildings.shp"))
 
@@ -469,7 +453,7 @@ rec_areas_buildings_mask <- crop(rec_areas_buildings_calbers, ca_raster)
 rec_areas_buildings_raster <- rasterize(rec_areas_buildings_mask, ca_raster)
 ```
 
-###Recreational Routes
+#### Recreational Routes wrangling
 ```{r}
 rec_areas_rr <- vect(here(gdrive_data, "/InputData/InputData_Files/recreational_areas/recreationalroutes/RecreationalRoutes.shp"))
 
@@ -480,7 +464,7 @@ rec_areas_rr_mask <- crop(rec_areas_rr_calbers, ca_raster)
 rec_areas_rr_raster <- rasterize(rec_areas_rr_mask, ca_raster)
 ```
 
-###Park Boundaries
+#### Park Boundaries wrangling
 ```{r}
 rec_areas_pb <- vect(here(gdrive_data, "/InputData/InputData_Files/recreational_areas/parkboundaries/ParkBoundaries.shp"))
 
@@ -491,7 +475,7 @@ rec_areas_pb_mask <- crop(rec_areas_pb_calbers, ca_raster)
 rec_areas_pb_raster <- rasterize(rec_areas_pb_mask, ca_raster)
 ```
 
-#####Saving Rec Areas to Distance Rasters
+##### Merging layers and saving Rec Areas to Distance Rasters
 ```{r}
 #savevect <- function(x){
   
@@ -532,7 +516,8 @@ saverast(rec_areas_ca)
 ```
 
 
-#masking rec areas from gis to california
+### Distance to Rec Areas Layer from ArcGIS 
+Due to the size of our rasters, using R to create distance layers was not feasible, and instead our group used ArcGIS to create these distance layers. We then reformatted these layers and saved them to our folder "model_ready" indicating they were ready for use in our final model code
 ```{r}
 dist_rec_areas <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_rec/distance_rec.tif"))
 
@@ -541,7 +526,7 @@ dist_rec_mask = resample(dist_rec_areas, ca_raster)
 rec_ca_distance <- mask(dist_rec_mask, ca_raster)
 ```
 
-#saving rec distance for ca to model ready
+### Save clipped recreation DISTANCE rasters to the data drive for use in model and easy access
 ```{r}
 saverast <- function(x){
   
@@ -555,7 +540,7 @@ saverast <- function(x){
 saverast(rec_ca_distance )
 ```
 
-##Distance to forest cover
+## Distance to forest cover data wrangling 
 
 ```{r}
 #creation of binary forest rasters from NLCD data (forest cover =1, all other cover = NA)
@@ -568,20 +553,9 @@ lc16 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Ra
 
 lc19 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc19_reclassed.tif"))
 
-#these ones are outside our time frame
-
-#lc01 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc01_reclassed.tif"))
-
-#lc04 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc04_reclassed.tif"))
-
-#lc06 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc06_reclassed.tif"))
-
-#lc08 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc08_reclassed.tif"))
-
-#lc11 <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/NLCD_Rasters_Formatted/lc11_reclassed.tif"))
-
 
 #list out the from, to values in an object
+# turning everything in the data NA except for forest layers 
 m <- c(0, NA,
        11, NA, 
        12, NA, 
@@ -629,29 +603,9 @@ fc16 <- reclassify(lc16)
 
 fc19 <- reclassify(lc19)
 
-#outside our time frame
-
-#fc01 <- reclassify(lc01)
-
-#fc04 <- reclassify(lc04)
-
-#fc06 <- reclassify(lc06)
-
-#fc08 <- reclassify(lc08)
-
-#fc11 <- reclassify(lc11)
-
-#Notes on distance rasters
-
-# fc13_lowres <- terra::aggregate(fc13, 5, fun = "sum", na.rm = TRUE) - make the distance raster lower resolution
-# 
-# fc13_lowres_dist <- distance(fc13_lowres) #then the distance would run
-
-#system.time({x <- distance(blah)}) to see the runtime/cpu time used
-
 ```
 
-##Save reclassified, reprojected, and clipped forest rasters to the data drive for use in ArcGIS
+### Save reclassified, reprojected, and clipped forest rasters to the data drive for use in ArcGIS
 
 **ONLY RUN THIS ONE TIME; IT WILL NOT RUN ONCE THE FILES ARE SAVED**
 
@@ -671,22 +625,11 @@ saverast(fc16)
 
 saverast(fc19)
 
-#outside our time frame
-
-#saverast(fc01)
-
-#saverast(fc04)
-
-#saverast(fc06)
-
-#saverast(fc08)
-
-#saverast(fc11)
-
 ```
 
 
-## reading forest cover distance rasters and masking them to CA
+### Distance to forest cover rasters from ArcGIS 
+Due to the size of our rasters, using R to create distance layers was not feasible, and instead our group used ArcGIS to create these distance layers. We then reformatted these layers and saved them to our folder "model_ready" indicating they were ready for use in our final model code
 ```{r}
 #Now we need to read back in the distance raster created in ArcGIS pro and mask these layers to match our CA extent again. Layers are already in the correct projection and resolution
 
@@ -713,7 +656,7 @@ fc13_ca_distance <- mask(dist_13_mask, ca_raster)
 #now we will save them back to the google drive to be referenced later 
 
 ```
-##Save clipped forest cover DISTANCE rasters to the data drive for use in model and easy access
+### Save clipped forest cover DISTANCE rasters to the data drive for use in model and easy access
 
 
 **ONLY RUN THIS ONE TIME; IT WILL NOT RUN ONCE THE FILES ARE SAVED**
@@ -733,9 +676,6 @@ saverast(fc19_ca_distance )
 saverast(fc16_ca_distance )
 
 saverast(fc13_ca_distance )
-
-
-
 
 ```
 

@@ -5,7 +5,14 @@ date: '2022-10-19'
 output: html_document
 ---
 
-##Setup and packages
+# Purpose of this .rmd 
+This rmd contains the code we used to create our base model, which was the model we created without climate variables. 
+
+Data was processed by year, data frames were generated for each year by conflict points and randomly generated non-conflict points, and then recombined into one final data frame. The final model was then ran utilizing this final data frame that combined all years. We ran 5 alternative models based on guidance from 2021 paper “Mapping and modeling human-black bear interactions in the Catskills region of New York using resource selection probability functions.” by Hagani et. al.
+
+Hagani, J. S., Kross, S. M., Clark, M., Wynn-Grant, R., & Blair, M. (2021). “Mapping and modeling human-black bear interactions in the Catskills region of New York using resource selection probability functions.” PLOS ONE, 16(9), e0257716. https://doi.org/10.1371/JOURNAL.PONE.0257716
+
+## Setup and packages
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -28,7 +35,7 @@ gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
 ```
 
-#Load in data layers
+# Load in data layers
 
 ```{r}
 #conflict data
@@ -105,9 +112,9 @@ fdens <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_
 
 ```
 
-#Process data by year
+# Process data by year
 
-##2016
+## 2016
 
 ```{r}
 
@@ -258,7 +265,7 @@ write.csv(modeldf_16_year, file = here(gdrive_data, "/AnalysisData/model_df_nocl
 ```
 
 
-##2017
+## 2017
 
 ```{r}
 #extract values for 2017, select only conflict indictor and geometry, and dissolve polygons

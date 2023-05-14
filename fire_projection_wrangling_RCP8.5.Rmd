@@ -1,5 +1,5 @@
 ---
-title: "fire_projection_wrangling"
+title: "fire_projection_wrangling_RCP8.5"
 author: "Claire Meuter"
 date: "2023-01-31"
 output: html_document
@@ -19,7 +19,10 @@ library(rmapshaper)
 
 #claire's file path
 gdrive_data <- "/Users/clairemeuter/Library/CloudStorage/GoogleDrive-clairemeuter@ucsb.edu/Shared drives/Black_Bear_Aware/gdrive_data"
+
 ```
+
+## Important note: this data is refering to future fire projections for 2024  to 2029 for fire preditions for Isaac Parks work. This fire layer is based on an RCP 8.5 scenario. We also  (for manuscript purposes later ran a 4.5 scenario)
 
 ```{r}
 # CA Raster example 

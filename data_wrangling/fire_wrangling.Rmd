@@ -28,9 +28,33 @@ gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
 ```
 
+# Purpose: 
+The purpose of this .rmd is to create distance to fire layers as variables for use in our model. 
+ 
+See our team's Dryad page for further information on the source data. 
 
+This .rmd resulted in the creation of these distance rasters: 
+- Distance to moderate to severe burn scars from 2015
+- Distance to moderate to severe burn scars from 2016
+- Distance to moderate to severe burn scars from 2017
+- Distance to moderate to severe burn scars from 2018
+- Distance to moderate to severe burn scars from 2019
+- Distance to moderate to severe burn scars from 2020
+- Distance to moderate to severe burn scars from 2011 to 2012
+- Distance to moderate to severe burn scars from 2012 to 2013
+- Distance to moderate to severe burn scars from 2013 to 2014
+- Distance to moderate to severe burn scars from 2014 to 2015
+- Distance to moderate to severe burn scars from 2015 to 2016
+- Distance to moderate to severe burn scars from 2016 to 2017
+- Distance to moderate to severe burn scars from 2017 to 2018
+- Distance to moderate to severe burn scars from 2018 to 2019
+
+## Data wrangling for fire burn scar data 
 ```{r}
 # CA Raster example 
+
+#reading in ca_raster, a raster formatted to the resolution, crs, and spatial extent we plan to run our model over. 
+
 ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
 
 #check the coordinate reference system 
@@ -43,7 +67,7 @@ crs(ca_raster)
 #  tmap_mode("view")
 ```
 
-# Initial fire data layers
+## Wrangling initial fire data layers
 
 Rasters showing fire location and severity, from 0-4
 
@@ -70,14 +94,17 @@ ca_fire_2019 <- rast(here(gdrive_data, "/InputData/InputData_Files/fire_intensit
 
 ca_fire_2020 <- rast(here(gdrive_data, "/InputData/InputData_Files/fire_intensity_CA_mtbs/2020_fire_intensity_CA_mtbs/mtbs_CA_2020.tif"))
 
+fire_list <- list()
 ```
+# have a list object
 
-
-#Getting layers in correct extent, resolution and projection
+### Getting layers in correct extent, resolution and projection
 
 ```{r}
 #reproject to the same crs (NAD 83, CA Albers (2011))
 # method = near in order to preserve categorical data
+
+fire_list_albers <- lapply(fire_list, terra::project(y = ca_raster, method = "near"))
 
 ca_fire_2011_albers <- terra::project(ca_fire_2011, ca_raster, method = "near")
 
@@ -125,7 +152,8 @@ fire_2019_mask <- mask(ca_fire_2019_albers, ca_raster)
 fire_2020_mask <- mask(ca_fire_2020_albers, ca_raster)
 ```
 
-#Save reprojected and clipped rasters to the data drive
+### Save reprojected and clipped rasters to the data drive
+This saves time rather than rerunning the script
 
 ```{r}
 saverast <- function(x){
@@ -160,7 +188,7 @@ saverast(fire_2020_mask)
 
 ```
 
-#Read in saved, formatted layers
+### Read in saved, formatted layers
 
 ```{r}
 #read in fire layers 
@@ -188,7 +216,8 @@ fire_2020_mask <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Fil
 ```
 
 
-#Reclassify to keep only medium and high fire intensity
+### Reclassify to keep only medium and high fire intensity
+We are only interesting in how medium and high intensity fires influences human-black bear conflict, so we will reclassify to only keep medium and hihgh intensity fires. 
 
 ```{r}
 #list out the from, to values in an object
@@ -250,7 +279,7 @@ fire_2020_reclassed <- reclassify_fire(fire_2020_mask)
 ```
 
 
-#Save reclassified rasters to the data drive
+### Save reclassified rasters to the data drive
 
 ```{r}
 saverast <- function(x){
@@ -277,7 +306,16 @@ saverast(fire_2020_reclassed)
 ```
 
 
-#Create multi-year merged layers for model data processing
+### Create multi-year merged layers for model data processing
+This step is necessary for creation of the following layers: 
+- Distance to moderate to severe burn scars from 2011 to 2012
+- Distance to moderate to severe burn scars from 2012 to 2013
+- Distance to moderate to severe burn scars from 2013 to 2014
+- Distance to moderate to severe burn scars from 2014 to 2015
+- Distance to moderate to severe burn scars from 2015 to 2016
+- Distance to moderate to severe burn scars from 2016 to 2017
+- Distance to moderate to severe burn scars from 2017 to 2018
+- Distance to moderate to severe burn scars from 2018 to 2019
 
 ```{r}
 #function for saving multi-year rasters
@@ -292,7 +330,7 @@ savemultirast <- function(x){
 }
 ```
 
-##2016
+##### 2016
 
 ```{r}
 #4-5 year: combined 2011-2012
@@ -323,7 +361,7 @@ savemultirast(fire_2011_2012)
 savemultirast(fire_2013_2014)
 ```
 
-##2017
+#### 2017
 
 ```{r}
 #4-5 year: 2012-2013
@@ -354,7 +392,7 @@ savemultirast(fire_2014_2015)
 
 ```
 
-##2018
+##### 2018
 
 ```{r}
 #4-5 year: 2013-2014 - this already exists from prior data wrangling
@@ -374,7 +412,7 @@ fire_2015_2016 <- merge(fire_2015, fire_2016)
 savemultirast(fire_2015_2016)
 ```
 
-##2019
+##### 2019
 
 ```{r}
 #4-5 year: 2014-2015 - this already exists from prior data wrangling
@@ -396,7 +434,7 @@ savemultirast(fire_2016_2017)
 ```
 
 
-##2020
+##### 2020
 
 ```{r}
 #4-5 year: 2015-2016 - this already exists from prior data wrangling
@@ -416,7 +454,7 @@ fire_2017_2018 <- merge(fire_2017, fire_2018)
 savemultirast(fire_2017_2018)
 ```
 
-##2021
+##### 2021
 
 ```{r}
 #4-5 year: 2016-2017 - this already exists from prior data wrangling
@@ -437,7 +475,9 @@ savemultirast(fire_2018_2019)
 
 ```
 
-#Fire distance rasters were created in arc gis pro, reading back in here and readjusting extent
+### Distance to Fire Arc Layers
+Due to the size of our rasters, using R to create distance layers was not feasible, and instead our group used ArcGIS to create these distance layers. We then reformatted these layers and saved them to our folder "model_ready" indicating they were ready for use in our final model code
+
 
 ```{r}
 #Now we need to read back in the distance raster created in ArcGIS pro and mask these layers to match our CA extent again. Layers are already in the correct projection and resolution
@@ -544,7 +584,9 @@ dist_fire18_19 = resample(dist_fire18_19, ca_raster)
 
 fire18_19_ca_distance <- mask(dist_fire18_19, ca_raster) 
 ```
-#now we will save them back to the google drive to be referenced later
+
+### Save clipped fire DISTANCE rasters to the data drive for use in model and easy access
+
 ```{r}
 saverast <- function(x){
   

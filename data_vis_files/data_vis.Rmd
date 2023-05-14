@@ -1,0 +1,455 @@
+---
+title: "Data Visualization"
+author: "Mia Guarnieri"
+date: '2022-11-02'
+output: html_document
+---
+
+# Summary
+
+This Rmd contains the code used to make  data visualizations for this project, including a table of model coefficients, figures displaying transformed coefficients and their confidence intervals, and a marginal effects plot for one specified coefficient.
+
+# Load in necessary packages (and file path, if needed)
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+#required packages
+
+library(tidyverse)
+library(terra)
+library(tmap)
+library(here)
+library(sf)
+library(ResourceSelection)
+library(ggplot2)
+library(ggtext)
+library(kableExtra)
+library(magick)
+
+
+#setting up a file path (or file paths for multiple collaborators) - useful if your data is being read in from a Google Drive, your desktop, or somewhere other than your designated working directory
+
+gdrive_data <- "/Users/mia/Library/CloudStorage/GoogleDrive-mguarnieri@ucsb.edu/Shared drives/Black_Bear_Aware/gdrive_data"
+
+#gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+
+#sam's file path
+#gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
+
+```
+
+#Conflict data vis - THIS SECTION COMING OUT FOR PUBLIC-FACING FILES BUT KEPT IN ORIGINAL REPO
+
+```{r}
+conflict <- read_sf(here(gdrive_data, "/IntermediateData/IntermediateData_Files/conflict_formatted/conflict_points/conflict_points.shp")) %>% 
+  separate(incdnt_d, into = c("inc_date", "inc_time"), sep = " ") %>% 
+  separate(inc_date, into = c("month", "day", "year"), sep = "/") %>% 
+  mutate(year = as.character.Date(year),
+         "type" = cnfrmd_,
+         "county" = cnty_nm,
+         "conflict" = 1) %>% 
+  filter(year != 2022)
+
+
+ggplot(conflict) +
+  geom_histogram(aes(x = year), stat = "count", fill = "#89a676") +
+  theme_minimal() +
+  labs(x = "Year",
+       y = "Number of Reported Conflicts")
+
+```
+
+
+# Creating model hotspot maps
+
+## Present day
+
+Read in the model and all necessary data files
+
+```{r}
+#read in the model
+model<- load(here("models", "sq_mod3climate.rds")) #you have to name the object "model or it will not read in right
+
+#read in all necessary data layers
+
+#elevation
+dem <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/elevation/dem_formatted.tif"))
+
+#aspect
+aspect <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/aspect/aspect.tif"))
+
+#terrain ruggedness
+TRI <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/terrain_ruggedness/terrain_ruggedness.tif"))
+
+#human population density
+popdens <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/population_density/pop_den_2021_mask.tif"))
+
+#land cover
+lc <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/land_cover/lc19_reclassed.tif"))
+
+#road density
+road_dens <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/road_density/road_density_ca.tif"))
+
+#distance to roads
+road_dist <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_road/model_ready/roads15_ca_distance.tif"))
+
+#distance to streams
+streams_dist <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_stream/model_ready/stream17_ca_distance.tif"))
+
+#distance to urban areas
+urban_dist <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_urban/model_ready/ua19_ca_distance.tif"))
+
+#distance to recreational areas
+rec_dist <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_rec/model_ready/rec_ca_distance.tif"))
+
+#distance to forest cover
+forest_dist <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_forest/model_ready/fc19_ca_distance.tif"))
+
+#forest density
+forest_dens <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/forest_density/forest_dens_2016_mask.tif"))
+
+#fire layers (present-day/historical values; 3, one for each time step)
+
+#1 year ago
+dist_fire_1yr <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/dist_fire/fire20_ca_distance.tif"))
+
+#2-3 years ago
+dist_fire_23yrs <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/dist_fire/fire18_19_ca_distance.tif"))
+
+#4-5 years ago
+dist_fire_45yrs <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/dist_fire/fire16_17_ca_distance.tif"))
+
+#drought (present-day/historical values)
+drought <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/drought/drought_rasters/UDM_2021/mean_drought_21.tif"))
+
+
+#create a "stack" of these rasters so they can all be used in a function as one object
+stackca_clim_rast <- c(dem, aspect, TRI, popdens, lc, road_dens, road_dist, streams_dist, urban_dist, rec_dist, forest_dist, forest_dens, dist_fire_1yr, dist_fire_23yrs, dist_fire_45yrs, drought)
+
+#read in the data used to create the model
+climate_model_data <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/1_31_2023/climate_model_data_allyears.csv"))
+```
+
+Wrangle the data files to be in the correct format for hotspot generation and create the hotspot map
+
+```{r}
+#change the names of the raster stack to match the names of our model variables EXACTLY (must be in the correct order as well, so that names correspond with correct data raster)
+names(stackca_clim_rast) <- c("dem", "aspect", "TRI", "popdens", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens", "dist_fire_1yr", "dist_fire_23yrs", "dist_fire_45yrs", "drought")
+
+#any categorical variables used (land cover) need to be identified before generating the hotspot map
+
+#turn land cover categories into factors
+lc_factors <- as.factor(climate_model_data$lc)
+
+#turn the levels of that factor into into an object
+f_lc <- levels(lc)
+
+#use the predict function in the terra package to generate a map of predicted conflict risk within the area of your stacked spatraster object (that contains your environmental and climate variables); make sure to specify the levels of categorical variables (land cover) using the `factors` argument and remove NA values using `na.rm = TRUE`
+map <- terra::predict(object = stackca_clim_rast, model = sq_mod3climate, fun = predict, factors = f_lc, na.rm = TRUE, type = "response")
+
+#save the map for future analysis
+writeRaster(map, filename = here(gdrive_data, "/AnalysisData/model_outputs/mod3clim_map_squared.tif"), filetype = "GTiff", overwrite= TRUE)
+
+#plot the map to test it visually
+plot(map, main="Model Predictions")
+```
+
+## Future
+
+Read in the model and all necessary data files - we only used projected (2030) data for fire and drought and used most recently available data for other variables, but any of these rasters could be replaced with projected data if desired.
+
+```{r}
+#read in the model
+model<- load(here("models", "sq_mod3climate.rds")) #you have to name the object "model or it will not read in right
+
+#read in all necessary data layers
+
+#elevation
+dem <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/elevation/dem_formatted.tif"))
+
+#aspect
+aspect <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/aspect/aspect.tif"))
+
+#terrain ruggedness
+TRI <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/terrain_ruggedness/terrain_ruggedness.tif"))
+
+#human pop density
+popdens <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/population_density/pop_den_2021_mask.tif"))
+
+#land cover
+lc <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/land_cover/lc19_reclassed.tif"))
+
+#road density
+road_dens <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/road_density/road_density_ca.tif"))
+
+#distance to roads
+road_dist <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_road/model_ready/roads15_ca_distance.tif"))
+
+#distance to streams
+streams_dist <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_stream/model_ready/stream17_ca_distance.tif"))
+
+#distance to urban areas
+urban_dist <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_urban/model_ready/ua19_ca_distance.tif"))
+
+#distance to recreational areas
+rec_dist <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_rec/model_ready/rec_ca_distance.tif"))
+
+#distance to forest cover
+forest_dist <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/distance_rasters/dist_to_forest/model_ready/fc19_ca_distance.tif"))
+
+#forest density
+forest_dens <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/forest_density/forest_dens_2016_mask.tif"))
+
+
+#fire layers (projected values; 3, one for each time step)
+
+#1 year ago
+dist_fire_1yr <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/dist_proj_fire/dist_proj_fire_2029_ca.tif"))
+
+#2-3 years ago
+dist_fire_23yrs <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/dist_proj_fire/dist_proj_fire_2027_2028_ca.tif"))
+
+#4-5 years ago
+dist_fire_45yrs <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/dist_proj_fire/dist_proj_fire_2025_2026_ca.tif"))
+
+#drought (projected)
+drought <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/drought/pdsi_masked.tif"))
+
+#create a "stack" of these rasters so they can all be used in a function as one object
+stackca_clim_rast <- c(dem, aspect, TRI, popdens, lc, road_dens, road_dist, streams_dist, urban_dist, rec_dist, forest_dist, forest_dens, dist_fire_1yr, dist_fire_23yrs, dist_fire_45yrs, drought)
+
+#read in the data used to create the model
+climate_model_data <- read_csv(here(gdrive_data, "/AnalysisData/model_df_climate/1_31_2023/climate_model_data_allyears.csv"))
+```
+
+Wrangle the data files to be in the correct format for hotspot generation and create the hotspot map
+
+```{r}
+#change the names of the raster stack to match the names of our model variables EXACTLY (must be in the correct order as well, so that names correspond with correct data raster)
+names(stackca_clim_rast) <- c("dem", "aspect", "TRI", "popdens", "lc", "road_dens", "road_dist", "streams_dist", "urban_dist", "rec_dist", "forest_dist", "forest_dens", "dist_fire_1yr", "dist_fire_23yrs", "dist_fire_45yrs", "drought")
+
+#any categorical variables used (land cover) need to be identified before generating the hotspot map
+
+#turn land cover categories into factors
+lc_factors <- as.factor(climate_model_data$lc)
+
+#turn the levels of that factor into into an object
+f_lc <- levels(lc)
+
+#use the predict function in the terra package to generate a map of predicted conflict risk within the area of your stacked spatraster object (that contains your environmental and climate variables); make sure to specify the levels of categorical variables (land cover) using the `factors` argument and remove NA values using `na.rm = TRUE`
+map <- terra::predict(object = stackca_clim_rast, model = sq_mod3climate, fun = predict, factors = f_lc, na.rm = TRUE, type = "response")
+
+#save the map for future analysis
+writeRaster(map, filename = here(gdrive_data, "/AnalysisData/model_outputs/projected_mod3_clim_map_squared.tif"), filetype = "GTiff", overwrite= TRUE)
+
+#plot the map to test it visually
+plot(map, main="Model Predictions")
+```
+
+## Differenced map (Future - Present)
+
+```{r}
+#read in the saved maps for current and future predicted conflict (the outputs from the terra `predict` function)
+current <- rast(here(gdrive_data, "/AnalysisData/model_outputs/mod3clim_map_squared.tif"))
+
+future <- rast(here(gdrive_data, "/AnalysisData/model_outputs/projected_mod3_clim_map_squared.tif"))
+
+#subtract current conflict risk from future conflict risk
+diff <- future - current
+
+#plot all three rasters to compare visually
+plot(diff)
+
+plot(current)
+
+plot(future)
+
+#save the map for future analysis
+writeRaster(diff, filename = here(gdrive_data, "/AnalysisData/model_outputs/differenced_conflict_risk.tif"), filetype = "GTiff", overwrite= TRUE)
+```
+
+
+# Model coefficient tables and plots
+
+## Overall model coefficients table
+
+```{r}
+#load in the model
+model<- load(here("models", "sq_mod3climate.rds")) #you have to name the object "model or it will not read in right
+
+#create a model summary object
+mod_sum <- summary(sq_mod3climate)
+
+#extract the coefficients from the model summary object
+coeffs <- mod_sum$coefficients
+
+#using kable, create a formatted table of model coefficients
+nice_table <- coeffs %>% 
+  kable() %>% 
+  kable_classic(full_width = TRUE, html_font = "Times New Roman")
+
+#check the table
+nice_table
+
+#save the table as a photo object (.jpeg)
+save_kable(nice_table, file = here("/Users/mia/Desktop/Black Bear Aware/coeffs_nicetable.jpeg"), zoom = 2.5)
+```
+
+## Individual plots for model coefficient groups
+
+To create these plots, use the coefficients table from the code above (coeffs)
+
+```{r}
+#convert the row names (variables) to a column for plotting
+coeffs_tidy <- cbind(rownames(coeffs), data.frame(coeffs, row.names=NULL)) %>% 
+  janitor::clean_names() %>% 
+  mutate(coeff_trans = exp(estimate),
+         ster_trans = exp(std_error),
+         prob_change = ifelse(coeff_trans < 1,
+                              (1 - coeff_trans)*100,
+                              (coeff_trans - 1)*100))
+
+#remove perennial ice and snow to make plot look more reasonable and convert log odds to probability
+coeffs_tidy_nosnow <- coeffs_tidy %>% 
+  filter(rownames_coeffs != "lcperrenial_ice_snow") %>% 
+  mutate(coeff_trans = exp(estimate)) 
+
+#test plot with ice and snow removed for visual check
+ggplot(coeffs_tidy_nosnow, aes(x = coeff_trans, y = rownames_coeffs)) + 
+  geom_point() +
+  geom_pointrange(aes(xmin = estimate-std_error, xmax = estimate+std_error)) +
+  scale_x_continuous(breaks = seq(-3, 4, 0.5))
+
+#make plots for each variable group
+
+#first, separate into independent dataframes by variable type
+
+#perennial ice and snow land cover class; not plotted but standard error and confidence interval calculated (values included in figure caption of other land cover classes)
+ice_snow <- coeffs_tidy[10,] %>% #select ice and snow row from coeffs dataframe
+  mutate(coeff_trans = exp(estimate), #convert from log odds to odds
+         prob_change = (coeff_trans - 1) * 100, #find the change in likelihood as a percentage
+         ster_min = exp(estimate - (2 * std_error)), #create std. error min and max values
+         ster_max = exp(estimate + (2 * std_error)),
+         cimax = (1 - ster_min)*100, #create confidence interval min and max values
+         cimin = (1 - ster_max)*100)
+
+#elevation; not plotted so no confidence interval and standard error calculated
+elev <- coeffs_tidy_nosnow[c(2), ] %>% #select elevation from coeffs dataframe
+  mutate(coeff_trans = exp(estimate*1000), #convert m to km (*1000) and convert from log odds to odds
+         prob_change = (coeff_trans - 1)*100) %>% #find the change in likelihood as a percentage
+  mutate(rownames_coeffs = c("Elevation")) #rename to variable
+
+#terrain ruggedness; not plotted so no confidence interval and standard error calculated
+tri <- coeffs_tidy_nosnow[c(18), ] %>% #select from dataframe
+  mutate(coeff_trans = exp(estimate), #convert to odds
+         prob_change = (1 - coeff_trans)*100) %>% #find change in likelihood
+  mutate(rownames_coeffs = c("Terrain Ruggedness")) #rename
+
+#land cover variables
+bluevar_lconly <- coeffs_tidy_nosnow[c(3:12), ] %>% #select land cover classes
+  mutate(coeff_trans = exp(estimate), #convert to odds
+         prob_change = (coeff_trans - 1) * 100, #find change in likelihood
+         ster_min = exp(estimate - (2 * std_error)), #find standard error
+         ster_max = exp(estimate + (2 * std_error)),
+         cimax = (ster_max - 1) * 100, #find conficence interval
+         cimin = ifelse(ster_min > 1,
+                        (ster_min - 1) * 100,
+                        (1 - ster_min) * 100)) %>% 
+  mutate(rownames_coeffs = c("High-Intensity Development", "Low-Intensity Development", "Medium-Intensity Development", "Developed Open Space", "Forest", "Grassland/Herbaceous", "Open Water", "Planted/Cultivated", "Shrub/Scrub", "Wetlands"))
+
+#variables biologically relevant to black bears; not plotted to standard error and confidence interval not calculated here
+greenvar <- coeffs_tidy_nosnow[c(13, 17), ] %>% #select variables
+  mutate(coeff_trans = exp(estimate*1000), #convert m to km (*1000) and convert from log odds to odds
+         prob_change = (1 - coeff_trans)*100) %>% #find change in likelihood
+  mutate(rownames_coeffs = c("Distance to Forest", "Distance to Streams")) #rename
+
+#variables that show human influence
+
+#separate the distance variables (these need to be converted from m to km)
+gray_dist <- coeffs_tidy_nosnow[c(16, 19), ] %>% #select variables
+  mutate(coeff_trans = exp(estimate*1000), #convert m to km (*1000) and convert from log odds to odds
+         ster_trans = exp(std_error * 1000), #standard error (converted)
+         prob_change = (1 - coeff_trans)*100, #find change in likelihood
+         ster_min = exp((estimate - (2 * std_error))*1000), #standard error min and max values
+         ster_max = exp((estimate + (2 * std_error))*1000),
+         cimax = (1 - ster_min)*100, #confidence intervals min and max values
+         cimin = (1 - ster_max)*100) %>% 
+  mutate(rownames_coeffs = c( "Distance to Recreational Areas", "Distance to Urban Areas")) #rename
+
+#population density
+gray_pop <- coeffs_tidy_nosnow[c(14), ] %>% #select variable
+  mutate(coeff_trans = exp(estimate), #convert from log odds to odds
+         ster_trans = exp(std_error), #transform standard error
+         prob_change = ifelse(coeff_trans < 1, #find change in likelihood; 1-x if x < 1 and x-1 if x > 1
+                              (1 - coeff_trans)*100,
+                              (coeff_trans - 1)*100),
+         ster_min = exp(estimate - (2 * std_error)), #standard error min and max values
+         ster_max = exp(estimate + (2 * std_error)),
+         cimax = (ster_min - 1)*100, #confidence intervals min and max values
+         cimin = (ster_max - 1)*100) %>% 
+  mutate(rownames_coeffs = c("Population Density")) #rename
+
+#bind distance and non-distance human influence variables together for plotting
+grayvar<- rbind(gray_dist, gray_pop)
+
+#fire variables
+orangevar <- coeffs_tidy_nosnow[c(20:22), ] %>% #select variables
+  mutate(coeff_mult = estimate * 1000, #multiply by 1000 to convert m to km
+         ster_mult = std_error * 1000,
+         coeff_trans = exp(coeff_mult), #transform from log odds to odds
+         prob_change = (1 - coeff_trans) * 100, #find change in likelihood
+         ster_min = exp((estimate - (2 * std_error))*1000), #standard error min and max
+         ster_max = exp((estimate + (2 * std_error))*1000),
+         cimax = (1 - ster_min)*100, #confidence intervals min and max
+         cimin = (1 - ster_max)*100) %>% 
+  mutate(rownames_coeffs = c("Distance to Fire 1 Year Ago", "Distance to Fire 2-3 Years Ago", "Distance to Fire 4-5 Years Ago")) #rename
+
+#drought; not plotted to standard error min and max, CI min and max not calculated here
+brownvar <- coeffs_tidy_nosnow[c(23), ] %>% #select variable
+  mutate (coeff_trans = exp(estimate), #transform from log odds to odds
+         ster_trans = exp(std_error), #transform standard error
+         prob_change = (1 - coeff_trans)*100)
+
+
+#now that the data is wrangled, plot desired variable groups
+
+#plot for fire variables
+ggplot(orangevar, mapping = aes(x = prob_change, y = reorder(rownames_coeffs, prob_change))) + 
+  geom_point(color = "#cc5500", size = 3) +
+  geom_linerange(aes(xmin = cimin, xmax = cimax), color = "#cc5500") +
+  labs(y = "Coefficient", x = "Estimate") +
+  theme_minimal() +
+  theme(plot.caption = ggtext::element_markdown(hjust = 0),
+        text = element_text(family = "Times New Roman")) 
+
+#plot for land cover variables
+ggplot(bluevar_lconly, mapping = aes(x = prob_change, y = reorder(rownames_coeffs, prob_change))) + 
+  geom_point(color = "#528faa", size = 3) +
+  geom_linerange(aes(xmin = cimin, xmax = cimax), color = "#528faa") +
+  labs(y = "Coefficient", x = "Estimate") +
+  theme_minimal() +
+  theme(plot.caption = ggtext::element_markdown(hjust = 0),
+        text = element_text(family = "Times New Roman"))
+
+#plot for human influence variables
+ggplot(grayvar, mapping = aes(x = prob_change, y = reorder(rownames_coeffs, prob_change))) + 
+  geom_point(color = "#777777", size = 3) +
+  geom_linerange(aes(xmin = cimin, xmax = cimax), color = "#777777") +
+  labs(y = "Coefficient", x = "Estimate") +
+  theme_minimal() +
+  theme(plot.caption = ggtext::element_markdown(hjust = 0),
+        text = element_text(family = "Times New Roman"))
+
+```
+
+## Marginal effects plot
+
+```{r}
+#load the model
+model<- load(here("models", "sq_mod3climate.rds")) #you have to name the object "model or it will not read in right
+
+#create a marginal effects plot using the `mep` function within the ResourceSelection package
+mep(sq_mod3climate, which = "popdens", col.points = "#c3c2b1", pch = 1, n = 100, family = "Times New Roman")
+
+```

@@ -23,10 +23,10 @@ library(terra)
 #gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #mia's file path
-#gdrive_data <- "/Users/mia/Library/CloudStorage/GoogleDrive-mguarnieri@ucsb.edu/Shared drives/Black_Bear_Aware/gdrive_data"
+gdrive_data <- "/Users/mia/Library/CloudStorage/GoogleDrive-mguarnieri@ucsb.edu/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #sam's file path
-gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
+#gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 
 ```
 
@@ -124,6 +124,7 @@ demographic_mask_reporting <- mask(demographic_stack, high_conflict_reporting_pr
 
 demographic_mask_no_reporting <- mask(demographic_stack, high_conflict_no_reporting_proj)
 ```
+
 ```{r}
 reporting_data_frame <- as.data.frame(demographic_mask_reporting)
 
@@ -159,11 +160,24 @@ hisp_mean_no_reporting <- mean(no_reporting_df_filter$CAPOP_2020_100m_HISP)
 
 ```{r}
 t_test_hisp <- t.test(reporting_df_filter$CAPOP_2020_100m_HISP,no_reporting_df_filter$CAPOP_2020_100m_HISP)
+#pval = 0.04961954
+
 t_test_nhblack <- t.test(reporting_df_filter$CAPOP_2020_100m_NHBLACK,no_reporting_df_filter$CAPOP_2020_100m_NHBLACK)
+#pval = 0.0006943373
+
 t_test_amind_combo <- t.test(reporting_df_filter$CAPOP_2020_100m_AMIND_COMBO,no_reporting_df_filter$CAPOP_2020_100m_AMIND_COMBO)
+#pval = 0.0002210685
+
 t_test_nhasian <- t.test(reporting_df_filter$CAPOP_2020_100m_NHASIAN,no_reporting_df_filter$CAPOP_2020_100m_NHASIAN)
+#pval = 0.07275465
+#not significant
+
 t_test_nhhipi <- t.test(reporting_df_filter$CAPOP_2020_100m_NHHIPI,no_reporting_df_filter$CAPOP_2020_100m_NHHIPI)
+#pval = 0.7993745
+#not significant
+
 t_testnhwhite <- t.test(reporting_df_filter$CAPOP_2020_100m_NHWHITE,no_reporting_df_filter$CAPOP_2020_100m_NHWHITE)
+#pval = 5.339204e-19
 ```
 
 ```{r}
@@ -171,9 +185,6 @@ hisp_reporting_mean <- mean(reporting_df_filter$CAPOP_2020_100m_HISP)
 hisp_no_reporting_mean <- mean(no_reporting_df_filter$CAPOP_2020_100m_HISP)
 #hisp_reporting_mean = 1.936476
 #hisp_no_reporting_mean = 1.63793
-
-hisp_reporting_mean
-hisp_no_reporting_mean 
 
 ```
 
@@ -183,9 +194,6 @@ nhblack_no_reporting_mean <- mean(no_reporting_df_filter$CAPOP_2020_100m_NHBLACK
 
 #nhblack_reporting_mean = 0.06228506
 #nhblack_no_reporting_mean =  0.1616677
-
-nhblack_reporting_mean
-nhblack_no_reporting_mean
 ```
 
 ```{r}
@@ -194,9 +202,6 @@ amind_combo_no_reporting_mean <- mean(no_reporting_df_filter$CAPOP_2020_100m_AMI
 
 #amind_combo_reporting_mean = 0.3629799
 #amind_combo_no_reporting_mean = 0.260228
-
-amind_combo_reporting_mean
-amind_combo_no_reporting_mean
 ```
 
 ```{r}
@@ -205,31 +210,23 @@ nhasian_no_reporting_mean <- mean(no_reporting_df_filter$CAPOP_2020_100m_NHASIAN
 
 #nhasian_reporting_mean = 0.187453
 #nhasian_no_reporting_mean = 0.2852263
-
-nhasian_reporting_mean 
-nhasian_no_reporting_mean
 ```
 
 ```{r}
 nhhipi_reporting_mean <- mean(reporting_df_filter$CAPOP_2020_100m_NHHIPI)
 nhhipi_no_reporting_mean <- mean(no_reporting_df_filter$CAPOP_2020_100m_NHHIPI)
 
-#nhhipi_reporting_mean  =  0.01253714
+#nhhipi_reporting_mean  = 0.01253714
 #nhhipi_no_reporting_mean = 0.01362763
 
-nhhipi_reporting_mean
-nhhipi_no_reporting_mean
 ```
 
 ```{r}
 nhwhite_reporting_mean <- mean(reporting_df_filter$CAPOP_2020_100m_NHWHITE)
 nhwhite_no_reporting_mean <- mean(no_reporting_df_filter$CAPOP_2020_100m_NHWHITE)
 
-#nhwhite_reporting_mean = 5.844748
-#nhwhite_no_reporting_mean =4.106572
-
-nhwhite_reporting_mean
-nhwhite_no_reporting_mean
+#nhwhite_reporting_mean = 5.844748 
+#nhwhite_no_reporting_mean = 4.106572
 
 ```
 # Poverty Reporting 
@@ -278,10 +275,72 @@ mean_poverty_reporting <- mean(poverty_reporting_data_frame$svi_2018_tract_overa
 mean_poverty_no_reporting <- mean(poverty_no_reporting_data_frame$svi_2018_tract_overall_nad83)
 #mean_poverty_reporting = 0.531186
 #mean_poverty_no_reporting = 0.6585639
-mean_poverty_reporting
-mean_poverty_no_reporting
 ```
 ```{r}
 t_test_poverty <- t.test(poverty_reporting_data_frame$svi_2018_tract_overall_nad83,poverty_no_reporting_data_frame$svi_2018_tract_overall_nad83)
 ```
 
+# Linguistic Data Analysis
+
+Create reporting and non-reporting rasters
+```{r}
+#high conflict binary raster (modeled conflict probability ≥ 0.7)
+high_conflict <- rast(here(gdrive_data, "/AnalysisData/model_outputs/mod3sq_current_highconf.tif"))
+
+#conflict reports buffered by 5km
+buffered_confpoints <- vect(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/conflict_buffered_refined/conflict_buffered_refined.shp"))
+
+#reporting areas - within buffers
+high_conflict_reporting <- mask(high_conflict, buffered_confpoints)
+
+#non-reporting areas - outside of buffers
+high_conflict_no_reporting <- mask(high_conflict, buffered_confpoints, inverse=TRUE)
+
+```
+
+Read in linguistic isolation data
+```{r}
+#load in the data and select for linguistic isolation (Percent limited English speaking households)
+ces <- read_sf(here(gdrive_data, "/InputData/InputData_Files/calenviroscreen40shpf2021shp/CES4 Final Shapefile.shp")) %>% 
+  select(Ling_Isol) %>% 
+  naniar::replace_with_na(replace = list(Ling_Isol = -999))
+
+#turn into a spatvector
+lingisol <- vect(ces)
+
+#rasterize using the conflict raster
+lingisol_proj <- rasterize(lingisol, high_conflict, field = "Ling_Isol")
+```
+
+Mask the linguistic isolation data by these rasters and create data frames
+```{r}
+#isolation in reporting zones
+isol_reporting <- mask(lingisol_proj, high_conflict_reporting)
+
+isol_reporting_df <- as.data.frame(isol_reporting)
+
+#isolation in non-reporting zones
+isol_nonreporting <- mask(lingisol_proj, high_conflict_no_reporting)
+
+isol_nonreporting_df <- as.data.frame(isol_nonreporting)
+```
+
+Take the mean of each category and run a t-test on it
+```{r}
+#mean isolation in reporting zones
+mean_isol_reporting <- mean(isol_reporting_df$Ling_Isol) #2.007024
+
+mean_isol_nonreporting <- mean(isol_nonreporting_df$Ling_Isol) #2.104348
+
+#t test of these means
+t_test_lingisol <- t.test(isol_reporting_df$Ling_Isol, isol_nonreporting_df$Ling_Isol) #not statistically significant; p val 0.511796
+```
+
+# Poverty analysis (more recent)
+
+```{r}
+#load in the data and select for linguistic isolation (Percent limited English speaking households)
+ces <- read_sf(here(gdrive_data, "/InputData/InputData_Files/calenviroscreen40shpf2021shp/CES4 Final Shapefile.shp")) %>% 
+  select(Ling_Isol) %>% 
+  naniar::replace_with_na(replace = list(Ling_Isol = -999))
+```
