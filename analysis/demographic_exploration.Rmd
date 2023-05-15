@@ -23,10 +23,10 @@ library(terra)
 #gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #mia's file path
-gdrive_data <- "/Users/mia/Library/CloudStorage/GoogleDrive-mguarnieri@ucsb.edu/Shared drives/Black_Bear_Aware/gdrive_data"
+#gdrive_data <- "/Users/mia/Library/CloudStorage/GoogleDrive-mguarnieri@ucsb.edu/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #sam's file path
-#gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
+gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 
 ```
 
@@ -87,9 +87,9 @@ ca_total <- rast(here(gdrive_data,"/InputData/InputData_Files/demographics_data_
 
 ```
 
-# Project them into the correct geogrphic reference 
-
+# Data wrangling - Get data into correct format to run analysis 
 ```{r}
+# Project them into the correct projected coordinate system (Califonia Teal Albers) 
 ca_amind_alone_proj <- project(ca_amind_alone,"epsg:6414")
 
 ca_amind_combo_proj <- project(ca_amind_combo, "epsg:6414")
@@ -113,14 +113,15 @@ ca_total_proj <- project(ca_total, "epsg:6414")
 ca_black_proj <- project(ca_black, "epsg:6414")
 ```
 
+
 ```{r}
+#create a stack of the rasters of racial/ethcic demographic data
 demographic_stack <- c(ca_amind_alone_proj, ca_amind_combo_proj, ca_hisp_proj, ca_minors_proj, ca_nhamind_proj, ca_nhasain_proj, ca_nhhipi_proj, ca_nhothermulti_proj, ca_nhwhite_proj, ca_total_proj, ca_black_proj)
 
 ```
 
 ```{r}
 #read in model data 
-
 high_conflict <- rast(here(gdrive_data, "/AnalysisData/model_outputs/mod3sq_current_highconf.tif"))
 
 buffer_conflict <- vect(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/conflict_buffered_refined/conflict_buffered_refined.shp"))
@@ -128,12 +129,14 @@ buffer_conflict <- vect(here(gdrive_data, "/IntermediateData/IntermediateData_Fi
 ```
 
 ```{r}
+#reproject the high conflict raster into the same projected coordinate system 
 high_conflict_reporting <- mask(high_conflict, buffer_conflict)
 
 high_conflict_reporting_proj <- project(high_conflict_reporting,ca_total_proj)
 ```
 
 ```{r}
+#clip out the buffered conflict in order to leave areas of high conflict, low reporting and project it into the correct format 
 high_conflict_no_reporting <- mask(high_conflict, buffer_conflict, inverse=TRUE)
 
 high_conflict_no_reporting_proj <- project(high_conflict_no_reporting, ca_total_proj)
@@ -141,12 +144,14 @@ high_conflict_no_reporting_proj <- project(high_conflict_no_reporting, ca_total_
 ```
 
 ```{r}
+#clip to the the demographic rasters to the correct conflict 
 demographic_mask_reporting <- mask(demographic_stack, high_conflict_reporting_proj)
 
 demographic_mask_no_reporting <- mask(demographic_stack, high_conflict_no_reporting_proj)
 ```
 
 ```{r}
+#convert to a data frame 
 reporting_data_frame <- as.data.frame(demographic_mask_reporting)
 
 no_reporting_data_frame <- as.data.frame(demographic_mask_no_reporting)
@@ -154,7 +159,7 @@ no_reporting_data_frame <- as.data.frame(demographic_mask_no_reporting)
 ```
 
 ```{r}
-
+#filter the columns we want to look at 
 reporting_df_filter<- reporting_data_frame %>% select(CAPOP_2020_100m_HISP,
                                                       CAPOP_2020_100m_NHBLACK,
                                                       CAPOP_2020_100m_AMIND_COMBO,
@@ -174,12 +179,15 @@ no_reporting_df_filter <- no_reporting_data_frame %>% select(CAPOP_2020_100m_HIS
 ```
 
 
+#Conduct the statistical anlysis - t-tests between the means 
 ```{r}
+#find the means for reporting vs underreporting 
 hisp_mean_reporting <- mean(reporting_df_filter$CAPOP_2020_100m_HISP)
 hisp_mean_no_reporting <- mean(no_reporting_df_filter$CAPOP_2020_100m_HISP)
 ```
 
 ```{r}
+#run the t-tests 
 t_test_hisp <- t.test(reporting_df_filter$CAPOP_2020_100m_HISP,no_reporting_df_filter$CAPOP_2020_100m_HISP)
 #pval = 0.04961954
 
@@ -202,6 +210,7 @@ t_testnhwhite <- t.test(reporting_df_filter$CAPOP_2020_100m_NHWHITE,no_reporting
 ```
 
 ```{r}
+#find the means for reporting vs underreporting 
 hisp_reporting_mean <- mean(reporting_df_filter$CAPOP_2020_100m_HISP)
 hisp_no_reporting_mean <- mean(no_reporting_df_filter$CAPOP_2020_100m_HISP)
 #hisp_reporting_mean = 1.936476
@@ -210,6 +219,7 @@ hisp_no_reporting_mean <- mean(no_reporting_df_filter$CAPOP_2020_100m_HISP)
 ```
 
 ```{r}
+#find the means for reporting vs underreporting 
 nhblack_reporting_mean <- mean(reporting_df_filter$CAPOP_2020_100m_NHBLACK)
 nhblack_no_reporting_mean <- mean(no_reporting_df_filter$CAPOP_2020_100m_NHBLACK)
 
@@ -218,6 +228,7 @@ nhblack_no_reporting_mean <- mean(no_reporting_df_filter$CAPOP_2020_100m_NHBLACK
 ```
 
 ```{r}
+#find the means for reporting vs underreporting 
 amind_combo_reporting_mean <- mean(reporting_df_filter$CAPOP_2020_100m_AMIND_COMBO)
 amind_combo_no_reporting_mean <- mean(no_reporting_df_filter$CAPOP_2020_100m_AMIND_COMBO)
 
@@ -226,6 +237,7 @@ amind_combo_no_reporting_mean <- mean(no_reporting_df_filter$CAPOP_2020_100m_AMI
 ```
 
 ```{r}
+#find the means for reporting vs underreporting 
 nhasian_reporting_mean <- mean(reporting_df_filter$CAPOP_2020_100m_NHASIAN)
 nhasian_no_reporting_mean <- mean(no_reporting_df_filter$CAPOP_2020_100m_NHASIAN)
 
@@ -234,6 +246,7 @@ nhasian_no_reporting_mean <- mean(no_reporting_df_filter$CAPOP_2020_100m_NHASIAN
 ```
 
 ```{r}
+#find the means for reporting vs underreporting 
 nhhipi_reporting_mean <- mean(reporting_df_filter$CAPOP_2020_100m_NHHIPI)
 nhhipi_no_reporting_mean <- mean(no_reporting_df_filter$CAPOP_2020_100m_NHHIPI)
 
@@ -243,6 +256,7 @@ nhhipi_no_reporting_mean <- mean(no_reporting_df_filter$CAPOP_2020_100m_NHHIPI)
 ```
 
 ```{r}
+#find the means for reporting vs underreporting 
 nhwhite_reporting_mean <- mean(reporting_df_filter$CAPOP_2020_100m_NHWHITE)
 nhwhite_no_reporting_mean <- mean(no_reporting_df_filter$CAPOP_2020_100m_NHWHITE)
 
@@ -250,6 +264,7 @@ nhwhite_no_reporting_mean <- mean(no_reporting_df_filter$CAPOP_2020_100m_NHWHITE
 #nhwhite_no_reporting_mean = 4.106572
 
 ```
+
 # Poverty Reporting 
 ```{r}
 poverty <- rast((here(gdrive_data, "/IntermediateData/IntermediateData_Files/zonal_statistics/svi_2018_tract_overall_nad83.tif")))
@@ -365,3 +380,55 @@ ces <- read_sf(here(gdrive_data, "/InputData/InputData_Files/calenviroscreen40sh
   select(Ling_Isol) %>% 
   naniar::replace_with_na(replace = list(Ling_Isol = -999))
 ```
+
+
+```{r}
+#load in the data and select for poverty
+cal_enviro_screen <- read_sf(here(gdrive_data, "/InputData/InputData_Files/calenviroscreen40shpf2021shp/CES4 Final Shapefile.shp")) %>% 
+  select(Poverty) %>% 
+  naniar::replace_with_na(replace = list(Poverty = -999))
+
+
+#turn into a spatvector
+poverty_vect <- vect(cal_enviro_screen)
+
+#rasterize using the conflict raster
+povertyenviro_proj <- rasterize(poverty_vect, high_conflict, field = "Poverty")
+```
+
+Mask the poverty data by these rasters and create data frames
+```{r}
+#poverty in reporting zones
+pov_reporting <- mask(povertyenviro_proj, high_conflict_reporting)
+
+pov_reporting_df <- as.data.frame(pov_reporting)
+
+#poverty in non-reporting zones
+pov_nonreporting <- mask(povertyenviro_proj, high_conflict_no_reporting)
+
+pov_nonreporting_df <- as.data.frame(pov_nonreporting)
+```
+
+Take the mean of each category and run a t-test on it
+```{r}
+#mean isolation in reporting zones
+mean_pov_reporting <- mean(pov_reporting_df$Poverty) #29.8732
+
+mean_pov_nonreporting <- mean(pov_nonreporting_df$Poverty) #27.35963
+
+#t test of these means
+t_test_pov <- t.test(pov_reporting_df$Poverty, pov_nonreporting_df$Poverty) #0.009566719
+```
+
+
+#Rerun SVI analysis
+```{r}
+svi_shp <- read_sf(here(gdrive_data, "/InputData/InputData_Files/California/SVI2020_CALIFORNIA_tract.shp")) %>% 
+   select(RPL_THEMES) 
+
+svi_vect <- vect(svi_shp)
+
+#rasterize using the conflict raster
+svi_proj <- rasterize(svi_vect, high_conflict, field = "RPL_THEMES")
+```
+
