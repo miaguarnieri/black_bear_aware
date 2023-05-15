@@ -4,7 +4,12 @@ author: "Mia Guarnieri"
 date: "2022-12-19"
 output: html_document
 ---
-##Setup and packages
+
+# Summary
+
+This Rmd contains the code to create a version of our final base model in which population density and forest distance are log-transformed. 
+
+# Load in necessary packages (and file path, if needed)
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -19,16 +24,8 @@ library(lubridate)
 library(ResourceSelection)
 library(rmapshaper)
 
-#mia, chase, and claire's file path
-#gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
-
-#mia's new file path
-
+#setting up a file path - useful if your data is being read in from a Google Drive, your desktop, or somewhere other than your designated working directory
 gdrive_data <- "/Users/mia/Library/CloudStorage/GoogleDrive-mguarnieri@ucsb.edu/Shared drives/Black_Bear_Aware/gdrive_data"
-
-#sam's file path
-#gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
-
 ```
 
 # Load in the data
@@ -39,29 +36,28 @@ model_data <- read_csv(here(gdrive_data, "/AnalysisData/model_df_noclimate/12_13
 ```
 
 
-# Run the base model
+# Run the base model code with log-transformed variables
 
 ```{r}
+
+#all-years base model
+
 basemodel_allyears <- rspf(ID ~ dem + aspect + TRI + log((popdens + 1)) + lc + road_dens + road_dist + streams_dist + urban_dist + rec_dist + log((forest_dist + 1)) + forest_dens, family = "binomial", m = 0, B = 1000, data = model_data)
 ```
 
 
 ```{r}
-#save the model - this one isn't working for some reason (says it cannot open the connection?)
-
-save(basemodel_allyears, file = here(gdrive_data, "/AnalysisData/model_log_transform/noclimate/basemodel_allyears_log.rds"))
-
 #save the model
-
 save(basemodel_allyears, file = here("models", "robustness_checks", "log_transform", "basemodel_allyears_log.rds"))
 
 ```
 
-#Set up 5 alternative models, with the same covariates as the Hagani et al models
+#Set up 5 alternative log-transformed models, with the same covariates as the Hagani et al models
 
 ```{r}
 
 #Model 1: elevation + land cover + distance to forests + population density + distance to recreational areas+ road density + distance to urban areas
+
 mod1 <- rspf(ID ~ dem + lc + log((forest_dist + 1)) + log((popdens + 1)) + rec_dist + road_dens + urban_dist, family = "binomial", m = 0, B = 1000, data = model_data)
 
 #Model 2: elevation + forest density + land cover + distance to forests + population density + distance to recreational areas + road density + distance to urban areas
@@ -79,14 +75,13 @@ mod4 <- rspf(ID ~ dem + forest_dens + lc + log((forest_dist + 1)) + log((popdens
 #Model 5: elevation + land cover + distance to forests + population density + distance to streams + terrain ruggedness + distance to urban areas
 
 mod5 <- rspf(ID ~ dem + lc + log((forest_dist + 1)) + log((popdens + 1)) + streams_dist + TRI + urban_dist, family = "binomial", m = 0, B = 1000, data = model_data)
-
-
-
 ```
 
-#save the 5 models 
 
 ```{r}
+#save the 
+
+
 #mod1
 save(mod1, file = here(gdrive_data, "/AnalysisData/model_log_transform/noclimate/mod1_log.rds"))
 

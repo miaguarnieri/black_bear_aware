@@ -23,10 +23,10 @@ library(terra)
 #gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #mia's file path
-#gdrive_data <- "/Users/mia/Library/CloudStorage/GoogleDrive-mguarnieri@ucsb.edu/Shared drives/Black_Bear_Aware/gdrive_data"
+gdrive_data <- "/Users/mia/Library/CloudStorage/GoogleDrive-mguarnieri@ucsb.edu/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #sam's file path
-gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
+#gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 
 ```
 
@@ -374,13 +374,21 @@ t_test_lingisol <- t.test(isol_reporting_df$Ling_Isol, isol_nonreporting_df$Ling
 
 # Poverty analysis (more recent)
 
+Create reporting and non-reporting rasters
 ```{r}
-#load in the data and select for linguistic isolation (Percent limited English speaking households)
-ces <- read_sf(here(gdrive_data, "/InputData/InputData_Files/calenviroscreen40shpf2021shp/CES4 Final Shapefile.shp")) %>% 
-  select(Ling_Isol) %>% 
-  naniar::replace_with_na(replace = list(Ling_Isol = -999))
-```
+#high conflict binary raster (modeled conflict probability ≥ 0.7)
+high_conflict <- rast(here(gdrive_data, "/AnalysisData/model_outputs/mod3sq_current_highconf.tif"))
 
+#conflict reports buffered by 5km
+buffered_confpoints <- vect(here(gdrive_data, "/IntermediateData/IntermediateData_Files/model_ready/conflict_buffered_refined/conflict_buffered_refined.shp"))
+
+#reporting areas - within buffers
+high_conflict_reporting <- mask(high_conflict, buffered_confpoints)
+
+#non-reporting areas - outside of buffers
+high_conflict_no_reporting <- mask(high_conflict, buffered_confpoints, inverse=TRUE)
+
+```
 
 ```{r}
 #load in the data and select for poverty
