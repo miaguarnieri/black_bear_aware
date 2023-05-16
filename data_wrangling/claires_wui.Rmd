@@ -18,6 +18,9 @@ library(rmapshaper)
 library(rgdal)
 ```
 
+#Summary
+This rmd contains the code used to format a raster of the wildland urban interface for one of the robustness checks that we conducted upon our model. Original WUI data was in the form of a shapefile from the US department of agriculture.  https://doi.org/10.2737/RDS-2015-0012-3
+
 #trying to read in 
 ```{r}
 sf_use_s2(FALSE)
