@@ -23,10 +23,10 @@ library(terra)
 #gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #mia's file path
-gdrive_data <- "/Users/mia/Library/CloudStorage/GoogleDrive-mguarnieri@ucsb.edu/Shared drives/Black_Bear_Aware/gdrive_data"
+#gdrive_data <- "/Users/mia/Library/CloudStorage/GoogleDrive-mguarnieri@ucsb.edu/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #sam's file path
-#gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
+gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 
 ```
 
@@ -443,4 +443,33 @@ svi_vect <- vect(svi_shp) %>%
 #rasterize using the conflict raster
 svi_proj <- rasterize(svi_vect, high_conflict, field = "RPL_THEMES")
 ```
+
+Mask the svi data by these rasters and create data frames
+```{r}
+#svi in reporting zones
+svi_reporting <- mask(svi_proj, high_conflict_reporting)
+
+svi_reporting_df <- as.data.frame(svi_reporting)
+
+#svi in non-reporting zones
+svi_nonreporting <- mask(svi_proj, high_conflict_no_reporting)
+
+svi_nonreporting_df <- as.data.frame(svi_nonreporting)
+```
+
+Take the mean of each category and run a t-test on it
+```{r}
+#svi in reporting zones
+svi_pov_reporting <- mean(svi_reporting_df$RPL_THEMES) #0.3341526
+
+svi_pov_nonreporting <- mean(svi_nonreporting_df$RPL_THEMES) #0.4884646
+
+#t test of these means
+t_test_svi <- t.test(svi_reporting_df$RPL_THEMES, svi_nonreporting_df$RPL_THEMES) # 2.24324e-22
+t_test_svi$p.value
+
+```
+
+
+
 
