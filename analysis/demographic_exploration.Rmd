@@ -23,10 +23,10 @@ library(terra)
 #gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #mia's file path
-#gdrive_data <- "/Users/mia/Library/CloudStorage/GoogleDrive-mguarnieri@ucsb.edu/Shared drives/Black_Bear_Aware/gdrive_data"
+gdrive_data <- "/Users/mia/Library/CloudStorage/GoogleDrive-mguarnieri@ucsb.edu/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #sam's file path
-gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
+#gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 
 ```
 
@@ -429,12 +429,16 @@ t_test_pov <- t.test(pov_reporting_df$Poverty, pov_nonreporting_df$Poverty) #0.0
 ```
 
 
-#Rerun SVI analysis
-```{r}
-svi_shp <- read_sf(here(gdrive_data, "/InputData/InputData_Files/California/SVI2020_CALIFORNIA_tract.shp")) %>% 
-   select(RPL_THEMES) 
+# Rerun SVI analysis
 
-svi_vect <- vect(svi_shp)
+```{r}
+svi_shp <- read_sf(here(gdrive_data, "/InputData/InputData_Files/SVI/SVI2020_CALIFORNIA_tract.shp")) %>% 
+   select(RPL_THEMES) %>% 
+  naniar::replace_with_na(replace = list(RPL_THEMES = -999))
+
+svi_vect <- vect(svi_shp) %>% 
+  project(high_conflict)
+
 
 #rasterize using the conflict raster
 svi_proj <- rasterize(svi_vect, high_conflict, field = "RPL_THEMES")
