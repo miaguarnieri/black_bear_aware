@@ -429,9 +429,10 @@ t_test_pov <- t.test(pov_reporting_df$Poverty, pov_nonreporting_df$Poverty) #0.0
 ```
 
 
-#Rerun SVI analysis
+# Rerun SVI analysis
+
 ```{r}
-svi_shp <- read_sf(here(gdrive_data, "/InputData/InputData_Files/California/SVI2020_CALIFORNIA_tract.shp")) %>% 
+svi_shp <- read_sf(here(gdrive_data, "/InputData/InputData_Files/SVI/SVI2020_CALIFORNIA_tract.shp")) %>% 
    select(RPL_THEMES) 
 
 svi_vect <- vect(svi_shp)
