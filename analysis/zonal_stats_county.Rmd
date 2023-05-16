@@ -5,6 +5,8 @@ date: "2023-02-28"
 output: html_document
 ---
 
+
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
@@ -30,6 +32,17 @@ gdrive_data <- "/Users/mia/Library/CloudStorage/GoogleDrive-mguarnieri@ucsb.edu/
 
 ```
 
+#Summary
+This rmd contains the code for calculating the averge conflict risk by California counties, California Metropolitan Statistical Area, and CDFW Region. 
+
+#Data Sourcing: 
+- Data for California counties came from: California State Geoportal and was created by the California Department of Forestry and Fire Protection
+https://gis.data.ca.gov/datasets/CALFIRE-Forestry::california-county-boundaries/about 
+
+- Data from California Metropolitan Statistical Area comes from the State of California Employment Development Department with data provided by the US Census Bureau
+https://data.edd.ca.gov/Shapefiles/California-Metropolitan-Statistical-Areas-MSA-and-/sb8f-wnqx  
+
+Data from CDFW region comes from: 
 
 #By county 
 ```{r}
@@ -181,7 +194,6 @@ ca_places<- vect(here(gdrive_data,"/IntermediateData/IntermediateData_Files/ca_p
 
 ```
 
-
 ```{r}
 #reproject/format the shp 
 
@@ -189,7 +201,6 @@ ca_places_crop <- crop(ca_places, ca_raster) %>%
   st_as_sf()
 
 ```
-
 
 ```{r}
 #run the zonal stats
