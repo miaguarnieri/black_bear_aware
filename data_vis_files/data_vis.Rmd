@@ -7,7 +7,7 @@ output: html_document
 
 # Summary
 
-This Rmd contains the code used to make  data visualizations for this project, including a table of model coefficients, figures displaying transformed coefficients and their confidence intervals, and a marginal effects plot for one specified coefficient.
+This Rmd contains the code used to make  data visualizations for this project, including hotspot maps, a table of model coefficients, figures displaying transformed coefficients and their confidence intervals, and a marginal effects plot for one specified coefficient.
 
 # Load in necessary packages (and file path, if needed)
 
