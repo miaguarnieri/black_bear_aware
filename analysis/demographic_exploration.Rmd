@@ -23,10 +23,10 @@ library(terra)
 #gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #mia's file path
-gdrive_data <- "/Users/mia/Library/CloudStorage/GoogleDrive-mguarnieri@ucsb.edu/Shared drives/Black_Bear_Aware/gdrive_data"
+#gdrive_data <- "/Users/mia/Library/CloudStorage/GoogleDrive-mguarnieri@ucsb.edu/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #sam's file path
-#gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
+gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
 
 ```
 
@@ -36,11 +36,8 @@ This rmd includes the code for a comparative statistical analysis between the de
 
 # Exploring high conflict points where nonreporting is occurring and understanding the demographics of the areas
 
-#Read in the model data 
+#Read in the CA raster 
 ```{r}
-#loading in data
-#model 3 raster - raster of high conflict
-mod3_rast <- rast(here(gdrive_data, "/AnalysisData/model_outputs/projected_mod3_clim_map_squared.tif"))
 
 #raster of california
 ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
@@ -429,14 +426,47 @@ t_test_pov <- t.test(pov_reporting_df$Poverty, pov_nonreporting_df$Poverty) #0.0
 ```
 
 
-#Rerun SVI analysis
-```{r}
-svi_shp <- read_sf(here(gdrive_data, "/InputData/InputData_Files/California/SVI2020_CALIFORNIA_tract.shp")) %>% 
-   select(RPL_THEMES) 
+# Rerun SVI analysis
 
-svi_vect <- vect(svi_shp)
+```{r}
+svi_shp <- read_sf(here(gdrive_data, "/InputData/InputData_Files/SVI/SVI2020_CALIFORNIA_tract.shp")) %>% 
+   select(RPL_THEMES) %>% 
+  naniar::replace_with_na(replace = list(RPL_THEMES = -999))
+
+svi_vect <- vect(svi_shp) %>% 
+  project(high_conflict)
+
 
 #rasterize using the conflict raster
 svi_proj <- rasterize(svi_vect, high_conflict, field = "RPL_THEMES")
 ```
+
+Mask the svi data by these rasters and create data frames
+```{r}
+#svi in reporting zones
+svi_reporting <- mask(svi_proj, high_conflict_reporting)
+
+svi_reporting_df <- as.data.frame(svi_reporting)
+
+#svi in non-reporting zones
+svi_nonreporting <- mask(svi_proj, high_conflict_no_reporting)
+
+svi_nonreporting_df <- as.data.frame(svi_nonreporting)
+```
+
+Take the mean of each category and run a t-test on it
+```{r}
+#svi in reporting zones
+svi_pov_reporting <- mean(svi_reporting_df$RPL_THEMES) #0.3341526
+
+svi_pov_nonreporting <- mean(svi_nonreporting_df$RPL_THEMES) #0.4884646
+
+#t test of these means
+t_test_svi <- t.test(svi_reporting_df$RPL_THEMES, svi_nonreporting_df$RPL_THEMES) # 2.24324e-22
+t_test_svi$p.value
+
+```
+
+
+
 
