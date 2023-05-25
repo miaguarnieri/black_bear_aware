@@ -82,10 +82,6 @@ This folder contains code we used to generate our models, as well as our .rds mo
 
 **Folder: Data_wrangling**
 
-+ Claires_wui: Code used to format a raster of the wildland urban interface for one of the robustness checks that we conducted upon our model
-
-+ Conflict_exploration : Code used to wrangle and explore human-black bear conflict data across California. Includes code for count of conflict by year and type, and code for a graph of conflict counts by year and type. 
-
 + distance_rasters : Code used to wrangle and create distance layers for 5 variables: Distance to streams, distance to roads, distance to urban areas, distance to recreational areas, and distance to forest cover. 
 
 + Drought_Projections: Code used to wrangle precipitation and evapotranspiration values and input them into the Palmer Drought Severity Index function to get pdsi values by year and location. 
