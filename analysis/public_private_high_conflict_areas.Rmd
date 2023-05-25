@@ -74,7 +74,7 @@ land_own_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Fi
 #exploring what the NAs look like 
 plot(is.na(land_own_raster))
 
-
+plot(land_own_raster)
 
 ```
 
@@ -143,7 +143,7 @@ reclassify <- function(x){
 
 
 land_own_reclassed <- reclassify(land_own_raster)
-#plot(land_own_reclassed)
+plot(land_own_reclassed)
 #levels(land_own_reclassed)
 #[[1]]
 #  id         category
@@ -162,13 +162,19 @@ land_own_reclassed <- reclassify(land_own_raster)
 ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CARaster_Tiger_Formatted/formattedcaraster.tif"))
 
 #make sure raster is in the same projection
-land_own_reclass_reproject <- project(land_own_reclassed,ca_raster)
+land_own_reclass_reproject = resample(land_own_reclassed, ca_raster)
+
 
 #mask to clear out NAs around california. land_own_mask is the raster i need!
+
+
 land_own_mask <- mask(land_own_reclass_reproject, ca_raster)
 
 plot(land_own_mask)
 #looks beautiful
+
+## SAVE land_own_mask
+writeRaster(land_own_mask, filename = here(gdrive_data, "/IntermediateData/IntermediateData_Files/land_own/land_own_mask.tif"), filetype = "GTiff", overwrite = TRUE)
 ```
 # clip the CA raster by the high conflict vect 
 ```{r}
