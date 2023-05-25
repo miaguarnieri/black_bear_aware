@@ -23,7 +23,7 @@ library(rmapshaper)
 library(rgdal)
 
 #mia and claire's file path
-gdrive_data <- "/Volumes/GoogleDrive/Shared drives/Black_Bear_Aware/gdrive_data"
+gdrive_data <- "/Users/clairemeuter/Library/CloudStorage/GoogleDrive-clairemeuter@ucsb.edu/Shared drives/Black_Bear_Aware/gdrive_data"
 
 #sam's file path
 #gdrive_data <- "G:/Shared drives/Black_Bear_Aware/gdrive_data"
@@ -48,7 +48,7 @@ ca_raster <- rast(here(gdrive_data, "/IntermediateData/IntermediateData_Files/CA
 
 #check the coordinate reference system 
 crs(ca_raster)
-
+res(ca_raster)
 
 #plot CA raster to confirm
 tm_shape(ca_raster) +
